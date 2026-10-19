@@ -1,0 +1,37 @@
+# Configuración de Streamlit para el dashboard de DripSafe.
+
+[server]
+# Recarga el dashboard en cuanto guardas un archivo.
+runOnSave = true
+# Sirve app/static/ en la ruta app/static/ (ahí viven las fuentes, para no depender de internet).
+enableStaticServing = true
+
+[browser]
+# Sin estadísticas de uso: la demo debe funcionar sin internet.
+gatherUsageStats = false
+
+[theme]
+# Paleta Grafana: fondo oscuro de centro de control y azul para los datos.
+base = "dark"
+primaryColor = "#5794f2"
+backgroundColor = "#111217"
+secondaryBackgroundColor = "#181b1f"
+textColor = "#f0efec"
+
+# Tipografía: Inter para texto y títulos, JetBrains Mono para código.
+# Los archivos están en app/static/fuentes/ (licencia OFL), así que funcionan sin internet.
+font = "Inter, sans-serif"
+headingFont = "Inter, sans-serif"
+codeFont = "'JetBrains Mono', monospace"
+metricValueFontWeight = 700
+
+# Fuentes variables: un solo archivo cubre todos los pesos del rango.
+[[theme.fontFaces]]
+family = "Inter"
+url = "app/static/fuentes/Inter-latin.woff2"
+weight = "400 800"
+
+[[theme.fontFaces]]
+family = "JetBrains Mono"
+url = "app/static/fuentes/JetBrainsMono-latin.woff2"
+weight = "400 500"
