@@ -15,7 +15,7 @@
 |---|---|
 | Sub-reto | **3 · Detección de anomalías con IA** en enfriamiento y gestión hídrica |
 | Métrica principal | **PUE** (Power Usage Effectiveness) |
-| Modelo | **Isolation Forest** (scikit-learn): ligero, explicable y con balance neto positivo |
+| Modelo | **Isolation Forest** (scikit-learn): ligero y explicable; balance neto por verificar |
 | Demo | **Streamlit** (Python) |
 | Bono extra | Ir por el **Zero Freshwater Footprint** (+5% a +15%) con enfriamiento híbrido |
 | Flujo de Git | **Trunk-based**, con ramas cortas; `git worktree` es opcional |
@@ -33,7 +33,7 @@ Cada documento es independiente. Léanlo completo o pásenselo a su IA de confia
 | 02 | [Decisiones](docs/02-decisiones.md) | Todos | Qué decidimos y por qué |
 | 03 | [Equipo y roles](docs/03-equipo-y-roles.md) | Todos | Quién hace qué |
 | 04 | [Plan de trabajo](docs/04-plan-de-trabajo.md) | Todos | Día por día, del 18 al 22 |
-| 05 | [Solución técnica](docs/05-solucion-tecnica.md) | Gadiel, Misa, Leo | Arquitectura, modelo, métricas y balance neto |
+| 05 | [Solución técnica](docs/05-solucion-tecnica.md) | Gadiel, Misa, Nico, Leo | Arquitectura, modelo, métricas y balance neto |
 | 06 | [Ciberseguridad OT](docs/06-ciberseguridad-ot.md) | Guille | Guía rápida de OT/ICS y MITRE ATT&CK for ICS |
 | 07 | [Agua y acuífero](docs/07-agua-y-acuifero.md) | Nico | Acuífero de Yucatán, balance neto y bono |
 | 08 | [Pitch](docs/08-pitch.md) | Nico, Leo | Estructura del pitch y modelo de negocio |
@@ -51,12 +51,14 @@ Cada documento es independiente. Léanlo completo o pásenselo a su IA de confia
 | Integrante | Rol |
 |---|---|
 | **Leo** (líder) | Demo en Streamlit y diseño visual del pitch |
-| **Misa** (co-líder) | Datos, cálculo de PUE, repositorio e integración |
+| **Misa** (co-líder) | Datos limpios, PUE inicial y energías de referencia, balance neto final con Nico, repositorio e integración |
 | **Gadiel** | Modelo de IA (Isolation Forest) y medición de consumo con CodeCarbon |
-| **Nico** | Agua y acuífero, balance neto, bono de cero agua dulce y estructura del pitch |
+| **Nico** | Ahorro y PUE final proyectados, balance neto final con Misa, resultados de impacto, acuífero, bono y contenido del pitch |
 | **Guille** | Ciberseguridad OT: amenazas y mapeo con MITRE ATT&CK for ICS |
 
 Detalle en [docs/03-equipo-y-roles.md](docs/03-equipo-y-roles.md).
+
+**Reparto aprobado:** Misa entrega a Nico el PUE inicial y los datos que lo sustentan; Nico calcula el ahorro, el PUE final proyectado y el impacto en agua y emisiones cuando haya datos suficientes. **Misa + Nico calculan y validan juntos el balance neto final**, usando las mediciones del modelo de Gadiel. Nico consolida las cifras para Leo. Los cálculos están pendientes de implementación; los ahorros y el PUE final serán proyecciones hasta contar con evidencia medida.
 
 ---
 

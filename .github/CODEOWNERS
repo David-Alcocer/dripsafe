@@ -3,6 +3,11 @@
 # Pendiente: agregar el usuario de GitHub de Gadiel en /src/modelo/.
 
 *                               @David-Alcocer
+/src/metricas/                  @Nicomoguel
+# La regla específica va después de la carpeta: Misa conserva el PUE inicial.
+/src/metricas/pue.py            @David-Alcocer
+/src/metricas/balance_neto.py   @David-Alcocer @Nicomoguel
+/resultados/numeros_oficiales.json @Nicomoguel
 /src/ataques/                   @Ghosflot
 /docs/06-ciberseguridad-ot.md   @Ghosflot
 /app/                           @Leosanlo30

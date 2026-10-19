@@ -1,6 +1,6 @@
 # 05 · Solución técnica
 
-> Documento para **Gadiel** (modelo), **Misa** (datos) y **Leo** (demo). Es una propuesta inicial: se ajusta cuando veamos el kit el 19.
+> Documento para **Gadiel** (modelo), **Misa** (datos y PUE inicial), **Nico** (cálculo de impacto), **Misa + Nico** (balance neto final) y **Leo** (demo). Es una propuesta inicial: se ajusta cuando veamos el kit el 19.
 
 ## Concepto: un vigilante, dos beneficios
 
@@ -26,12 +26,21 @@ data/ (kit)  →  limpieza (pandas)  →  features  →  Isolation Forest  →  
 | Paso | Responsable | Herramienta |
 |---|---|---|
 | Cargar y limpiar datos | Misa | pandas |
-| PUE base | Misa | pandas |
+| PUE inicial, energías total y de TI, unidades y periodo | Misa | pandas |
 | Features y modelo | Gadiel | scikit-learn |
+| Alertas y consumo esperado del enfriamiento | Gadiel | scikit-learn |
 | Consumo del modelo | Gadiel | CodeCarbon |
 | Clasificar anomalías (falla o ataque) | Gadiel + Guille | reglas + modelo |
-| PUE después y balance neto | Misa + Nico | pandas |
+| Ahorro energético y PUE final proyectado | Nico | pandas |
+| Cálculo y validación del balance neto final | Misa + Nico | pandas |
+| Impacto en agua y emisiones, cuando los datos lo permitan | Nico | pandas + fuentes citadas |
+| Consolidar cifras para dashboard y pitch | Nico | `resultados/numeros_oficiales.json` |
+| Integrar datos, modelo, métricas y demo | Misa | Python |
 | Dashboard | Leo | Streamlit |
+
+**Entrega entre Misa y Nico:** Misa entrega el PUE inicial junto con la telemetría limpia y las energías total y de TI en kWh, indicando unidades, intervalo y periodo. El PUE por sí solo no basta para calcular kWh ahorrados. Nico usa esa referencia, las alertas, el consumo esperado y las mediciones de CodeCarbon de Gadiel para calcular el impacto posterior. Los formatos de intercambio siguen definidos en [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
+
+**Estado:** este reparto está aprobado (D10 y ajuste D11); los cálculos y la consolidación de resultados siguen pendientes de implementación.
 
 ## Stack
 
@@ -54,7 +63,7 @@ pip install pandas numpy scikit-learn codecarbon streamlit plotly jupyter
 
 **Por qué este modelo:**
 - No necesita datos etiquetados: aprende solo lo "normal".
-- Entrena en segundos o minutos en una laptop, así que el balance neto queda positivo.
+- Entrena en segundos o minutos en una laptop; su balance neto se comprobará con las mediciones de Gadiel y los cálculos conjuntos de Misa + Nico.
 - Es fácil de explicar al jurado.
 
 **Esqueleto (se adapta a las columnas reales del kit):**
@@ -108,19 +117,23 @@ WUE = agua consumida en sitio (L)           / energía de TI (kWh)
 CUE = emisiones CO2e (kg)                   / energía de TI (kWh)  =  factor de emisión de la red × PUE
 ```
 
-**PUE antes y después:**
-- **Antes:** PUE calculado con los datos del kit tal como vienen.
-- **Después:** se resta el exceso de energía de los periodos con anomalías de ineficiencia, como si se hubieran corregido:
+**PUE inicial y final proyectado:**
+- **Inicial (Misa):** PUE calculado con los datos limpios del kit, para un periodo definido.
+- **Final proyectado (Nico):** se resta el exceso de energía estimado de los periodos con anomalías de ineficiencia, suponiendo que se corrigieran:
 
 ```text
-PUE_después = (E_total − E_exceso_evitado) / E_TI
+PUE_final_proyectado = (E_total − E_exceso_evitado_estimado) / E_TI
 ```
 
-El exceso se estima comparando cada periodo anómalo contra el comportamiento normal en condiciones similares (misma carga de TI y hora).
+El exceso se estima comparando cada periodo anómalo contra el comportamiento normal en condiciones similares (misma carga de TI y hora), usando el consumo esperado que entrega Gadiel. Nico documenta la corrección supuesta y mantiene el mismo periodo y energía de TI en ambos PUE. Una alerta no demuestra por sí sola un ahorro.
+
+El campo existente `pue_despues` se presenta como **PUE final proyectado**. Los ahorros también se identifican como estimaciones hasta contar con evidencia medida tras una intervención.
 
 ## Balance neto (obligatorio)
 
 **Hay que demostrar con números que el modelo ahorra más de lo que gasta.**
+
+**Responsables del cálculo y validación final: Misa + Nico.** Gadiel proporciona las mediciones del modelo; Misa proporciona la referencia inicial y Nico estima el ahorro. Misa + Nico calculan juntos el balance, restando el costo del modelo con unidades y horizontes temporales compatibles. El valor puede ser positivo, cero o negativo; se reporta el resultado obtenido.
 
 ```text
 Costo del modelo:
@@ -129,7 +142,7 @@ Costo del modelo:
   Agua_modelo = E_modelo × (WUE_sitio + intensidad hídrica de la electricidad)  (L)
 
 Ahorro:
-  E_ahorrada  = (PUE_antes − PUE_después) × E_TI anual (kWh)
+  E_ahorrada  = (PUE_inicial − PUE_final_proyectado) × E_TI anual (kWh)
   CO2_ahorrado = E_ahorrada × factor de emisión
   Agua_ahorrada = ΔWUE × E_TI + E_ahorrada × intensidad hídrica de la electricidad  (L)
 
@@ -137,16 +150,18 @@ Balance neto = Ahorro − Costo   → debe ser > 0
 Razón        = Ahorro / Costo    → "ahorra N veces lo que consume"
 ```
 
-**Datos a buscar** (Nico y Misa):
+Las cantidades de ahorro de este esquema son **proyecciones**. Si se extrapola a un año, Nico documenta el supuesto y utiliza ese mismo horizonte para el costo. El cálculo de agua requiere conocer el consumo o un WUE aplicable y la intensidad hídrica de la electricidad; un mejor PUE no demuestra automáticamente ahorro de agua.
+
+**Datos a buscar y citar (Nico):**
 - Factor de emisión del Sistema Eléctrico Nacional de México, en su valor oficial más reciente.
 - Intensidad hídrica de la generación eléctrica (litros por kWh). El artículo *Making AI Less "Thirsty"* explica cómo se calcula el agua "fuera del sitio".
 
-> Con un Isolation Forest, la energía del modelo se mide en milésimas o centésimas de kWh, mientras que un centro de datos consume miles de kWh al día. Esa diferencia de órdenes de magnitud es nuestro mejor argumento.
+**Resultados pendientes:** si faltan datos o factores suficientes para agua o emisiones, Nico marca esas métricas como pendientes. Cualquier valor de referencia se identifica como supuesto, sin presentarlo como medición del kit.
 
 ## Demo (Streamlit)
 
 Pantallas sugeridas:
-1. **Resumen:** PUE antes y después, agua ahorrada y balance neto en tarjetas grandes.
+1. **Resumen:** PUE inicial y final proyectado, ahorro estimado de agua cuando pueda calcularse y balance neto en tarjetas grandes. Leo usa las cifras consolidadas por Nico.
 2. **Serie de tiempo:** consumo con las anomalías marcadas en rojo o naranja.
 3. **Detalle de alerta:** qué variable falló, si es ineficiencia o posible ataque, y qué hacer.
 4. **Balance neto:** costo del modelo frente al ahorro, en una gráfica de barras.

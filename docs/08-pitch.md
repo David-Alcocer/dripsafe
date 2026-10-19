@@ -15,16 +15,18 @@ Sí tenemos que demostrar que la solución **podría** usarse en el mundo real, 
 | 1 | **El problema** | ~15% | La IA consume agua; en Yucatán el acuífero es la única fuente; el enfriamiento es infraestructura crítica atacable |
 | 2 | **La solución** | ~15% | DripSafe: un vigilante, dos beneficios |
 | 3 | **Demo en vivo** | ~25% | Mostrar una alerta de ineficiencia y una de posible ataque. Tener el video de respaldo listo |
-| 4 | **Los números** | ~25% | PUE antes y después, agua ahorrada y balance neto ("ahorra N veces lo que consume") |
+| 4 | **Los números** | ~25% | PUE inicial y final proyectado, ahorro estimado y balance neto; agua y emisiones solo si hay datos suficientes |
 | 5 | **Impacto y escala** | ~20% | Acuífero, bono de cero agua dulce, quién lo usaría y cierre |
+
+**Preparación:** Nico calcula el ahorro y el PUE final proyectado, usando el PUE inicial de Misa y los insumos de Gadiel. **Misa + Nico calculan y validan juntos el balance neto final**; Nico consolida las cifras en `resultados/numeros_oficiales.json` y escribe el contenido. Leo diseña las diapositivas y muestra las mismas cifras en el dashboard. El PUE final y los ahorros se presentan como proyecciones hasta contar con evidencia medida; las métricas pendientes no se presentan como resultados.
 
 ## Checklist: los 7 criterios deben escucharse en el pitch
 
 - [ ] **Innovación:** un solo modelo para eficiencia y ciberseguridad.
 - [ ] **Viabilidad técnica:** demo funcionando sobre el kit real.
 - [ ] **Impacto en ciberseguridad:** técnicas de MITRE ATT&CK for ICS que detectamos.
-- [ ] **Eficiencia Green AI:** mejora de PUE con números.
-- [ ] **Balance neto y gobernanza:** el modelo gasta mucho menos de lo que ahorra, más el análisis del acuífero.
+- [ ] **Eficiencia Green AI:** comparación del PUE inicial con el final proyectado, con sus supuestos.
+- [ ] **Balance neto y gobernanza:** comparar el costo medido o extrapolado del modelo con el ahorro estimado para el mismo horizonte, más el análisis del acuífero.
 - [ ] **Escalabilidad y negocio:** ver abajo.
 - [ ] **Presentación:** historia clara y diapositivas limpias.
 - [ ] **Bono:** propuesta de enfriamiento híbrido con cero agua potable.

@@ -9,22 +9,26 @@
 - [ ] **Leo:** revisar el correo de confirmación de CIFOX y **preguntar la duración del pitch**. Hacer un "hola mundo" en Streamlit.
 - [ ] **Gadiel:** correr un ejemplo de Isolation Forest con datos de prueba.
 - [ ] **Nico:** juntar de 3 a 5 fuentes sobre el acuífero de Yucatán (CONAGUA, UADY, CICY).
+- [ ] **Nico:** preparar las fórmulas, entradas y supuestos del cálculo de impacto y un ejemplo con datos sintéticos, según [05-solucion-tecnica.md](05-solucion-tecnica.md).
 - [ ] **Guille:** leer la introducción de MITRE ATT&CK for ICS y qué es Modbus.
 
 ## Lunes 19: entender el kit
 
 - [ ] Leer el kit cada quien desde su rol (ver [03-equipo-y-roles.md](03-equipo-y-roles.md)).
-- [ ] **Misa:** cargar los datos y calcular el **PUE base**.
+- [ ] **Misa:** cargar y limpiar los datos; entregar a Nico el **PUE inicial**, las energías total y de TI, unidades, intervalo y periodo.
+- [ ] **Nico:** revisar esos insumos, identificar qué cálculos de agua y emisiones permite el kit y ajustar los supuestos del ejemplo.
 - [ ] **Todos, en la noche:** 30 min de reunión para confirmar el sub-reto, las variables del modelo y el plan.
 
 ## Martes 20: construir
 
-- [ ] **Gadiel:** modelo v1 entrenado, con alertas sobre los datos del kit.
+- [ ] **Gadiel:** modelo v1 entrenado; entregar alertas y consumo esperado del enfriamiento a Nico.
 - [ ] **Gadiel:** medir el consumo del modelo con CodeCarbon.
 - [ ] **Guille:** 3 o 4 técnicas de ataque mapeadas y cómo las detecta el modelo.
-- [ ] **Nico:** primer cálculo del balance neto y borrador del análisis del acuífero.
+- [ ] **Nico:** implementar ahorro energético y PUE final proyectado; estimar agua y emisiones si hay datos suficientes y consolidar los resultados para Leo.
+- [ ] **Misa + Nico:** implementar juntos el balance neto final, usando el ahorro estimado por Nico y el consumo del modelo de Gadiel.
+- [ ] **Nico:** preparar el borrador del análisis del acuífero y documentar fuentes y supuestos de los cálculos.
 - [ ] **Leo:** dashboard leyendo los datos reales.
-- [ ] **Misa:** integrar el modelo con la demo y calcular el PUE "después".
+- [ ] **Misa:** integrar datos, modelo y métricas de Nico con la demo.
 - [ ] **Todos, en la noche:** llamada corta de avance.
 
 ## Miércoles 21: cerrar
@@ -32,8 +36,10 @@
 - [ ] Demo funcionando de punta a punta.
 - [ ] **Video de respaldo** de la demo grabado.
 - [ ] Análisis del acuífero y propuesta del bono terminados.
-- [ ] Balance neto con cifras finales.
-- [ ] Borrador de diapositivas del pitch y **primer ensayo con cronómetro**.
+- [ ] **Misa + Nico:** verificar juntos el balance neto final, sus unidades, periodo y supuestos.
+- [ ] **Nico:** entregar programa y ejemplo reproducible con el balance conjunto y las cifras consolidadas, distinguiendo mediciones de proyecciones.
+- [ ] **Nico:** cerrar el contenido y guion del pitch; **Leo:** diseñar las diapositivas con las mismas cifras que el dashboard.
+- [ ] **Todos:** primer ensayo con cronómetro.
 - [ ] **Regla:** a partir de hoy en la noche no entra nada nuevo.
 
 ## Jueves 22: UPY
