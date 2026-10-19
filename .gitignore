@@ -1,0 +1,16 @@
+# Kit de datos del hackatón: confidencial, NO subir
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# CodeCarbon
+emissions.csv
+
+# Sistema
+.DS_Store
+.env

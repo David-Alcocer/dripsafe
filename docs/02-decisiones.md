@@ -1,0 +1,78 @@
+# 02 · Decisiones tomadas y por qué
+
+> Registro de las decisiones del equipo. Si alguien quiere cambiar una, que la discuta con todos **antes del 19 en la noche**. Después ya no hay tiempo para cambiar de rumbo.
+
+## D1 · Sub-reto 3: detección de anomalías con IA ✅
+
+**Decisión:** sub-reto 3, con **PUE** como métrica principal.
+
+**Por qué:**
+- Somos 5 estudiantes de Ingeniería de Software: construir un modelo y una demo es nuestro fuerte.
+- Un mismo detector de anomalías cubre **los dos lados del reto**:
+  - **Agua y energía:** detecta ineficiencias en el enfriamiento → baja el PUE.
+  - **Ciberseguridad:** detecta lecturas o comandos que no cuadran con la física del sistema → posible manipulación.
+- Así sumamos en "Eficiencia Green AI" **y** en "Impacto en ciberseguridad" sin hacer dos proyectos.
+
+**Pendiente:** confirmarla al leer el kit el 19. Si los datos del sub-reto 3 vinieran muy incompletos, lo platicamos.
+
+## D2 · Modelo ligero, hecho por nosotros ✅
+
+**Decisión:** **Isolation Forest** de scikit-learn, entrenado con los datos del kit. No usaremos un LLM para analizar los datos.
+
+**Por qué:**
+- Se entrena en minutos en una laptop y consume casi nada de energía → **balance neto claramente positivo**, que es obligatorio.
+- Es explicable: podemos decir por qué marcó una alerta.
+- Los LLM son malos analizando miles de lecturas numéricas, cuestan energía y los jueces quieren ver nuestro trabajo, no el de una API.
+- "Hecho por nosotros" no es "desde cero": scikit-learn trae el algoritmo listo. Son unas 20 líneas.
+
+**Uso permitido de LLM:**
+- Como asistente para programar, investigar y entender el kit (Claude, etc.).
+- *Opcional:* en la demo, para explicar una alerta en lenguaje natural. Si se hace, su consumo **se suma al balance neto**.
+
+**Alternativas si el Isolation Forest no basta:** One-Class SVM, un autoencoder pequeño o umbrales estadísticos (z-score) como línea base.
+
+## D3 · Demo en Streamlit, no Grafana ✅
+
+**Decisión:** dashboard en **Streamlit**.
+
+**Por qué:**
+- Es Python, así que se conecta directo con el modelo.
+- Se arma en horas.
+- Grafana se ve muy "industrial", pero requiere una base de datos de series de tiempo (InfluxDB o Prometheus) o plugins, y duplicaría el trabajo de la demo.
+- **Grafana no da puntos extra.** Los jueces califican qué hace la solución y sus números.
+
+**Grafana queda como extra opcional** solo si a Guille le sobra tiempo el 21.
+
+## D4 · Ir por el bono de cero agua dulce ✅
+
+**Decisión:** proponer un **enfriamiento híbrido**:
+- **Base:** enfriamiento líquido en circuito cerrado. El refrigerante recircula y casi no se repone agua.
+- **Respaldo en picos de calor:** agua residual tratada, no potable.
+- **Conexión con nuestra IA:** el modelo puede decidir cuándo activar el respaldo.
+
+**Por qué:** el bono suma de 5% a 15% a la calificación final y puede definir el primer lugar. El enfriamiento por aire solo, en el clima cálido y húmedo de Yucatán, sube el consumo de energía y por lo tanto el PUE.
+
+## D5 · Cubrir ciberseguridad con lo justo ✅
+
+**Contexto:** nadie del equipo tiene experiencia fuerte en ciberseguridad. Guille es quien más sabe (Linux, SSH keys, ufw, Fail2ban).
+
+**Decisión:** no prometer una solución completa de seguridad. Presentar el modelo como **primera capa de detección** y mapear de 3 a 4 técnicas de ataque de MITRE ATT&CK for ICS que detectaría.
+
+**Por qué:** el criterio "Impacto en ciberseguridad" lo califican a todos. Con esto evitamos sacar cero en él, sin desviarnos del sub-reto. El 22 hay mentores en sitio para validar.
+
+## D6 · Flujo de Git: trunk-based ✅
+
+**Decisión:** **trunk-based development** con ramas cortas (de horas) y PR rápidos a `main`. `git worktree` es **opcional**, recomendado para quien trabaje con Claude o la terminal (Misa y Guille). Ver [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+**Por qué no git flow:** en 3 días las ramas largas solo generan conflictos.
+
+## D7 · Nombre del proyecto ✅
+
+**DripSafe**: juega con "goteo" (agua) y "seguro" (ciberseguridad).
+
+## Decisiones pendientes
+
+- [ ] ¿Quién presenta el pitch? Candidatos: Nico (presentó propuestas en IRAP) y Leo (líder).
+- [ ] Duración del pitch: preguntarle a CIFOX.
+- [ ] Confirmar las variables exactas del modelo al ver el kit.
+- [ ] ¿Quién es el representante oficial ante CIFOX?
