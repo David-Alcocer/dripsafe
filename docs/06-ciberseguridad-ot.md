@@ -66,7 +66,7 @@ Basadas en **ISA/IEC 62443**, el estándar de seguridad industrial:
 - 1 o 2 diapositivas: amenazas → cómo las detectamos → recomendaciones.
 - Tabla final de técnicas de ATT&CK aplicadas al caso del kit.
 
-## ⚠️ Regla del hackatón
+## Regla del hackatón
 **Prohibido hacer pruebas o ataques sobre sistemas reales.** Todo se hace sobre el kit de datos o en simulaciones. Los "ataques" se simulan modificando datos en un CSV, nunca contra equipos reales.
 
 ## Para leer más

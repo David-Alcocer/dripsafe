@@ -4,38 +4,38 @@
 
 ## Perfiles
 
-| Integrante | Fortalezas | Inglés |
-|---|---|---|
-| **Leo** (líder) | C++, programación competitiva, POO media, **muy bueno en diseño front**, no deja nada a medias | Medio-alto |
-| **Misa** (co-líder) | Orden, **GitHub** (trunk-based, git flow), investigación, **trabaja muy bien con Claude y la terminal**, POO media | Medio |
-| **Gadiel** | C++, **programación competitiva**, muy dedicado a esa área, POO | Medio |
-| **Nico** | C++, programación competitiva, algoritmos, POO, **participó en IRAP** (investigación de campo en Yucatán y propuestas ante evaluadores) | Medio-alto |
-| **Guille** | C++, **Linux** (administra un server de Minecraft), **ciberseguridad básica** (Fail2ban, SSH keys, ufw), estricto con GitHub, trabaja bien con Claude y la terminal | **Alto** |
+| Integrante | Fortalezas
+|---|---|
+| **Leo** (líder) | C++, programación competitiva, POO media, **muy bueno en diseño front**, no deja nada a medias |
+| **Misa** (co-líder) | Orden, **GitHub** (trunk-based, git flow), investigación, **trabaja muy bien con Claude y la terminal**, POO media | 
+| **Gadiel** | C++, **programación competitiva**, muy dedicado a esa área, POO | 
+| **Nico** | C++, programación competitiva, algoritmos, POO, **participó en IRAP** (investigación de campo en Yucatán y propuestas ante evaluadores) | 
+| **Guille** | C++, **Linux** (administra un server de Minecraft), **ciberseguridad básica** (Fail2ban, SSH keys, ufw), estricto con GitHub, trabaja bien con Claude y la terminal |
 
 ## Roles
 
-### 🎨 Leo · Demo y diseño visual
+###  Leo · Demo y diseño visual
 - Dashboard en **Streamlit**: alertas del modelo, PUE antes y después, gráficas.
 - Diseño visual de las diapositivas del pitch.
 - Video de respaldo de la demo, por si algo falla en vivo.
 - **Por qué él:** es fuerte en diseño front y termina lo que empieza.
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md) y [08-pitch.md](08-pitch.md).
 
-### 🗂️ Misa · Datos e integración
+### Misa · Datos e integración
 - Explorar y limpiar el kit de datos.
 - Calcular el **PUE base** (antes de la solución).
 - Administrar el repo, el tablero de tareas y la integración de las partes.
 - **Por qué ella:** orden, GitHub y saber usar Claude para procesar datos rápido.
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md) y [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-### 🧠 Gadiel · Modelo de IA
+### Gadiel · Modelo de IA
 - Entrenar el detector de anomalías (**Isolation Forest**).
 - Medir la energía y el carbono del modelo con **CodeCarbon**, que es el insumo del balance neto.
 - Explicar por qué el modelo marca cada alerta.
 - **Por qué él:** su fuerte en algoritmos le ayuda a entender y ajustar el modelo.
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md).
 
-### 💧 Nico · Agua, propuesta y pitch
+###  Nico · Agua, propuesta y pitch
 - Análisis del **impacto en el acuífero de Yucatán** (obligatorio).
 - Cálculo del **balance neto** junto con Gadiel (obligatorio).
 - Propuesta de enfriamiento para el **bono de cero agua dulce**.
@@ -43,7 +43,7 @@
 - **Por qué él:** su experiencia en IRAP (investigación de campo en Yucatán y presentación de propuestas) encaja justo con esto.
 - **Lee:** [07-agua-y-acuifero.md](07-agua-y-acuifero.md) y [08-pitch.md](08-pitch.md).
 
-### 🛡️ Guille · Ciberseguridad OT
+###  Guille · Ciberseguridad OT
 - Entender OT/ICS y por qué protocolos como Modbus son inseguros.
 - Mapear de 3 a 4 técnicas de **MITRE ATT&CK for ICS** que el modelo detectaría.
 - Explicar cómo distinguir una **falla** de un **ataque**.
