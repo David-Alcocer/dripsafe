@@ -10,4 +10,5 @@ select = [
 ignore = [
     "E501",  # line too long: no bloquea el CI; es cosa del formatter
     "B905",  # zip() sin strict=: tolerable en prototipos
+    "E402",  # import no al principio: Streamlit requiere set_page_config() antes
 ]
