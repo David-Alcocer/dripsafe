@@ -1,0 +1,16 @@
+{
+  "_instrucciones": "Misa: a la derecha va el nombre de la columna en el kit; deja null si el kit no la trae. Los nombres de la izquierda son los del contrato (src/contrato.py) y no se cambian.",
+  "timestamp": null,
+  "kw_ti": null,
+  "kw_total": null,
+  "kw_chiller": null,
+  "kw_bombas": null,
+  "kw_torre": null,
+  "t_exterior": null,
+  "t_suministro": null,
+  "t_retorno": null,
+  "setpoint_suministro": null,
+  "flujo_m3h": null,
+  "agua_reposicion_l": null,
+  "bomba_encendida": null
+}

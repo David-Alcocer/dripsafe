@@ -48,7 +48,7 @@
 **Decisión:** proponer un **enfriamiento híbrido**:
 - **Base:** enfriamiento líquido en circuito cerrado. El refrigerante recircula y casi no se repone agua.
 - **Respaldo en picos de calor:** agua residual tratada, no potable.
-- **Conexión con nuestra IA:** el modelo puede decidir cuándo activar el respaldo.
+- **Conexión con nuestra IA:** el modelo **recomienda** cuándo activar el respaldo y el operador lo confirma. La IA nunca manda órdenes al enfriamiento: si pudiera, quien engañe al modelo controlaría la planta (ver «Cómo se instala DripSafe sin abrir una puerta nueva» en [06-ciberseguridad-ot.md](06-ciberseguridad-ot.md)). *Ajuste aprobado por Guille el 19 oct.*
 
 **Por qué:** el bono suma de 5% a 15% a la calificación final y puede definir el primer lugar. El enfriamiento por aire solo, en el clima cálido y húmedo de Yucatán, sube el consumo de energía y por lo tanto el PUE.
 
@@ -69,6 +69,18 @@
 ## D7 · Nombre del proyecto ✅
 
 **DripSafe**: juega con "goteo" (agua) y "seguro" (ciberseguridad).
+
+## D8 · Piezas conectadas por contratos de datos (propuesta de Guille, por aprobar)
+
+**Decisión:** cada quien es dueño de una carpeta y las piezas se comunican solo por archivos con columnas fijas. Mientras el kit no esté limpio, todos trabajan con datos sintéticos del mismo formato. Ver [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
+
+**Por qué:** en 3 días nadie puede esperar a nadie. Si el formato está fijo desde hoy, el modelo, los ataques simulados, las métricas y el dashboard avanzan al mismo tiempo y se unen el martes sin sorpresas.
+
+## D9 · Una sola fuente para las cifras del pitch (propuesta de Guille, por aprobar)
+
+**Decisión:** `resultados/numeros_oficiales.json` es la única fuente de las cifras del dashboard, las diapositivas y el pitch. Se sube al repo porque solo trae totales, nunca filas del kit.
+
+**Por qué:** si el dashboard dice un PUE y la diapositiva otro, el jurado deja de creer todos los números. Además, Git guarda el historial de cada cifra.
 
 ## Decisiones pendientes
 

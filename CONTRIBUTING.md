@@ -4,7 +4,9 @@
 
 - `main` es la única rama permanente y **siempre debe funcionar**.
 - Cada tarea va en una **rama corta** que vive horas, no días.
-- Se integra a `main` con un **PR pequeño** y una revisión rápida de otra persona.
+- Se integra a `main` con un **PR pequeño** y una revisión rápida del dueño de la carpeta, con *squash merge*.
+- Cada rama nace de un **issue** y su PR dice `Cierra #N`. Así cada cambio queda trazado hasta el requisito que cubre ([docs/12-trazabilidad.md](docs/12-trazabilidad.md)).
+- Las piezas se conectan por **contratos** de datos. Quién es dueño de qué y cómo cambiar un contrato: [docs/11-trabajo-en-paralelo.md](docs/11-trabajo-en-paralelo.md).
 - Nada de ramas `develop` ni `release`: en 3 días solo generan conflictos.
 
 ### Nombres de rama
@@ -57,5 +59,5 @@ git worktree remove ../dripsafe-revision
 
 - 🚫 **Nunca subir `data/`.** El kit de datos es confidencial y ya está en `.gitignore`.
 - 🚫 Nada de llaves, contraseñas ni archivos `.env` en el repo.
-- ✅ Antes de hacer merge, `main` debe seguir corriendo (notebook o `streamlit run app/main.py`).
+- ✅ Antes de hacer merge, `main` debe seguir corriendo (notebook o `streamlit run app/main.py`) y las pruebas automáticas deben pasar (`pytest`).
 - ✅ El miércoles 21 en la noche se congela `main`: el 22 solo entran arreglos.

@@ -28,6 +28,13 @@ Python 3.11+, pandas, numpy, scikit-learn, codecarbon, streamlit, plotly y jupyt
 - **Prohibido** atacar sistemas reales. Solo se trabaja con datos del kit o simulados.
 - El equipo viene de C++ y está aprendiendo Python: explica el código con claridad y prefiere soluciones simples.
 
+## Reglas de código
+- Las piezas se comunican solo por los archivos y columnas de `src/contrato.py` y `docs/11-trabajo-en-paralelo.md`. No inventes columnas ni rutas nuevas: si hace falta una, propón el cambio del contrato.
+- El modelo nunca usa columnas `etiqueta_*` (usa `contrato.columnas_del_modelo`).
+- Desarrolla y prueba con `src/sinteticos.py`; nunca pongas datos del kit en pruebas, notebooks subidos ni commits.
+- Toda cifra que vaya al pitch sale de `resultados/numeros_oficiales.json`.
+- Respeta al dueño de cada carpeta (tabla en `docs/11-trabajo-en-paralelo.md`).
+
 ## Mapa de la documentación
 - `docs/01-convocatoria.md`: reglas y criterios oficiales
 - `docs/02-decisiones.md`: decisiones y razones
@@ -39,3 +46,5 @@ Python 3.11+, pandas, numpy, scikit-learn, codecarbon, streamlit, plotly y jupyt
 - `docs/08-pitch.md`: pitch
 - `docs/09-recursos.md`: enlaces
 - `docs/10-faq.md`: preguntas frecuentes
+- `docs/11-trabajo-en-paralelo.md`: contratos de datos, dueños y trazabilidad
+- `docs/12-trazabilidad.md`: requisito → responsable → issue → evidencia
