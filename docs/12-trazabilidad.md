@@ -8,51 +8,51 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 
 | § | Requisito | Responsable | Issue | Evidencia esperada | Estado |
 |---|---|---|---|---|---|
-| 10 | Sub-reto 3: reportar el impacto en **PUE** | Misa | — | `numeros_oficiales.json` → `pue_antes`, `pue_despues` | ⬜ |
-| 11 | **Balance neto positivo**, con cifras | Nico + Gadiel | — | `consumo_modelo.json` + `numeros_oficiales.json` → `balance_neto_*` | ⬜ |
-| 11 | **Impacto en el acuífero** de Yucatán | Nico | — | Sección en `docs/07` con fuentes citadas | ⬜ |
-| 12 | Propuesta de solución sobre el kit | Todos | — | `main` corre de punta a punta con el kit | ⬜ |
-| 12 | Pitch final | Nico + Leo | — | Diapositivas en PDF + guion | ⬜ |
-| 14 | Bono de cero agua dulce | Nico | — | Sección del bono en `docs/07` con WUE estimado | ⬜ |
-| 17 | Kit confidencial | Todos | — | Pruebas automáticas: ningún archivo de datos en el repo | ✅ |
-| 18 | Nada de ataques a sistemas reales | Guille | — | Los ataques solo existen como cambios en CSV (`src/ataques/`) | ⬜ |
+| 10 | Sub-reto 3: reportar el impacto en **PUE** | Misa | #2, #3 | `numeros_oficiales.json` → `pue_antes`, `pue_despues` | ⬜ |
+| 11 | **Balance neto positivo**, con cifras | Nico + Gadiel | #7, #14 | `consumo_modelo.json` + `numeros_oficiales.json` → `balance_neto_*` | ⬜ |
+| 11 | **Impacto en el acuífero** de Yucatán | Nico | #13 | Sección en `docs/07` con fuentes citadas | ⬜ |
+| 12 | Propuesta de solución sobre el kit | Todos | #4 | `main` corre de punta a punta con el kit | ⬜ |
+| 12 | Pitch final | Nico + Leo | #16, #19 | Diapositivas en PDF + guion | ⬜ |
+| 14 | Bono de cero agua dulce | Nico | #15 | Sección del bono en `docs/07` con WUE estimado | ⬜ |
+| 17 | Kit confidencial | Todos | pruebas automáticas | Pruebas automáticas: ningún archivo de datos en el repo | ✅ |
+| 18 | Nada de ataques a sistemas reales | Guille | #9 | Los ataques solo existen como cambios en CSV (`src/ataques/`) | ⬜ |
 
 ## Criterios de evaluación (§ 13)
 
-| Criterio | Responsable | Evidencia que lo demuestra | Estado |
-|---|---|---|---|
-| Innovación | Gadiel + Guille | Detección por coherencia física: ataques que se ven normales pero «no cuadran» | ⬜ |
-| Viabilidad técnica | Misa | Un solo comando reproduce todos los números | ⬜ |
-| Impacto en ciberseguridad | Guille | `deteccion_por_escenario.csv` + tabla ATT&CK final en `docs/06` | ⬜ |
-| Eficiencia Green AI | Misa + Gadiel | PUE antes y después en `numeros_oficiales.json` | ⬜ |
-| Balance neto y gobernanza hídrica | Nico | Balance en kWh y litros + análisis del acuífero | ⬜ |
-| Escalabilidad y negocio | Nico + Leo | Diapositiva de modelo de negocio | ⬜ |
-| Presentación | Leo + Nico | Dos ensayos con cronómetro + video de respaldo | ⬜ |
+| Criterio | Responsable | Issues | Evidencia que lo demuestra | Estado |
+|---|---|---|---|---|
+| Innovación | Gadiel + Guille | #6, #8 | Detección por coherencia física: ataques que se ven normales pero «no cuadran» | ⬜ |
+| Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números | ⬜ |
+| Impacto en ciberseguridad | Guille | #9, #10, #11, #12 | `deteccion_por_escenario.csv` + tabla ATT&CK final en `docs/06` | ⬜ |
+| Eficiencia Green AI | Misa + Gadiel | #2, #3, #5 | PUE antes y después en `numeros_oficiales.json` | ⬜ |
+| Balance neto y gobernanza hídrica | Nico | #13, #14 | Balance en kWh y litros + análisis del acuífero | ⬜ |
+| Escalabilidad y negocio | Nico + Leo | #16 | Diapositiva de modelo de negocio | ⬜ |
+| Presentación | Leo + Nico | #17 a #21 | Dos ensayos con cronómetro + video de respaldo | ⬜ |
 
 ## Issues iniciales
 
-Se crean en GitHub con la etiqueta de rol y de criterio. Al crearlos, se anota su número en las tablas de arriba.
+Creados en GitHub el 19 de octubre, cada uno con su etiqueta `rol:*` y sus etiquetas `criterio:*`.
 
-| Dueño | Issue | Produce |
-|---|---|---|
-| Misa | Cargar y limpiar el kit; llenar `config/columnas.json` | Contrato 1 |
-| Misa | PUE base | `pue_antes` |
-| Misa | PUE después y `numeros_oficiales.json` | Contrato 4 |
-| Misa | Un solo comando que corre todo el flujo | `python -m src.pipeline` |
-| Gadiel | Modelo de consumo esperado del enfriamiento | `kw_esperado_enfriamiento` |
-| Gadiel | Isolation Forest v1 | Contrato 3 (`alertas.csv`) |
-| Gadiel | Medición con CodeCarbon | `consumo_modelo.json` |
-| Gadiel | Explicar cada alerta | `variable_principal` |
-| Guille | Escenarios simulados de ataque y falla | Contrato 2 |
-| Guille | Evaluación de detección por escenario | `deteccion_por_escenario.csv` |
-| Guille | Modelo de amenazas y tabla ATT&CK final | `docs/06` |
-| Guille | Cómo se instala el detector sin abrir una puerta nueva | `docs/06` |
-| Nico | Análisis del acuífero | `docs/07` |
-| Nico | Balance neto en kWh y litros | `balance_neto_*` |
-| Nico | Propuesta del bono | `docs/07` |
-| Nico | Guion del pitch | `docs/08` |
-| Leo | Dashboard v1 con datos sintéticos | `app/` |
-| Leo | Dashboard con datos reales y demo de ataque | `app/` |
-| Leo | Diapositivas | PDF |
-| Leo | Video de respaldo | Video sin conexión |
-| Todos | Congelamiento y ensayo del miércoles | Etiqueta `congelado-21` |
+| # | Dueño | Issue | Produce |
+|---|---|---|---|
+| #1 | Misa | Cargar y limpiar el kit; llenar `config/columnas.json` | Contrato 1 |
+| #2 | Misa | PUE base | `pue_antes` |
+| #3 | Misa | PUE después y `numeros_oficiales.json` | Contrato 4 |
+| #4 | Misa | Un solo comando que corre todo el flujo | `python -m src.pipeline` |
+| #5 | Gadiel | Modelo de consumo esperado del enfriamiento | `kw_esperado_enfriamiento` |
+| #6 | Gadiel | Isolation Forest v1 | Contrato 3 (`alertas.csv`) |
+| #7 | Gadiel | Medición con CodeCarbon | `consumo_modelo.json` |
+| #8 | Gadiel | Explicar cada alerta | `variable_principal` |
+| #9 | Guille | Escenarios simulados de ataque y falla | Contrato 2 |
+| #10 | Guille | Evaluación de detección por escenario | `deteccion_por_escenario.csv` |
+| #11 | Guille | Modelo de amenazas y tabla ATT&CK final | `docs/06` |
+| #12 | Guille | Cómo se instala el detector sin abrir una puerta nueva | `docs/06` |
+| #13 | Nico | Análisis del acuífero | `docs/07` |
+| #14 | Nico | Balance neto en kWh y litros | `balance_neto_*` |
+| #15 | Nico | Propuesta del bono | `docs/07` |
+| #16 | Nico | Guion del pitch | `docs/08` |
+| #17 | Leo | Dashboard v1 con datos sintéticos | `app/` |
+| #18 | Leo | Dashboard con datos reales y demo de ataque | `app/` |
+| #19 | Leo | Diapositivas | PDF |
+| #20 | Leo | Video de respaldo | Video sin conexión |
+| #21 | Todos | Congelamiento y ensayo del miércoles | Etiqueta `congelado-21` |
