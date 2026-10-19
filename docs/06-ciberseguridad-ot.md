@@ -34,6 +34,47 @@ Del catálogo **MITRE ATT&CK for ICS** (<https://attack.mitre.org/matrices/ics/>
 | Modify Parameter | T0836 | Alguien cambia valores de configuración (setpoints) | Cambio brusco de un parámetro fuera del patrón normal u horario |
 | Unauthorized Command Message | T0855 | Llegan órdenes no autorizadas a bombas o válvulas | Arranques y paros que no corresponden con la carga ni el horario |
 | Manipulation of Control | T0831 | El atacante altera el control físico del proceso | Consumo de energía o agua anómalo sin causa operativa |
+| Denial of View | T0815 | El operador deja de recibir la telemetría | Huecos en los sensores mientras los medidores de energía siguen reportando. **Se atrapa con una regla, no con el modelo** (ver 3b) |
+
+Por dónde entraría un atacante (para el modelo de amenazas): **Internet Accessible Device** (T0883), un BMS o HMI expuesto a internet, y **Remote Services** (T0886), el acceso remoto de un proveedor de mantenimiento.
+
+## 3b. Escenarios simulados (`src/ataques/`)
+
+Para demostrar con números qué detecta DripSafe, metemos ataques y fallas **simulados** en la telemetría: solo cambian números en un CSV. Cada escenario vive en su propia ventana de tiempo y la respuesta correcta queda en las columnas `etiqueta_*`, que el modelo nunca ve.
+
+```bash
+python -m src.ataques.inyectar --entrada data/procesado/telemetria.csv    # o data/sinteticos/...
+python -m src.ataques.evaluar                                              # cuando existan las alertas de Gadiel
+```
+
+| Escenario | Tipo | Técnica | Qué se simula | Huella física que lo delata |
+|---|---|---|---|---|
+| `setpoint_alterado` | Ataque | T0836 | Bajan 3 °C la temperatura objetivo, poco a poco | El chiller gasta ~9 % más con la misma carga de TI |
+| `sensor_falsificado` | Ataque | T0856 | El sensor de retorno reporta 0.8 °C menos | Caudal × ΔT ya no alcanza para el calor de los servidores |
+| `vista_repetida` | Ataque | T0832 + T0831 | Bajan la bomba al 65 % y repiten en pantalla las lecturas de ayer | La bomba gasta ~70 % menos pero el caudal «es normal»: rompe la ley de afinidad (potencia ∝ caudal³) |
+| `comandos_no_autorizados` | Ataque | T0855 | Apagan y prenden la bomba cada 10 min a las 3 a. m. | Arranques y paros sin relación con la carga ni el horario |
+| `denegacion_de_vista` | Ataque | T0815 | Se corta la telemetría de temperatura y caudal | Sensores vacíos mientras la energía sigue llegando |
+| `ensuciamiento` | Falla | — | El intercambiador se ensucia en 2 días | Consumo que sube gradual y coherente |
+| `sensor_atorado` | Falla | — | El sensor repite siempre el mismo valor | Varianza cero |
+| `fuga_reposicion` | Falla | — | Entra 35 % más agua a la torre | Más agua sin más calor (sube el WUE) |
+
+**Falla contra ataque, en una frase:** una falla cambia la física de forma gradual y coherente; un ataque deja lecturas que **no cuadran con la física** o cambios bruscos sin causa operativa. Un sensor congelado es falla; un sensor que se mueve «normal» pero rompe el balance de calor es ataque.
+
+### Primer experimento (datos sintéticos, 19 oct)
+
+Un Isolation Forest rápido, entrenado con los 7 días limpios y evaluado en los 7 días con escenarios:
+
+| Variables del modelo | Escenarios detectados | Falsas alarmas |
+|---|---|---|
+| Solo las columnas crudas | 6 de 8 | 0.5 por día |
+| Crudas + variables físicas (balance de calor, afinidad de la bomba, chiller por kW de TI, agua por calor, varianza del sensor) | **7 de 8** | 1 por día |
+
+Lo que aprendimos (insumo para Gadiel):
+- **Las variables físicas son las que atrapan los ataques disfrazados.** `vista_repetida` solo se detecta con ellas, y `sensor_falsificado` pasa de 1 % a 11 % de la ventana marcada.
+- **La telemetría cortada (T0815) no la ve el modelo**, porque nunca vio huecos al entrenar. Se resuelve con una regla directa: «si faltan lecturas de sensores y la energía sigue llegando → alerta».
+- Un Isolation Forest diluye una anomalía que aparece en una sola variable cuando hay muchas. Conviene combinarlo con reglas simples sobre las variables físicas (z-score), la línea base que ya propone [05-solucion-tecnica.md](05-solucion-tecnica.md).
+
+Son datos sintéticos: los números finales salen del kit.
 
 **Mensaje clave para el pitch:**
 > "DripSafe funciona como **primera capa de detección**: no reemplaza un firewall ni un SOC, pero detecta cuando los datos físicos del enfriamiento no tienen sentido, que es justo lo que pasa cuando alguien manipula sensores o controladores."
@@ -54,6 +95,15 @@ Basadas en **ISA/IEC 62443**, el estándar de seguridad industrial:
 - **Acceso remoto seguro:** VPN, llaves SSH y autenticación multifactor. Lo que ya sabes del server aplica.
 - **Respaldo manual:** si se detecta un ataque, el sistema pasa a un modo seguro.
 
+### Cómo se instala DripSafe sin abrir una puerta nueva
+
+Un detector conectado a la planta también puede ser atacado. Por eso:
+- **Solo lee.** Recibe una copia del tráfico (puerto espejo o diodo de datos, que deja pasar información en un solo sentido) y **nunca manda órdenes** a PLCs ni bombas.
+- **Alerta a una persona; no actúa solo.** Si DripSafe pudiera cambiar el enfriamiento, quien engañe al modelo controlaría la planta. Esto aplica también al bono: la IA **recomienda** cuándo activar el respaldo con agua tratada y el operador confirma.
+- **Vive en su propia zona** de la red (IEC 62443): separado de la red de oficina y sin salida a internet.
+- **Se entrena solo con periodos verificados como limpios** y cada versión del modelo queda registrada. Así nadie le «enseña» a ver un ataque como normal (envenenamiento del modelo).
+- **Si el atacante conoce el modelo:** puede imitar la estadística de un sensor, pero tendría que falsificar a la vez temperatura, caudal y energía de forma físicamente coherente, y los medidores de energía suelen ser otro sistema.
+
 ## 6. Qué revisar en el kit (lunes 19)
 
 - [ ] ¿Qué equipos aparecen (chillers, torres, bombas, CRAC/CRAH)?
@@ -65,6 +115,8 @@ Basadas en **ISA/IEC 62443**, el estándar de seguridad industrial:
 
 - 1 o 2 diapositivas: amenazas → cómo las detectamos → recomendaciones.
 - Tabla final de técnicas de ATT&CK aplicadas al caso del kit.
+- Escenarios simulados sobre el kit (contrato 2) y `deteccion_por_escenario.csv` con el modelo final de Gadiel: qué detecta, en cuánto tiempo y con cuántas falsas alarmas.
+- Diagrama del modelo de amenazas (niveles Purdue y puntos de entrada).
 
 ## Regla del hackatón
 **Prohibido hacer pruebas o ataques sobre sistemas reales.** Todo se hace sobre el kit de datos o en simulaciones. Los "ataques" se simulan modificando datos en un CSV, nunca contra equipos reales.

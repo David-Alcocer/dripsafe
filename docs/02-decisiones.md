@@ -48,7 +48,7 @@
 **Decisión:** proponer un **enfriamiento híbrido**:
 - **Base:** enfriamiento líquido en circuito cerrado. El refrigerante recircula y casi no se repone agua.
 - **Respaldo en picos de calor:** agua residual tratada, no potable.
-- **Conexión con nuestra IA:** el modelo puede decidir cuándo activar el respaldo.
+- **Conexión con nuestra IA:** el modelo **recomienda** cuándo activar el respaldo y el operador lo confirma. La IA nunca manda órdenes al enfriamiento: si pudiera, quien engañe al modelo controlaría la planta (ver «Cómo se instala DripSafe sin abrir una puerta nueva» en [06-ciberseguridad-ot.md](06-ciberseguridad-ot.md)). *Ajuste aprobado por Guille el 19 oct.*
 
 **Por qué:** el bono suma de 5% a 15% a la calificación final y puede definir el primer lugar. El enfriamiento por aire solo, en el clima cálido y húmedo de Yucatán, sube el consumo de energía y por lo tanto el PUE.
 

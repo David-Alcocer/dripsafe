@@ -52,7 +52,7 @@ Estructura sugerida para la propuesta:
 | **Enfriamiento líquido en circuito cerrado** | El refrigerante recircula y casi no se repone agua | Mayor inversión inicial |
 | **Agua residual tratada** (no potable) | No compite con el agua de consumo humano | Depende de que exista una planta de tratamiento cercana |
 | **Aire de alta eficiencia** | Cero agua | En clima cálido y húmedo gasta mucha energía y sube el PUE |
-| **Híbrido** (recomendado) | Circuito cerrado como base y agua tratada solo en picos de calor | Más complejo de operar, pero **nuestra IA lo puede controlar** |
+| **Híbrido** (recomendado) | Circuito cerrado como base y agua tratada solo en picos de calor | Más complejo de operar, pero **nuestra IA recomienda cuándo activar el respaldo y el operador confirma** |
 
 **Para que el bono cuente** hay que mostrar:
 1. Que la alternativa es **técnicamente viable** (casos reales y referencias).

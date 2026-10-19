@@ -48,6 +48,8 @@
 - Mapear de 3 a 4 técnicas de **MITRE ATT&CK for ICS** que el modelo detectaría.
 - Explicar cómo distinguir una **falla** de un **ataque**.
 - Revisar las especificaciones OT/ICS del kit.
+- Simular ataques y fallas sobre los datos (`src/ataques/`) y medir qué detecta el modelo de Gadiel.
+- Definir cómo se instala el detector sin volverse una puerta de entrada.
 - **Por qué él:** es el único con base en Linux y seguridad, y su inglés alto le sirve porque casi todo el material está en inglés.
 - **Lee:** [06-ciberseguridad-ot.md](06-ciberseguridad-ot.md).
 
