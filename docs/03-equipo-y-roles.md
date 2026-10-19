@@ -25,7 +25,7 @@
 - Explorar y limpiar el kit de datos.
 - Calcular el **PUE base** (antes de la solución).
 - Administrar el repo, el tablero de tareas y la integración de las partes.
-- **Por qué ella:** orden, GitHub y saber usar Claude para procesar datos rápido.
+- **Por qué él:** orden, GitHub y saber usar Claude para procesar datos rápido.
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md) y [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ### Gadiel · Modelo de IA
