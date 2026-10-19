@@ -13,10 +13,10 @@ gatherUsageStats = false
 [theme]
 # Paleta Grafana: fondo oscuro de centro de control y azul para los datos.
 base = "dark"
-primaryColor = "#5794f2"
+primaryColor = "#3d71d9"
 backgroundColor = "#111217"
 secondaryBackgroundColor = "#181b1f"
-textColor = "#f0efec"
+textColor = "#ccccdc"
 
 # Tipografía: Inter para texto y títulos, JetBrains Mono para código.
 # Los archivos están en app/static/fuentes/ (licencia OFL), así que funcionan sin internet.
