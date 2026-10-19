@@ -1,16 +1,21 @@
 {
-  "_instrucciones": "Misa: a la derecha va el nombre de la columna en el kit; deja null si el kit no la trae. Los nombres de la izquierda son los del contrato (src/contrato.py) y no se cambian.",
-  "timestamp": null,
-  "kw_ti": null,
-  "kw_total": null,
+  "_instrucciones": "Mapeo del CSV del kit (valor) al contrato de DripSafe (clave). Dejar null si el kit no trae esa columna. Los nombres de la clave son los del contrato (src/contrato.py) y no se cambian. Ver docs/02-decisiones.md D14 para el detalle del contrato v2.",
+  "timestamp": "timestamp",
+  "kw_ti": "energy_it_kwh",
+  "kw_total": "energy_total_kwh",
   "kw_chiller": null,
   "kw_bombas": null,
   "kw_torre": null,
-  "t_exterior": null,
+  "t_exterior": "outdoor_temp_c",
   "t_suministro": null,
   "t_retorno": null,
   "setpoint_suministro": null,
   "flujo_m3h": null,
-  "agua_reposicion_l": null,
-  "bomba_encendida": null
+  "agua_reposicion_l": "water_l",
+  "bomba_encendida": null,
+  "site_id": "site_id",
+  "cooling_type": "cooling_type",
+  "load_pct": "load_pct",
+  "inlet_temp_c": "inlet_temp_c",
+  "ot_event": "ot_event"
 }
