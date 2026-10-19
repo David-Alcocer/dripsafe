@@ -131,7 +131,7 @@ Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y
 
 **Para no pisarse en el modelo:** Gadiel **construye** el detector; Nico lo **mide y lo pone a prueba**. La interfaz entre ambos es el Contrato 3 (`alertas.csv` + `consumo_modelo.json`).
 
-## D14 · Contrato v2 adaptado al kit real (propuesta, por aprobar)
+## D14 · Contrato v2 adaptado al kit real ✅ (19 oct, por confirmar en PR)
 
 **Problema:** `src/contrato.py` supone un solo sitio, potencias en kW y sensores por equipo. El kit tiene **3 sitios por cada hora**, energía en kWh por intervalo y otras columnas. Con el contrato actual, `validar()` fallaría por dos razones: el `timestamp` se repite por sitio y aparecen columnas fuera del contrato.
 
@@ -155,11 +155,13 @@ Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y
 
 **Cómo se aprueba:** un PR que cambie a la vez [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md), `src/contrato.py` y `config/columnas.json`, con el visto bueno de todos. Responsable: Misa. Revisa: Gadiel.
 
+**Implementado en:** rama `feat/datos-kit-v2`, cierra #1. Incluye `src/datos/cargar.py` para transformar el kit al contrato v2 y pruebas en `tests/test_datos.py`.
+
 ## Decisiones pendientes
 
 - [ ] ¿Quién presenta el pitch? Candidatos: Nico (presentó propuestas en IRAP) y Leo (líder).
 - [ ] Duración del pitch: preguntarle a CIFOX.
 - [x] Confirmar las variables exactas del modelo al ver el kit → ver D12.
-- [ ] Aprobar el contrato v2 (D14).
+- [x] Aprobar el contrato v2 (D14) → PR de la rama `feat/datos-kit-v2`.
 - [ ] Confirmar en la reunión el enfoque híbrido (D12).
 - [ ] ¿Quién es el representante oficial ante CIFOX?

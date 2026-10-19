@@ -29,7 +29,17 @@ OPCIONALES = {
     "flujo_m3h": "Caudal de agua helada en m3/h",
     "agua_reposicion_l": "Agua que se repone en la torre durante el intervalo, en litros",
     "bomba_encendida": "1 si la bomba está encendida, 0 si está apagada",
+    # Columnas v2 (kit real: varios sitios con tecnologías distintas).
+    "site_id": "Identificador del sitio (ej. SIM-A, SIM-B, SIM-C en el kit)",
+    "cooling_type": "Tecnología de enfriamiento del sitio (aire, evaporativa, liquida)",
+    "load_pct": "Carga de IT en porcentaje",
+    "inlet_temp_c": "Temperatura del aire a la entrada del rack en °C",
+    "ot_event": "Evento OT resumido (normal, login_fallido, cambio_config_no_autorizado)",
 }
+
+# Valores válidos para etiqueta_tipo. 'evento_ot' es nuevo en v2: el kit lo distingue
+# de 'ataque' porque un login fallido no prueba una intrusión (ver docs/02 D14).
+TIPOS_VALIDOS = {"normal", "falla", "ataque", "evento_ot"}
 
 PREFIJO_ETIQUETA = "etiqueta_"
 ETIQUETAS = ["etiqueta_escenario", "etiqueta_tipo", "etiqueta_tecnica", "etiqueta_particion"]
@@ -45,6 +55,14 @@ def validar(df: pd.DataFrame) -> list[str]:
         ts = pd.to_datetime(df["timestamp"], errors="coerce")
         if ts.isna().any():
             problemas.append("hay valores de 'timestamp' que no son fechas")
+        elif "site_id" in df.columns:
+            # v2: el timestamp se repite por sitio; validar orden y unicidad POR sitio.
+            df_ts = df.assign(_ts=ts)
+            for site, grupo in df_ts.groupby("site_id", sort=False):
+                if not grupo["_ts"].is_monotonic_increasing:
+                    problemas.append(f"'timestamp' no está ordenado para site_id='{site}'")
+                if grupo["_ts"].duplicated().any():
+                    problemas.append(f"'timestamp' tiene duplicados para site_id='{site}'")
         elif not ts.is_monotonic_increasing:
             problemas.append("'timestamp' no está ordenado de menor a mayor")
     desconocidas = [

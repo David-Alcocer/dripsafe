@@ -40,8 +40,6 @@ python -m src.sinteticos --dias 14 --salida data/sinteticos/telemetria.csv
 
 ## Los contratos
 
-> **Pendiente (D14):** el kit real tiene 3 sitios por hora, energía en kWh por intervalo y columnas distintas a las de este contrato. Hay una propuesta de **contrato v2** en [02-decisiones.md](02-decisiones.md). Mientras no se apruebe con su PR, el contrato vigente es el de abajo.
-
 ### Contrato 1 · Telemetría limpia (Misa)
 
 `data/procesado/telemetria.csv`. Columnas definidas en [src/contrato.py](../src/contrato.py):
@@ -49,15 +47,18 @@ python -m src.sinteticos --dias 14 --salida data/sinteticos/telemetria.csv
 | Columna | Unidad | ¿Obligatoria? |
 |---|---|---|
 | `timestamp` | fecha y hora, intervalo fijo | Sí |
-| `kw_ti` | kW de los servidores | Sí |
-| `kw_total` | kW de toda la instalación | Sí |
+| `kw_ti` | kW de los servidores (o kWh/intervalo si es horario) | Sí |
+| `kw_total` | kW de toda la instalación (o kWh/intervalo) | Sí |
 | `kw_chiller`, `kw_bombas`, `kw_torre` | kW | Si el kit las trae |
 | `t_exterior`, `t_suministro`, `t_retorno`, `setpoint_suministro` | °C | Si el kit las trae |
 | `flujo_m3h` | m³/h | Si el kit las trae |
 | `agua_reposicion_l` | litros por intervalo | Si el kit las trae |
 | `bomba_encendida` | 0 o 1 | Si el kit las trae |
+| `site_id` | SIM-A/B/C en el kit | Si hay varios sitios |
+| `cooling_type` | aire / evaporativa / liquida | Si el kit las trae |
+| `load_pct`, `inlet_temp_c`, `ot_event` | % / °C / texto | Si el kit las trae |
 
-Misa traduce los nombres del kit a estos en `config/columnas.json`. Para revisar que un archivo cumple el contrato: `contrato.validar(df)` regresa una lista vacía.
+Misa traduce los nombres del kit a estos en `config/columnas.json` y los carga con `python -m src.datos.cargar --kit <csv>`. Para revisar que un archivo cumple el contrato: `contrato.validar(df)` regresa una lista vacía. Si existe `site_id`, el orden del `timestamp` se valida **por sitio**.
 
 **Entrega a Nico:** además de la telemetría limpia, Misa entrega el PUE inicial calculado en `src/metricas/pue.py` y las energías total y de TI en kWh, indicando unidades, intervalo y periodo. Esos datos sustentan la referencia inicial; el cociente PUE por sí solo no permite calcular kWh ahorrados. Este acuerdo de responsabilidades no añade columnas ni archivos al contrato.
 
