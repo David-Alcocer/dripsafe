@@ -1,0 +1,30 @@
+name: Pruebas
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ningún archivo de datos en el repo (el kit es confidencial)
+        run: |
+          datos=$(git ls-files '*.csv' '*.xlsx' '*.xls' '*.parquet' 'data/*')
+          if [ -n "$datos" ]; then
+            echo "Archivos de datos encontrados en el repo:"; echo "$datos"; exit 1
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install pandas numpy scikit-learn pytest
+
+      - name: Correr pruebas (solo datos sintéticos)
+        run: pytest -q

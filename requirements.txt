@@ -1,0 +1,8 @@
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.4
+codecarbon>=2.7
+streamlit>=1.38
+plotly>=5.22
+jupyter
+pytest>=8

@@ -39,6 +39,8 @@ Cada documento es independiente. Léanlo completo o pásenselo a su IA de confia
 | 08 | [Pitch](docs/08-pitch.md) | Nico, Leo | Estructura del pitch y modelo de negocio |
 | 09 | [Recursos](docs/09-recursos.md) | Todos | Enlaces en español e inglés por tema |
 | 10 | [Preguntas frecuentes](docs/10-faq.md) | Todos | Dudas que ya resolvimos |
+| 11 | [Trabajo en paralelo](docs/11-trabajo-en-paralelo.md) | Todos | Contratos entre piezas, dueños de carpetas y trazabilidad |
+| 12 | [Trazabilidad](docs/12-trazabilidad.md) | Todos | Requisito → responsable → issue → evidencia |
 | — | [CONTRIBUTING](CONTRIBUTING.md) | Todos | Cómo trabajamos con Git |
 | — | [AGENTS](AGENTS.md) | Su IA | Contexto del proyecto para asistentes de IA |
 
@@ -91,11 +93,25 @@ dripsafe/
 ├── AGENTS.md
 ├── CONTRIBUTING.md
 ├── docs/          # Documentación del proyecto
-├── data/          # Kit de datos (NO se sube; está en .gitignore)
+├── config/        # Traducción de nombres del kit al contrato (columnas.json)
+├── data/          # Kit de datos y todo lo derivado de él (NO se sube; está en .gitignore)
 ├── notebooks/     # Exploración y experimentos (Jupyter)
-├── src/           # Código del modelo y cálculo de métricas
+├── src/           # Código: contrato, datos, ataques, modelo y métricas
+├── resultados/    # numeros_oficiales.json: solo totales, la única fuente de cifras del pitch
+├── tests/         # Pruebas automáticas (solo datos sintéticos)
+├── .github/       # Plantillas de PR e issues, dueños y pruebas automáticas
 └── app/           # Demo en Streamlit
 ```
+
+Para empezar sin esperar el kit:
+
+```bash
+pip install -r requirements.txt
+python -m src.sinteticos --dias 14 --salida data/sinteticos/telemetria.csv
+pytest
+```
+
+Cómo se conectan las piezas: [docs/11-trabajo-en-paralelo.md](docs/11-trabajo-en-paralelo.md).
 
 ---
 

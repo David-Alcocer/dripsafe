@@ -70,6 +70,18 @@
 
 **DripSafe**: juega con "goteo" (agua) y "seguro" (ciberseguridad).
 
+## D8 · Piezas conectadas por contratos de datos (propuesta de Guille, por aprobar)
+
+**Decisión:** cada quien es dueño de una carpeta y las piezas se comunican solo por archivos con columnas fijas. Mientras el kit no esté limpio, todos trabajan con datos sintéticos del mismo formato. Ver [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
+
+**Por qué:** en 3 días nadie puede esperar a nadie. Si el formato está fijo desde hoy, el modelo, los ataques simulados, las métricas y el dashboard avanzan al mismo tiempo y se unen el martes sin sorpresas.
+
+## D9 · Una sola fuente para las cifras del pitch (propuesta de Guille, por aprobar)
+
+**Decisión:** `resultados/numeros_oficiales.json` es la única fuente de las cifras del dashboard, las diapositivas y el pitch. Se sube al repo porque solo trae totales, nunca filas del kit.
+
+**Por qué:** si el dashboard dice un PUE y la diapositiva otro, el jurado deja de creer todos los números. Además, Git guarda el historial de cada cifra.
+
 ## Decisiones pendientes
 
 - [ ] ¿Quién presenta el pitch? Candidatos: Nico (presentó propuestas en IRAP) y Leo (líder).
