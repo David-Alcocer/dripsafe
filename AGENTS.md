@@ -35,6 +35,12 @@ Python 3.11+, pandas, numpy, scikit-learn, codecarbon, streamlit, plotly y jupyt
 - Toda cifra que vaya al pitch sale de `resultados/numeros_oficiales.json`.
 - Respeta al dueño de cada carpeta (tabla en `docs/11-trabajo-en-paralelo.md`).
 
+## Reparto de métricas aprobado (D10)
+- Misa calcula el PUE inicial en `src/metricas/pue.py` y entrega los datos limpios, energía total y de TI, unidades y periodo; conserva la integración.
+- Nico calcula ahorro, PUE final proyectado y balance neto, estima agua y emisiones cuando hay datos suficientes y consolida `resultados/numeros_oficiales.json`. El resto de `src/metricas/` es suyo.
+- Gadiel entrega alertas, consumo esperado del enfriamiento y mediciones de CodeCarbon; Leo usa los resultados en el dashboard y diseña las diapositivas. Nico prepara el contenido del pitch, el acuífero y el bono.
+- Los cálculos siguen pendientes de implementación. Identifica proyecciones y supuestos; el balance positivo se verifica con resultados y las métricas sin datos suficientes quedan pendientes.
+
 ## Mapa de la documentación
 - `docs/01-convocatoria.md`: reglas y criterios oficiales
 - `docs/02-decisiones.md`: decisiones y razones

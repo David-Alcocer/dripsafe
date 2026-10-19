@@ -20,7 +20,7 @@
 **Decisión:** **Isolation Forest** de scikit-learn, entrenado con los datos del kit. No usaremos un LLM para analizar los datos.
 
 **Por qué:**
-- Se entrena en minutos en una laptop y consume casi nada de energía → **balance neto claramente positivo**, que es obligatorio.
+- Se entrena en minutos en una laptop y buscamos un consumo bajo → el **balance neto positivo** obligatorio se verificará con las mediciones de Gadiel y los cálculos de Nico (D10).
 - Es explicable: podemos decir por qué marcó una alerta.
 - Los LLM son malos analizando miles de lecturas numéricas, cuestan energía y los jueces quieren ver nuestro trabajo, no el de una API.
 - "Hecho por nosotros" no es "desde cero": scikit-learn trae el algoritmo listo. Son unas 20 líneas.
@@ -81,6 +81,18 @@
 **Decisión:** `resultados/numeros_oficiales.json` es la única fuente de las cifras del dashboard, las diapositivas y el pitch. Se sube al repo porque solo trae totales, nunca filas del kit.
 
 **Por qué:** si el dashboard dice un PUE y la diapositiva otro, el jurado deja de creer todos los números. Además, Git guarda el historial de cada cifra.
+
+## D10 · Misa entrega el PUE inicial; Nico calcula el impacto posterior ✅
+
+**Decisión aprobada por el equipo:** Misa entrega el PUE inicial, la telemetría limpia y las energías total y de TI, con unidades y periodo. Conserva el cálculo base en `src/metricas/pue.py`, el repositorio y la integración.
+
+Nico calcula el ahorro energético, el PUE final proyectado, el balance neto y el impacto en agua y emisiones cuando los datos lo permitan. Es responsable del resto de `src/metricas/` y de consolidar `resultados/numeros_oficiales.json`. Gadiel aporta alertas, consumo esperado y mediciones de CodeCarbon; Leo integra las cifras en la demo y diseña las diapositivas.
+
+Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y modelo de negocio del pitch. Su entregable incluye un programa en Python, un ejemplo reproducible y resultados con fuentes y supuestos.
+
+**Tareas:** #2 sigue con Misa, #3 pasa a Nico y #14 continúa con Nico. Los cálculos siguen pendientes de implementación. El PUE final y los ahorros se presentan como proyecciones hasta tener evidencia medida; un balance positivo debe comprobarse.
+
+**Por qué:** deja claro quién entrega la referencia y quién transforma esa referencia en cifras de impacto. Este acuerdo actualiza los responsables descritos en D8 y D9; esas propuestas conservan su estado pendiente de aprobación.
 
 ## Decisiones pendientes
 

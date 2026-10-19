@@ -1,6 +1,6 @@
 # 07 · Agua, acuífero y bono de cero agua dulce
 
-> Documento para **Nico**. Aquí van los dos requisitos obligatorios que dependen de la investigación (**balance neto** e **impacto en el acuífero**) y el **bono** de +5% a +15%.
+> Documento para **Nico**. Incluye su cálculo de impacto posterior al PUE inicial de Misa, los requisitos de **balance neto** e **impacto en el acuífero**, y la propuesta del **bono** de +5% a +15%.
 
 ## 1. Por qué la IA consume agua
 
@@ -32,16 +32,22 @@ Estructura sugerida para la propuesta:
 | **Gobernanza** | ¿Quién regula y qué permisos aplican? | CONAGUA (concesiones de agua) y normas de descarga; zonas protegidas |
 | **Justicia ambiental** | ¿A quién le quita agua el centro de datos? | Comunidades que dependen del mismo acuífero |
 
-## 4. Balance neto (obligatorio, junto con Gadiel)
+## 4. Balance neto (obligatorio, cálculo a cargo de Nico)
 
 **El consumo del modelo de IA debe ser menor que el ahorro que genera.** Las fórmulas están en [05-solucion-tecnica.md](05-solucion-tecnica.md#balance-neto-obligatorio).
+
+**Misa entrega:** PUE inicial, datos limpios y energías total y de TI, con unidades, intervalo y periodo.
+
+**Nico calcula:** ahorro energético, PUE final proyectado y balance neto; estima agua y emisiones cuando haya datos suficientes. Identifica proyecciones, fuentes y supuestos, y consolida los resultados para Leo. El balance positivo se verifica con cifras; los cálculos siguen pendientes de implementación.
 
 **A Nico le toca conseguir y citar:**
 - [ ] Factor de emisión del Sistema Eléctrico Nacional de México, en su valor oficial más reciente.
 - [ ] Intensidad hídrica de la generación eléctrica (L/kWh), o un valor de referencia citado.
-- [ ] WUE típico de un centro de datos con torres de enfriamiento, como referencia si el kit no lo trae.
+- [ ] Consumo de agua o WUE del caso; si se usa un valor de referencia, justificar su aplicación y presentarlo como escenario supuesto.
 
-**Gadiel aporta:** la energía del modelo, medida con CodeCarbon.
+**Gadiel aporta:** alertas, consumo esperado del enfriamiento y mediciones de energía y emisiones del modelo con CodeCarbon.
+
+Si faltan datos suficientes, el resultado correspondiente queda pendiente. El análisis del acuífero contextualiza el impacto local; los litros de agua ahorrada requieren un cálculo sustentado.
 
 ## 5. Bono Zero Freshwater Footprint (+5% a +15%)
 
@@ -60,10 +66,14 @@ Estructura sugerida para la propuesta:
 3. Que no dispara el PUE. Si lo sube un poco, explicar el balance.
 
 ## 6. Entregable de Nico
-- 1 diapositiva: el acuífero de Yucatán y por qué importa.
-- 1 diapositiva: balance neto con cifras.
-- 1 diapositiva: propuesta de enfriamiento híbrido para el bono.
-- Lista de fuentes citadas.
+
+**Pendiente de implementación y elaboración:**
+
+- **Programa en Python** dentro de `src/metricas/`, usando el PUE inicial que entrega Misa desde `src/metricas/pue.py`. Calcula ahorro, PUE final proyectado, balance neto y, cuando sea posible, impacto en agua y emisiones.
+- **Ejemplo reproducible con datos sintéticos**, con instrucciones y escenarios sin ahorro, con balance positivo y con ahorro menor que el costo del modelo.
+- **Resultados consolidados** en `resultados/numeros_oficiales.json`, con origen y responsable de cada cifra; documentación del periodo, unidades, fuentes y supuestos, distinguiendo mediciones de proyecciones.
+- **Análisis del acuífero y propuesta del bono**, con fuentes y condiciones de viabilidad.
+- **Contenido y guion del pitch**, incluyendo el impacto local, las cifras del balance y la propuesta del bono. Leo diseña las diapositivas con esos resultados.
 
 ## Para leer más
 Ver las secciones "Agua y centros de datos" y "Acuífero de Yucatán" en [09-recursos.md](09-recursos.md).
