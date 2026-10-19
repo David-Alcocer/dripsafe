@@ -102,9 +102,64 @@ Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y
 
 **Por qué:** el balance final se construye entre ambos, con unidades, periodos y supuestos acordados. Misa conserva el PUE inicial; Nico conserva el ahorro, el PUE final proyectado, las estimaciones de agua y emisiones y la consolidación de resultados. Este ajuste actualiza D10.
 
+## D12 · El kit cambia el enfoque del modelo (19 oct, confirmar en la reunión)
+
+**Lo que trae el kit** (detalle en [05-solucion-tecnica.md](05-solucion-tecnica.md#lo-que-trae-el-kit-19-oct)):
+- Un solo CSV **totalmente simulado** con 3 sitios ficticios (aire, evaporativa y líquida) × 168 horas, con intervalos de **1 hora**. Trae energía IT y total en kWh, agua en L, carga, temperatura exterior y de entrada, y un **evento OT resumido**.
+- Ya vienen **anomalías etiquetadas** (ineficiencia, fuga de agua y eventos OT) y una partición **referencia/evaluación**. Las columnas `scenario` y `simulated_anomaly` están **prohibidas como entrada** del detector.
+- **No** trae variables por equipo (chiller, bombas, torre, temperaturas del agua, caudal, setpoint) ni protocolos.
+- En el ejemplo del kit, las **reglas fijas** aciertan todo y el **Isolation Forest** con 6 variables tiene 38% de precisión y 48% de recall. El kit aclara que esa comparación **no es justa**: las reglas ven el evento OT y el modelo no, y las anomalías se diseñaron para ser visibles a las reglas.
+- El kit pide: mostrar **"DATOS SIMULADOS"** siempre, presentar energía y emisiones como **estimaciones con supuestos**, no calcular litros por consulta, no presentar ahorros hipotéticos como observados, y explicar **qué venía en el kit y qué aportamos**.
+
+**Decisión:**
+- **Detector híbrido:** reglas explicables (las del kit, mejoradas) más Isolation Forest con **variables derivadas por sitio**: PUE por hora, L/kWh IT, y la diferencia entre la energía auxiliar o el agua reales y lo esperado según carga, temperatura y tipo de enfriamiento. El modelo se ajusta **solo con referencia**. Cada alerta conserva un motivo legible.
+- **La comparación justa es parte del entregable:** mismas entradas, ajuste y evaluación separados, y varias corridas con dispersión. Si las reglas bastan, lo decimos. *El método más ligero que funciona es el argumento Green AI.*
+- La **coherencia física** se aplica a nivel agregado: energía auxiliar (total − IT) y agua esperadas para cada sitio.
+- El PUE final, los ahorros y el balance neto se presentan como **proyecciones con supuestos explícitos y análisis de sensibilidad**. `tools/compare_detectors.py` del kit sirve como referencia de cómo medir.
+- Usamos el **Stack A (Streamlit)** del kit como referencia, con **Python 3.12**.
+
+## D13 · Reparto ajustado: Nico se suma al modelo ✅ (19 oct)
+
+**Decisión:**
+- **Gadiel** construye el detector híbrido (#5, #6, #8) y mide su consumo con CodeCarbon (#7).
+- **Nico** se encarga de la **evaluación justa y Green AI** (costo frente a calidad del detector), del ahorro y el PUE final proyectado (#3), de consolidar `numeros_oficiales.json` y del balance neto con Misa (#14). **Deja** el acuífero, el bono y el guion.
+- **Guille** conserva ciberseguridad (#9–#12) y **toma el acuífero y la gobernanza** (#13).
+- **Misa** conserva datos, PUE inicial e integración (#1, #2, #4), el balance neto con Nico (#14), y **toma la comparación de refrigeración y el bono** (#15). Es el reto 3 del kit.
+- **Leo** conserva dashboard, diapositivas y video (#17–#20) y **toma el guion del pitch** (#16). Nico le aporta las cifras.
+
+**Por qué:** Nico es fuerte en algoritmos y el balance neto depende directamente del modelo. El kit resultó pequeño (504 filas, sin sensores por equipo), así que la parte de datos de Misa y la de OT de Guille son más ligeras de lo previsto y pueden absorber el bono y el acuífero.
+
+**Para no pisarse en el modelo:** Gadiel **construye** el detector; Nico lo **mide y lo pone a prueba**. La interfaz entre ambos es el Contrato 3 (`alertas.csv` + `consumo_modelo.json`).
+
+## D14 · Contrato v2 adaptado al kit real (propuesta, por aprobar)
+
+**Problema:** `src/contrato.py` supone un solo sitio, potencias en kW y sensores por equipo. El kit tiene **3 sitios por cada hora**, energía en kWh por intervalo y otras columnas. Con el contrato actual, `validar()` fallaría por dos razones: el `timestamp` se repite por sitio y aparecen columnas fuera del contrato.
+
+**Propuesta:**
+
+| Kit | Contrato | Nota |
+|---|---|---|
+| `timestamp` | `timestamp` | UTC, intervalo de 1 h |
+| `energy_it_kwh` | `kw_ti` | Con intervalo de 1 h, kWh por intervalo = kW promedio |
+| `energy_total_kwh` | `kw_total` | Igual |
+| `outdoor_temp_c` | `t_exterior` | |
+| `water_l` | `agua_reposicion_l` | Es **captación in situ**, no reposición exacta de la torre: declararlo |
+| `site_id`, `cooling_type`, `load_pct`, `inlet_temp_c`, `ot_event` | **nuevas** columnas opcionales | |
+| `split` | `etiqueta_particion` | referencia → entrenamiento; evaluacion → evaluacion |
+| `scenario` | `etiqueta_escenario` | |
+| `scenario` (derivada) | `etiqueta_tipo` | base → normal; ineficiencia y fuga_agua → falla; evento_ot → `evento_ot` (el kit advierte que un login fallido **no prueba** un ataque) |
+| `simulated_anomaly`, `is_simulated` | no entran | Solo para evaluar y para el aviso de simulación |
+
+- `validar()` debe revisar el orden por **(site_id, timestamp)** y no globalmente.
+- Los escenarios de `src/ataques/` que requieren columnas que el kit no trae (chiller, temperaturas del agua, caudal) **siguen funcionando con los sintéticos**. Sobre el kit solo se inyectan los que tengan sus columnas disponibles, y se distinguen los escenarios **del kit** de los **nuestros**.
+
+**Cómo se aprueba:** un PR que cambie a la vez [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md), `src/contrato.py` y `config/columnas.json`, con el visto bueno de todos. Responsable: Misa. Revisa: Gadiel.
+
 ## Decisiones pendientes
 
 - [ ] ¿Quién presenta el pitch? Candidatos: Nico (presentó propuestas en IRAP) y Leo (líder).
 - [ ] Duración del pitch: preguntarle a CIFOX.
-- [ ] Confirmar las variables exactas del modelo al ver el kit.
+- [x] Confirmar las variables exactas del modelo al ver el kit → ver D12.
+- [ ] Aprobar el contrato v2 (D14).
+- [ ] Confirmar en la reunión el enfoque híbrido (D12).
 - [ ] ¿Quién es el representante oficial ante CIFOX?

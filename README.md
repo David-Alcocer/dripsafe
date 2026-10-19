@@ -15,7 +15,7 @@
 |---|---|
 | Sub-reto | **3 · Detección de anomalías con IA** en enfriamiento y gestión hídrica |
 | Métrica principal | **PUE** (Power Usage Effectiveness) |
-| Modelo | **Isolation Forest** (scikit-learn): ligero y explicable; balance neto por verificar |
+| Modelo | **Detector híbrido**: reglas explicables + Isolation Forest con variables por sitio (D12); balance neto por verificar |
 | Demo | **Streamlit** (Python) |
 | Bono extra | Ir por el **Zero Freshwater Footprint** (+5% a +15%) con enfriamiento híbrido |
 | Flujo de Git | **Trunk-based**, con ramas cortas; `git worktree` es opcional |
@@ -51,15 +51,15 @@ Cada documento es independiente. Léanlo completo o pásenselo a su IA de confia
 
 | Integrante | Rol |
 |---|---|
-| **Leo** (líder) | Demo en Streamlit y diseño visual del pitch |
-| **Misa** (co-líder) | Datos limpios, PUE inicial y energías de referencia, balance neto final con Nico, repositorio e integración |
-| **Gadiel** | Modelo de IA (Isolation Forest) y medición de consumo con CodeCarbon |
-| **Nico** | Ahorro y PUE final proyectados, balance neto final con Misa, resultados de impacto, acuífero, bono y contenido del pitch |
-| **Guille** | Ciberseguridad OT: amenazas y mapeo con MITRE ATT&CK for ICS |
+| **Leo** (líder) | Demo en Streamlit, guion y diapositivas del pitch |
+| **Misa** (co-líder) | Datos limpios y contrato v2, PUE inicial, balance neto final con Nico, comparación de refrigeración y bono, repositorio e integración |
+| **Gadiel** | Construye el detector híbrido, consumo esperado y medición con CodeCarbon |
+| **Nico** | Evaluación justa y Green AI del detector, ahorro y PUE final proyectados, balance neto final con Misa, consolida las cifras |
+| **Guille** | Ciberseguridad OT (eventos del kit y ATT&CK for ICS), análisis del acuífero y gobernanza |
 
 Detalle en [docs/03-equipo-y-roles.md](docs/03-equipo-y-roles.md).
 
-**Reparto aprobado:** Misa entrega a Nico el PUE inicial y los datos que lo sustentan; Nico calcula el ahorro, el PUE final proyectado y el impacto en agua y emisiones cuando haya datos suficientes. **Misa + Nico calculan y validan juntos el balance neto final**, usando las mediciones del modelo de Gadiel. Nico consolida las cifras para Leo. Los cálculos están pendientes de implementación; los ahorros y el PUE final serán proyecciones hasta contar con evidencia medida.
+**Reparto aprobado:** Misa entrega a Nico el PUE inicial y los datos que lo sustentan; Nico calcula el ahorro, el PUE final proyectado y el impacto en agua y emisiones cuando haya datos suficientes. **Misa + Nico calculan y validan juntos el balance neto final**, usando las mediciones del modelo de Gadiel. Nico consolida las cifras para Leo. **Ajuste D13 (19 oct):** Nico se suma al modelo como evaluador; el acuífero pasa a Guille, el bono a Misa y el guion a Leo. Los cálculos están pendientes de implementación; los ahorros y el PUE final serán proyecciones hasta contar con evidencia medida.
 
 ---
 

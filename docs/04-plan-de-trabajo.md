@@ -14,19 +14,25 @@
 
 ## Lunes 19: entender el kit
 
-- [ ] Leer el kit cada quien desde su rol (ver [03-equipo-y-roles.md](03-equipo-y-roles.md)).
+- [ ] **Todos:** instalar Python 3.12 y correr el **Stack A** del kit (ver [03-equipo-y-roles.md](03-equipo-y-roles.md)).
+- [ ] **Misa:** proponer el contrato v2 (D14) y abrir su PR.
+- [ ] **Gadiel:** correr `tools/compare_detectors.py` (reglas e Isolation Forest) y diseñar las variables por sitio.
+- [ ] **Nico:** diseñar el protocolo de comparación justa (#22).
+- [ ] **Guille:** revisar los eventos OT del kit y empezar las fuentes del acuífero (#13).
 - [ ] **Misa:** cargar y limpiar los datos; entregar a Nico el **PUE inicial**, las energías total y de TI, unidades, intervalo y periodo.
 - [ ] **Nico:** revisar esos insumos, identificar qué cálculos de agua y emisiones permite el kit y ajustar los supuestos del ejemplo.
-- [ ] **Todos, en la noche:** 30 min de reunión para confirmar el sub-reto, las variables del modelo y el plan.
+- [ ] **Todos, en la noche:** 30 min de reunión para confirmar D12 (detector híbrido) y aprobar D14 (contrato v2).
 
 ## Martes 20: construir
 
-- [ ] **Gadiel:** modelo v1 entrenado; entregar alertas y consumo esperado del enfriamiento a Nico.
+- [ ] **Gadiel:** detector híbrido v1 (reglas + Isolation Forest ajustado con referencia); entregar alertas y consumo esperado a Nico.
 - [ ] **Gadiel:** medir el consumo del modelo con CodeCarbon.
 - [ ] **Guille:** 3 o 4 técnicas de ataque mapeadas y cómo las detecta el modelo.
 - [ ] **Nico:** implementar ahorro energético y PUE final proyectado; estimar agua y emisiones si hay datos suficientes y consolidar los resultados para Leo.
 - [ ] **Misa + Nico:** implementar juntos el balance neto final, usando el ahorro estimado por Nico y el consumo del modelo de Gadiel.
-- [ ] **Nico:** preparar el borrador del análisis del acuífero y documentar fuentes y supuestos de los cálculos.
+- [ ] **Nico:** primera corrida de la comparación justa (calidad frente a costo, varias repeticiones) y documentar fuentes y supuestos de los cálculos.
+- [ ] **Guille:** borrador del análisis del acuífero y la gobernanza.
+- [ ] **Misa:** comparación de los 3 tipos de refrigeración del kit y borrador del bono.
 - [ ] **Leo:** dashboard leyendo los datos reales.
 - [ ] **Misa:** integrar datos, modelo y métricas de Nico con la demo.
 - [ ] **Todos, en la noche:** llamada corta de avance.
@@ -35,10 +41,10 @@
 
 - [ ] Demo funcionando de punta a punta.
 - [ ] **Video de respaldo** de la demo grabado.
-- [ ] Análisis del acuífero y propuesta del bono terminados.
+- [ ] Análisis del acuífero (Guille) y propuesta del bono (Misa) terminados.
 - [ ] **Misa + Nico:** verificar juntos el balance neto final, sus unidades, periodo y supuestos.
 - [ ] **Nico:** entregar programa y ejemplo reproducible con el balance conjunto y las cifras consolidadas, distinguiendo mediciones de proyecciones.
-- [ ] **Nico:** cerrar el contenido y guion del pitch; **Leo:** diseñar las diapositivas con las mismas cifras que el dashboard.
+- [ ] **Leo:** cerrar el guion del pitch y las diapositivas con las mismas cifras que el dashboard; **Nico** revisa las cifras y su explicación.
 - [ ] **Todos:** primer ensayo con cronómetro.
 - [ ] **Regla:** a partir de hoy en la noche no entra nada nuevo.
 

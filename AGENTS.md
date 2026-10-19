@@ -35,11 +35,22 @@ Python 3.11+, pandas, numpy, scikit-learn, codecarbon, streamlit, plotly y jupyt
 - Toda cifra que vaya al pitch sale de `resultados/numeros_oficiales.json`.
 - Respeta al dueño de cada carpeta (tabla en `docs/11-trabajo-en-paralelo.md`).
 
+## El kit real (19 oct, ver D12 en docs/02)
+- CSV **totalmente simulado**: 3 sitios ficticios (aire, evaporativa, líquida) × 168 h, intervalo de 1 h. Columnas: energía IT y total (kWh), agua (L), carga, temperatura exterior y de entrada, evento OT, más etiquetas `scenario`, `simulated_anomaly` y `split`.
+- `scenario` y `simulated_anomaly` **nunca** son entrada del detector. Se ajusta con `split == referencia` y se evalúa con `evaluacion`.
+- No hay sensores por equipo; el contrato v2 (D14) está pendiente de aprobación. No cambies `src/contrato.py` fuera de ese PR.
+- Mostrar siempre "DATOS SIMULADOS". Energía y emisiones son estimaciones con supuestos. Nada de litros por consulta ni de ahorros hipotéticos presentados como observados.
+- Enfoque: detector híbrido (reglas + Isolation Forest con variables por sitio) y comparación justa con las reglas del kit.
+
+## Reparto vigente (D13, 19 oct)
+- Gadiel construye el detector; Nico lo evalúa (calidad frente a costo), calcula el ahorro y el PUE final proyectados y consolida `numeros_oficiales.json`.
+- Misa: datos, contrato v2, PUE inicial, integración, comparación de refrigeración y bono. Guille: ciberseguridad OT, acuífero y gobernanza. Leo: dashboard, guion y diapositivas.
+
 ## Reparto de métricas aprobado (D10 y ajuste D11)
 - Misa calcula el PUE inicial en `src/metricas/pue.py` y entrega los datos limpios, energía total y de TI, unidades y periodo; conserva la integración.
 - Nico calcula ahorro y PUE final proyectado, estima agua y emisiones cuando hay datos suficientes y consolida `resultados/numeros_oficiales.json`.
 - Misa + Nico calculan y validan juntos el balance neto final; comparten la responsabilidad de `src/metricas/balance_neto.py` (pendiente de implementación). El resto de `src/metricas/`, salvo el PUE inicial de Misa, corresponde a Nico.
-- Gadiel entrega alertas, consumo esperado del enfriamiento y mediciones de CodeCarbon; Leo usa los resultados en el dashboard y diseña las diapositivas. Nico prepara el contenido del pitch, el acuífero y el bono.
+- Gadiel entrega alertas, consumo esperado del enfriamiento y mediciones de CodeCarbon; Leo usa los resultados en el dashboard y diseña las diapositivas. (D13: el guion pasa a Leo, el acuífero a Guille y el bono a Misa).
 - Los cálculos siguen pendientes de implementación. Identifica proyecciones y supuestos; el balance positivo se verifica con resultados y las métricas sin datos suficientes quedan pendientes.
 
 ## Mapa de la documentación

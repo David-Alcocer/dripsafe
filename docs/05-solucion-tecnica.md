@@ -1,6 +1,33 @@
 # 05 · Solución técnica
 
-> Documento para **Gadiel** (modelo), **Misa** (datos y PUE inicial), **Nico** (cálculo de impacto), **Misa + Nico** (balance neto final) y **Leo** (demo). Es una propuesta inicial: se ajusta cuando veamos el kit el 19.
+> Documento para **Gadiel** (modelo), **Misa** (datos y PUE inicial), **Nico** (evaluación del detector y cálculo de impacto), **Misa + Nico** (balance neto final) y **Leo** (demo). **Actualizado tras el kit (19 oct):** ver la sección siguiente.
+
+## Lo que trae el kit (19 oct)
+
+> Resumen del kit oficial. **El kit no se sube al repo.** Aquí solo se describe su estructura. Decisiones derivadas: D12, D13 y D14 en [02-decisiones.md](02-decisiones.md).
+
+**Datos:** un CSV **totalmente simulado** con 3 sitios ficticios × 168 horas (una semana), intervalo de 1 hora.
+
+| Columna del kit | Unidad | Uso |
+|---|---|---|
+| `timestamp`, `site_id` | UTC · SIM-A/B/C | Clave: una fila por sitio y hora |
+| `cooling_type` | aire / evaporativa / liquida | Un tipo por sitio |
+| `energy_it_kwh`, `energy_total_kwh` | kWh por intervalo | PUE = suma(total) / suma(IT), **nunca** el promedio de PUE horarios |
+| `water_l` | L por intervalo | Captación in situ simulada; "WUE pedagógica" = suma(agua) / suma(IT) |
+| `load_pct`, `outdoor_temp_c`, `inlet_temp_c` | %, °C, °C | Variables de contexto |
+| `ot_event` | normal / login_fallido / cambio_config_no_autorizado | Evento OT resumido; un login fallido no prueba un ataque |
+| `split` | referencia (72 h) / evaluacion (96 h) | Ajustar con referencia, evaluar con evaluacion |
+| `scenario`, `simulated_anomaly` | etiquetas | **Prohibido** usarlas como entrada; solo para evaluar |
+
+**Qué cambia respecto al plan original:**
+- **No hay sensores por equipo** (chiller, bombas, torre, temperaturas del agua, caudal). La "coherencia física" se hace a nivel agregado por sitio: energía auxiliar (total − IT) y agua esperadas según carga, temperatura exterior y tipo de enfriamiento.
+- **Las reglas del kit ya detectan todo en su ejemplo**, y el Isolation Forest del ejemplo, con 6 variables y sin OT, se queda en 38% de precisión y 48% de recall. El kit aclara que esa comparación **no es justa**. Por eso:
+  - **Gadiel** construye un **detector híbrido**: reglas explicables más Isolation Forest con variables derivadas por sitio (PUE horario, L/kWh, residuos frente a lo esperado), ajustado solo con referencia.
+  - **Nico** hace la **comparación justa**: mismas entradas para todos los métodos, ajuste y evaluación separados, varias corridas y la calidad reportada junto al costo. Si las reglas bastan, se dice. *El método más ligero que funciona es el argumento Green AI.*
+- **Stack:** el Stack A (Streamlit) del kit es la referencia y se usa **Python 3.12**. Las herramientas del kit (`common/cifox.py` y `tools/compare_detectors.py`) se pueden reutilizar citando que vienen del kit (licencia MIT).
+- **Reglas de presentación del kit:** "DATOS SIMULADOS" siempre visible. Energía y emisiones como **estimación con supuestos** (watts y gCO₂e/kWh editables, con análisis de sensibilidad). Nada de litros por consulta. Los ahorros son **proyecciones**, no observaciones. Hay que explicar **qué venía en el kit y qué aportamos**.
+
+**Entregable que sugiere el kit:** demo local de 3 minutos, README reproducible, cambios y tests, ficha de datos y supuestos, resultados con incertidumbre, tres límites y la siguiente validación necesaria.
 
 ## Concepto: un vigilante, dos beneficios
 
@@ -27,7 +54,8 @@ data/ (kit)  →  limpieza (pandas)  →  features  →  Isolation Forest  →  
 |---|---|---|
 | Cargar y limpiar datos | Misa | pandas |
 | PUE inicial, energías total y de TI, unidades y periodo | Misa | pandas |
-| Features y modelo | Gadiel | scikit-learn |
+| Variables por sitio y detector híbrido (reglas + Isolation Forest) | Gadiel | scikit-learn |
+| Comparación justa: calidad frente a costo del detector | Nico | scikit-learn + `tools/compare_detectors.py` del kit |
 | Alertas y consumo esperado del enfriamiento | Gadiel | scikit-learn |
 | Consumo del modelo | Gadiel | CodeCarbon |
 | Clasificar anomalías (falla o ataque) | Gadiel + Guille | reglas + modelo |
@@ -40,7 +68,7 @@ data/ (kit)  →  limpieza (pandas)  →  features  →  Isolation Forest  →  
 
 **Entrega entre Misa y Nico:** Misa entrega el PUE inicial junto con la telemetría limpia y las energías total y de TI en kWh, indicando unidades, intervalo y periodo. El PUE por sí solo no basta para calcular kWh ahorrados. Nico usa esa referencia, las alertas, el consumo esperado y las mediciones de CodeCarbon de Gadiel para calcular el impacto posterior. Los formatos de intercambio siguen definidos en [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
 
-**Estado:** este reparto está aprobado (D10 y ajuste D11); los cálculos y la consolidación de resultados siguen pendientes de implementación.
+**Estado:** este reparto está aprobado (D10, D11 y D13); los cálculos y la consolidación de resultados siguen pendientes de implementación.
 
 ## Stack
 

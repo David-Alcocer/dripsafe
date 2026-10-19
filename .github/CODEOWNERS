@@ -11,5 +11,8 @@
 /src/ataques/                   @Ghosflot
 /docs/06-ciberseguridad-ot.md   @Ghosflot
 /app/                           @Leosanlo30
-/docs/07-agua-y-acuifero.md     @Nicomoguel
-/docs/08-pitch.md               @Nicomoguel
+/docs/07-agua-y-acuifero.md     @Ghosflot @David-Alcocer
+/docs/08-pitch.md               @Leosanlo30 @Nicomoguel
+# D13: Nico evalúa el detector que construye Gadiel.
+/src/modelo/                    @Nicomoguel
+/src/evaluacion/                @Nicomoguel

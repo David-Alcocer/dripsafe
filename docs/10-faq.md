@@ -24,6 +24,9 @@ Pulir y presentar, **no construir desde cero**. Son 6 horas de trabajo con mento
 ### ¿Hacemos nuestro propio modelo o usamos un LLM barato?
 **Nuestro propio modelo** (Isolation Forest con scikit-learn). Los LLM son malos con datos numéricos masivos, arruinan el balance neto y los jueces quieren ver nuestro trabajo. Un LLM solo se usaría, opcionalmente, para explicar alertas en lenguaje natural, sumando su consumo al balance. Usar Claude para programar e investigar sí está bien.
 
+### El kit dice que sus reglas simples detectan todo y el Isolation Forest no. ¿Tiramos el modelo?
+No. Su ejemplo no es una comparación justa: las reglas ven el evento OT y el modelo no, y las anomalías se diseñaron para ser visibles a esas reglas. Por eso hacemos un **detector híbrido** (reglas + modelo con variables por sitio) y una **comparación justa** (D12). Si al final las reglas bastan, lo decimos con números: usar el método más ligero que funciona es justo el argumento de Green AI.
+
 ### ¿Usamos Grafana?
 No para el plan principal: usamos **Streamlit**, que se conecta directo con el modelo en Python. Grafana requiere más configuración y **no da puntos extra**. Queda como opcional si sobra tiempo.
 

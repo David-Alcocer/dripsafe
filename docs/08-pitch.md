@@ -1,6 +1,6 @@
 # 08 · El pitch
 
-> Documento para **Nico** (estructura y contenido) y **Leo** (diseño visual). **Pendiente:** preguntar a CIFOX la duración y el formato exactos.
+> Documento para **Leo** (guion y diseño, D13) y **Nico** (cifras y su explicación). **Pendiente:** preguntar a CIFOX la duración y el formato exactos.
 
 ## ¿Qué es el pitch?
 
@@ -18,7 +18,7 @@ Sí tenemos que demostrar que la solución **podría** usarse en el mundo real, 
 | 4 | **Los números** | ~25% | PUE inicial y final proyectado, ahorro estimado y balance neto; agua y emisiones solo si hay datos suficientes |
 | 5 | **Impacto y escala** | ~20% | Acuífero, bono de cero agua dulce, quién lo usaría y cierre |
 
-**Preparación:** Nico calcula el ahorro y el PUE final proyectado, usando el PUE inicial de Misa y los insumos de Gadiel. **Misa + Nico calculan y validan juntos el balance neto final**; Nico consolida las cifras en `resultados/numeros_oficiales.json` y escribe el contenido. Leo diseña las diapositivas y muestra las mismas cifras en el dashboard. El PUE final y los ahorros se presentan como proyecciones hasta contar con evidencia medida; las métricas pendientes no se presentan como resultados.
+**Preparación:** Nico calcula el ahorro y el PUE final proyectado, usando el PUE inicial de Misa y los insumos de Gadiel. **Misa + Nico calculan y validan juntos el balance neto final**; Nico consolida las cifras en `resultados/numeros_oficiales.json` y explica las cifras. Leo escribe el guion (D13) y diseña las diapositivas y muestra las mismas cifras en el dashboard. El PUE final y los ahorros se presentan como proyecciones hasta contar con evidencia medida; las métricas pendientes no se presentan como resultados.
 
 ## Checklist: los 7 criterios deben escucharse en el pitch
 

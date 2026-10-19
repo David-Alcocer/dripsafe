@@ -1,6 +1,8 @@
 # 07 · Agua, acuífero y bono de cero agua dulce
 
-> Documento para **Nico**. Incluye su cálculo de impacto posterior al PUE inicial de Misa, los requisitos de **balance neto** e **impacto en el acuífero**, y la propuesta del **bono** de +5% a +15%.
+> **Reparto D13 (19 oct):** el **acuífero y la gobernanza** (sección 3) los lleva **Guille**; la **comparación de refrigeración y el bono** (sección 5) los lleva **Misa**; el **balance neto** sigue con **Misa + Nico**. Incluye los requisitos de **balance neto** e **impacto en el acuífero** y la propuesta del **bono** de +5% a +15%.
+>
+> **Del kit:** `water_l` es **captación in situ** simulada. No es consumo neto, ni agua de la generación eléctrica, ni potabilidad. Las diferencias entre los sitios del kit no son un experimento controlado: toda recomendación del bono va **condicionada a sus supuestos**.
 
 ## 1. Por qué la IA consume agua
 

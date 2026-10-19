@@ -55,11 +55,14 @@ Prohibido atacar sistemas reales: solo se trabaja con el kit o con simulaciones.
 
 Somos 5 estudiantes de segundo año de Ingeniería de Software. Todos venimos de C++ y estamos aprendiendo Python para este proyecto.
 
-- **Leo** (líder): diseño front y demo en Streamlit.
-- **Misa** (co-líder): datos, cálculo de PUE, GitHub e integración.
-- **Gadiel**: modelo de IA (Isolation Forest) y medición de consumo con CodeCarbon.
-- **Nico**: acuífero de Yucatán, balance neto, bono de enfriamiento y pitch. Participó en IRAP (programa de investigación de Texas A&M en Yucatán).
-- **Guille**: ciberseguridad OT. Maneja Linux y seguridad básica.
+Reparto vigente (D13, 19 oct):
+- **Leo** (líder): demo en Streamlit, guion y diapositivas del pitch.
+- **Misa** (co-líder): datos, PUE inicial, GitHub e integración; comparación de refrigeración y bono; balance neto con Nico.
+- **Gadiel**: construye el detector híbrido (reglas + Isolation Forest) y mide su consumo con CodeCarbon.
+- **Nico**: evalúa el detector (calidad frente a costo, Green AI), ahorro y PUE final proyectados, balance neto con Misa. Participó en IRAP (programa de investigación de Texas A&M en Yucatán).
+- **Guille**: ciberseguridad OT, análisis del acuífero y gobernanza. Maneja Linux y seguridad básica.
+
+Sobre el kit (19 oct): datos totalmente simulados, 3 sitios ficticios (enfriamiento por aire, evaporativo y líquido) × 168 h, con energía, agua, carga, temperaturas y eventos OT resumidos. Las reglas simples del kit detectan sus anomalías de ejemplo; el Isolation Forest de ejemplo no, pero la comparación no es justa. Por eso usamos un detector híbrido con comparación justa.
 
 ---
 

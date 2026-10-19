@@ -104,12 +104,14 @@ Un detector conectado a la planta también puede ser atacado. Por eso:
 - **Se entrena solo con periodos verificados como limpios** y cada versión del modelo queda registrada. Así nadie le «enseña» a ver un ataque como normal (envenenamiento del modelo).
 - **Si el atacante conoce el modelo:** puede imitar la estadística de un sensor, pero tendría que falsificar a la vez temperatura, caudal y energía de forma físicamente coherente, y los medidores de energía suelen ser otro sistema.
 
-## 6. Qué revisar en el kit (lunes 19)
+## 6. Lo que trae el kit sobre OT (19 oct)
 
-- [ ] ¿Qué equipos aparecen (chillers, torres, bombas, CRAC/CRAH)?
-- [ ] ¿Qué protocolos usan (Modbus TCP, BACnet/IP, OPC UA)?
-- [ ] ¿Hay diagrama de red o arquitectura?
-- [ ] ¿Hay eventos de ataque o falla marcados en los datos?
+- **No trae** equipos, protocolos ni diagrama de red. El kit es solo de lectura local: sin PLC, sin red OT, sin actuadores y sin respuesta automatizada.
+- **Sí trae** una columna `ot_event` con eventos ficticios resumidos: `login_fallido` y `cambio_config_no_autorizado`, sin IPs ni credenciales.
+- El kit advierte que **un login fallido no prueba un ataque**. Proponemos tratarlo como `evento_ot` que requiere revisión humana, no como "ataque" confirmado (ver D14).
+- Mapeo tentativo para la tabla final: `cambio_config_no_autorizado` → **Modify Parameter (T0836)**. Para `login_fallido`, documentar que es un indicio de acceso, no una técnica confirmada; verificar en la matriz si conviene citar alguna técnica de acceso inicial.
+- Los escenarios de `src/ataques/` que necesitan columnas que el kit no trae (temperaturas del agua, chiller, caudal) **siguen sirviendo con los sintéticos** para mostrar la idea de "no cuadra físicamente". Sobre el kit, solo se usan los que tengan sus columnas.
+- **Acuífero y gobernanza (#13) también son de Guille desde D13.** Ver [07-agua-y-acuifero.md](07-agua-y-acuifero.md).
 
 ## 7. Entregable de Guille
 
