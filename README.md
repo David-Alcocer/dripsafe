@@ -39,6 +39,7 @@ Cada documento es independiente. Léanlo completo o pásenselo a su IA de confia
 | 08 | [Pitch](docs/08-pitch.md) | Nico, Leo | Estructura del pitch y modelo de negocio |
 | 09 | [Recursos](docs/09-recursos.md) | Todos | Enlaces en español e inglés por tema |
 | 10 | [Preguntas frecuentes](docs/10-faq.md) | Todos | Dudas que ya resolvimos |
+| — | [Contexto para NotebookLM](docs/notebooklm-contexto.md) | Investigación | Todo el contexto en un solo archivo, con preguntas y plantilla de apuntes |
 | 11 | [Trabajo en paralelo](docs/11-trabajo-en-paralelo.md) | Todos | Contratos entre piezas, dueños de carpetas y trazabilidad |
 | 12 | [Trazabilidad](docs/12-trazabilidad.md) | Todos | Requisito → responsable → issue → evidencia |
 | — | [CONTRIBUTING](CONTRIBUTING.md) | Todos | Cómo trabajamos con Git |

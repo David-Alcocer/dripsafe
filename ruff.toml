@@ -1,0 +1,13 @@
+target-version = "py311"
+line-length = 100
+
+[lint]
+select = [
+    "E",   # pycodestyle: errores
+    "F",   # pyflakes: bugs reales (imports sin usar, nombres indefinidos)
+    "B",   # flake8-bugbear: patrones comunes de bug
+]
+ignore = [
+    "E501",  # line too long: no bloquea el CI; es cosa del formatter
+    "B905",  # zip() sin strict=: tolerable en prototipos
+]
