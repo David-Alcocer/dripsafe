@@ -4,14 +4,14 @@
 
 Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 
-**Reparto aprobado en D10:** Misa entrega el PUE inicial (#2); Nico calcula el PUE final proyectado y consolida resultados (#3), además del balance neto (#14). Gadiel proporciona las alertas, el consumo esperado y las mediciones del modelo. Los cálculos siguen pendientes de implementación. Esta matriz registra el reparto acordado; los responsables y descripciones de los issues deben reflejarlo también en GitHub.
+**Reparto aprobado en D10 y ajustado en D11:** Misa entrega el PUE inicial (#2); Nico calcula el PUE final proyectado y consolida resultados (#3); Misa + Nico calculan y validan juntos el balance neto final (#14). Gadiel proporciona las alertas, el consumo esperado y las mediciones del modelo. Los cálculos siguen pendientes de implementación. Esta matriz registra el reparto acordado; los responsables y descripciones de los issues deben reflejarlo también en GitHub.
 
 ## Requisitos de la convocatoria
 
 | § | Requisito | Responsable | Issue | Evidencia esperada | Estado |
 |---|---|---|---|---|---|
 | 10 | Sub-reto 3: reportar el impacto en **PUE** | Misa: inicial; Nico: final proyectado | #2, #3 | `numeros_oficiales.json` → `pue_antes`, `pue_despues` (proyectado) | ⬜ |
-| 11 | **Balance neto positivo**, con cifras | Nico: cálculo; Gadiel: medición del modelo | #7, #14 | `consumo_modelo.json` + `numeros_oficiales.json` → `balance_neto_*`, con fuentes y supuestos | ⬜ |
+| 11 | **Balance neto positivo**, con cifras | Misa + Nico: cálculo y validación; Gadiel: medición del modelo | #7, #14 | `consumo_modelo.json` + `numeros_oficiales.json` → `balance_neto_*`, con fuentes y supuestos | ⬜ |
 | 11 | **Impacto en el acuífero** de Yucatán | Nico | #13 | Sección en `docs/07` con fuentes citadas | ⬜ |
 | 12 | Propuesta de solución sobre el kit | Todos | #4 | `main` corre de punta a punta con el kit | ⬜ |
 | 12 | Pitch final | Nico + Leo | #16, #19 | Diapositivas en PDF + guion | ⬜ |
@@ -27,7 +27,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números | ⬜ |
 | Impacto en ciberseguridad | Guille | #9, #10, #11, #12 | `deteccion_por_escenario.csv` + tabla ATT&CK final en `docs/06` | ⬜ |
 | Eficiencia Green AI | Nico: impacto; Misa: PUE inicial; Gadiel: consumo esperado | #2, #3, #5 | PUE inicial y final proyectado en `numeros_oficiales.json` | ⬜ |
-| Balance neto y gobernanza hídrica | Nico | #13, #14 | Balance en kWh y litros + análisis del acuífero | ⬜ |
+| Balance neto y gobernanza hídrica | Misa + Nico: balance; Nico: acuífero | #13, #14 | Balance en kWh y litros + análisis del acuífero | ⬜ |
 | Escalabilidad y negocio | Nico + Leo | #16 | Diapositiva de modelo de negocio | ⬜ |
 | Presentación | Leo + Nico | #17 a #21 | Dos ensayos con cronómetro + video de respaldo | ⬜ |
 
@@ -50,7 +50,7 @@ Creados en GitHub el 19 de octubre, cada uno con su etiqueta `rol:*` y sus etiqu
 | #11 | Guille | Modelo de amenazas y tabla ATT&CK final | `docs/06` |
 | #12 | Guille | Cómo se instala el detector sin abrir una puerta nueva | `docs/06` |
 | #13 | Nico | Análisis del acuífero | `docs/07` |
-| #14 | Nico | Balance neto energético y, con datos suficientes, hídrico y de emisiones | `balance_neto_*` + fuentes, periodo y supuestos |
+| #14 | Misa + Nico | Balance neto final energético y, con datos suficientes, hídrico y de emisiones | `balance_neto_*` + fuentes, periodo y supuestos |
 | #15 | Nico | Propuesta del bono | `docs/07` |
 | #16 | Nico | Guion del pitch | `docs/08` |
 | #17 | Leo | Dashboard v1 con datos sintéticos | `app/` |

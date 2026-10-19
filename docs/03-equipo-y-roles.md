@@ -25,6 +25,7 @@
 - Explorar y limpiar el kit de datos.
 - Calcular el **PUE inicial o base** (antes de la solución) en `src/metricas/pue.py`.
 - Entregar a Nico el PUE inicial, los datos limpios y las energías total y de TI, con unidades, intervalo de muestreo y periodo analizado.
+- Calcular y validar el **balance neto final junto con Nico**, usando el ahorro estimado y las mediciones del modelo de Gadiel.
 - Administrar el repo, el tablero de tareas y la integración de las partes.
 - **Por qué él:** orden, GitHub y saber usar Claude para procesar datos rápido.
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md) y [CONTRIBUTING.md](../CONTRIBUTING.md).
@@ -39,7 +40,7 @@
 
 ### Nico · Cálculo de impacto, agua y contenido del pitch
 - Recibir el **PUE inicial de Misa** y calcular el ahorro energético y el **PUE final proyectado**, con los insumos del modelo de Gadiel.
-- Calcular el **balance neto** (obligatorio), descontando el consumo del modelo medido por Gadiel con CodeCarbon.
+- Calcular y validar el **balance neto final junto con Misa** (obligatorio), descontando el consumo del modelo medido por Gadiel con CodeCarbon.
 - Estimar el impacto en agua y emisiones cuando haya datos y factores suficientes; documentar unidades, periodo, fuentes y supuestos.
 - Desarrollar el programa de impacto en Python y un ejemplo reproducible; consolidar `resultados/numeros_oficiales.json` para el dashboard y el pitch. Los cálculos están pendientes de implementación.
 - Análisis del **impacto en el acuífero de Yucatán** (obligatorio).

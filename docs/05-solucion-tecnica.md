@@ -1,6 +1,6 @@
 # 05 · Solución técnica
 
-> Documento para **Gadiel** (modelo), **Misa** (datos y PUE inicial), **Nico** (cálculo de impacto) y **Leo** (demo). Es una propuesta inicial: se ajusta cuando veamos el kit el 19.
+> Documento para **Gadiel** (modelo), **Misa** (datos y PUE inicial), **Nico** (cálculo de impacto), **Misa + Nico** (balance neto final) y **Leo** (demo). Es una propuesta inicial: se ajusta cuando veamos el kit el 19.
 
 ## Concepto: un vigilante, dos beneficios
 
@@ -31,7 +31,8 @@ data/ (kit)  →  limpieza (pandas)  →  features  →  Isolation Forest  →  
 | Alertas y consumo esperado del enfriamiento | Gadiel | scikit-learn |
 | Consumo del modelo | Gadiel | CodeCarbon |
 | Clasificar anomalías (falla o ataque) | Gadiel + Guille | reglas + modelo |
-| Ahorro energético, PUE final proyectado y balance neto | Nico | pandas |
+| Ahorro energético y PUE final proyectado | Nico | pandas |
+| Cálculo y validación del balance neto final | Misa + Nico | pandas |
 | Impacto en agua y emisiones, cuando los datos lo permitan | Nico | pandas + fuentes citadas |
 | Consolidar cifras para dashboard y pitch | Nico | `resultados/numeros_oficiales.json` |
 | Integrar datos, modelo, métricas y demo | Misa | Python |
@@ -39,7 +40,7 @@ data/ (kit)  →  limpieza (pandas)  →  features  →  Isolation Forest  →  
 
 **Entrega entre Misa y Nico:** Misa entrega el PUE inicial junto con la telemetría limpia y las energías total y de TI en kWh, indicando unidades, intervalo y periodo. El PUE por sí solo no basta para calcular kWh ahorrados. Nico usa esa referencia, las alertas, el consumo esperado y las mediciones de CodeCarbon de Gadiel para calcular el impacto posterior. Los formatos de intercambio siguen definidos en [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
 
-**Estado:** este reparto está aprobado (D10); los cálculos y la consolidación de resultados siguen pendientes de implementación.
+**Estado:** este reparto está aprobado (D10 y ajuste D11); los cálculos y la consolidación de resultados siguen pendientes de implementación.
 
 ## Stack
 
@@ -62,7 +63,7 @@ pip install pandas numpy scikit-learn codecarbon streamlit plotly jupyter
 
 **Por qué este modelo:**
 - No necesita datos etiquetados: aprende solo lo "normal".
-- Entrena en segundos o minutos en una laptop; su balance neto se comprobará con las mediciones de Gadiel y los cálculos de Nico.
+- Entrena en segundos o minutos en una laptop; su balance neto se comprobará con las mediciones de Gadiel y los cálculos conjuntos de Misa + Nico.
 - Es fácil de explicar al jurado.
 
 **Esqueleto (se adapta a las columnas reales del kit):**
@@ -132,7 +133,7 @@ El campo existente `pue_despues` se presenta como **PUE final proyectado**. Los 
 
 **Hay que demostrar con números que el modelo ahorra más de lo que gasta.**
 
-**Responsable del cálculo: Nico.** Gadiel proporciona las mediciones del modelo; Misa proporciona la referencia inicial. Nico estima el ahorro y resta el costo del modelo con unidades y horizontes temporales compatibles. El valor puede ser positivo, cero o negativo; se reporta el resultado obtenido.
+**Responsables del cálculo y validación final: Misa + Nico.** Gadiel proporciona las mediciones del modelo; Misa proporciona la referencia inicial y Nico estima el ahorro. Misa + Nico calculan juntos el balance, restando el costo del modelo con unidades y horizontes temporales compatibles. El valor puede ser positivo, cero o negativo; se reporta el resultado obtenido.
 
 ```text
 Costo del modelo:

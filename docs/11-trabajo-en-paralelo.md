@@ -24,6 +24,7 @@ data/escenarios/telemetria_escenarios.csv + manifiesto ........ CONTRATO 2
 data/resultados/alertas.csv + consumo_modelo.json ............. CONTRATO 3
    │  Guille · src/ataques/evaluar.py  → deteccion_por_escenario.csv
    │  Nico · src/metricas/ (impacto, usando la referencia inicial de Misa)
+   │  Misa + Nico · src/metricas/balance_neto.py (balance neto final)
    ▼
 resultados/numeros_oficiales.json ............................. CONTRATO 4
    │  Leo · app/  (y las diapositivas)
@@ -96,7 +97,7 @@ Además se genera un `.manifiesto.json` con las ventanas exactas de cada escenar
 
 `resultados/numeros_oficiales.json` es **la única fuente** de las cifras que aparecen en el dashboard, las diapositivas y el pitch. Cada número dice de dónde salió:
 
-**Nico es responsable de consolidarlo.** Misa aporta `pue_antes` y las energías y periodo que lo sustentan; Nico calcula `pue_despues` (PUE final proyectado), el ahorro, el balance neto y el impacto en agua y emisiones cuando los datos sean suficientes. Usa las alertas, el consumo esperado y las mediciones de CodeCarbon de Gadiel. Misa conserva la integración del flujo y Leo consume las cifras.
+**Nico es responsable de consolidarlo.** Misa aporta `pue_antes` y las energías y periodo que lo sustentan; Nico calcula `pue_despues` (PUE final proyectado), el ahorro y el impacto en agua y emisiones cuando los datos sean suficientes. Usa las alertas y el consumo esperado de Gadiel. **Misa + Nico calculan y validan juntos el balance neto final**, usando las mediciones de CodeCarbon de Gadiel. Misa conserva la integración del flujo y Leo consume las cifras.
 
 Ejemplo ilustrativo de la entrada de Misa; no es un resultado medido del proyecto:
 
@@ -121,7 +122,8 @@ Un contrato solo cambia con un PR que actualice **este documento y `src/contrato
 |---|---|---|
 | `src/contrato.py`, `config/`, `src/datos/` | Misa | Gadiel |
 | `src/metricas/pue.py` (PUE inicial) | Misa | Gadiel |
-| Resto de `src/metricas/` (ahorro, PUE final proyectado y balance) | Nico | Misa |
+| `src/metricas/balance_neto.py` (balance neto final) | Misa + Nico | Ambos validan el resultado |
+| Resto de `src/metricas/` (ahorro, PUE final proyectado e impacto) | Nico | Misa |
 | `src/modelo/` | Gadiel | Misa |
 | `src/ataques/`, `docs/06-ciberseguridad-ot.md` | Guille | Gadiel |
 | `app/` | Leo | Misa |
@@ -131,7 +133,7 @@ Un contrato solo cambia con un PR que actualice **este documento y `src/contrato
 
 La misma tabla está en `.github/CODEOWNERS`, para que GitHub pida la revisión automáticamente si el plan de la cuenta lo permite.
 
-El reparto de métricas fue aprobado en **D10**: #2 sigue con Misa, #3 pasa a Nico y #14 sigue con Nico. Las rutas de métricas y resultados señalan el destino de los entregables pendientes; asignar un dueño no significa que ya estén implementados.
+El reparto de métricas fue aprobado en **D10 y ajustado en D11**: #2 sigue con Misa, #3 pasa a Nico y #14 queda compartida entre Misa + Nico. `src/metricas/balance_neto.py` es el módulo previsto para el trabajo conjunto; las rutas de métricas y resultados señalan el destino de los entregables pendientes, sin cambiar los formatos de intercambio. Asignar un dueño no significa que ya estén implementados.
 
 ## Cómo queda trazado todo
 

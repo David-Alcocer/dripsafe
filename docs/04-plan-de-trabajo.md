@@ -24,7 +24,8 @@
 - [ ] **Gadiel:** modelo v1 entrenado; entregar alertas y consumo esperado del enfriamiento a Nico.
 - [ ] **Gadiel:** medir el consumo del modelo con CodeCarbon.
 - [ ] **Guille:** 3 o 4 técnicas de ataque mapeadas y cómo las detecta el modelo.
-- [ ] **Nico:** implementar ahorro energético, PUE final proyectado y balance neto; estimar agua y emisiones si hay datos suficientes y consolidar los resultados para Leo.
+- [ ] **Nico:** implementar ahorro energético y PUE final proyectado; estimar agua y emisiones si hay datos suficientes y consolidar los resultados para Leo.
+- [ ] **Misa + Nico:** implementar juntos el balance neto final, usando el ahorro estimado por Nico y el consumo del modelo de Gadiel.
 - [ ] **Nico:** preparar el borrador del análisis del acuífero y documentar fuentes y supuestos de los cálculos.
 - [ ] **Leo:** dashboard leyendo los datos reales.
 - [ ] **Misa:** integrar datos, modelo y métricas de Nico con la demo.
@@ -35,7 +36,8 @@
 - [ ] Demo funcionando de punta a punta.
 - [ ] **Video de respaldo** de la demo grabado.
 - [ ] Análisis del acuífero y propuesta del bono terminados.
-- [ ] **Nico:** entregar programa y ejemplo reproducible; verificar balance neto y cifras consolidadas, distinguiendo mediciones de proyecciones.
+- [ ] **Misa + Nico:** verificar juntos el balance neto final, sus unidades, periodo y supuestos.
+- [ ] **Nico:** entregar programa y ejemplo reproducible con el balance conjunto y las cifras consolidadas, distinguiendo mediciones de proyecciones.
 - [ ] **Nico:** cerrar el contenido y guion del pitch; **Leo:** diseñar las diapositivas con las mismas cifras que el dashboard.
 - [ ] **Todos:** primer ensayo con cronómetro.
 - [ ] **Regla:** a partir de hoy en la noche no entra nada nuevo.

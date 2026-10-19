@@ -20,7 +20,7 @@
 **Decisión:** **Isolation Forest** de scikit-learn, entrenado con los datos del kit. No usaremos un LLM para analizar los datos.
 
 **Por qué:**
-- Se entrena en minutos en una laptop y buscamos un consumo bajo → el **balance neto positivo** obligatorio se verificará con las mediciones de Gadiel y los cálculos de Nico (D10).
+- Se entrena en minutos en una laptop y buscamos un consumo bajo → el **balance neto positivo** obligatorio se verificará con las mediciones de Gadiel y los cálculos conjuntos de Misa + Nico (D11).
 - Es explicable: podemos decir por qué marcó una alerta.
 - Los LLM son malos analizando miles de lecturas numéricas, cuestan energía y los jueces quieren ver nuestro trabajo, no el de una API.
 - "Hecho por nosotros" no es "desde cero": scikit-learn trae el algoritmo listo. Son unas 20 líneas.
@@ -84,15 +84,23 @@
 
 ## D10 · Misa entrega el PUE inicial; Nico calcula el impacto posterior ✅
 
+**Ajuste vigente D11:** el balance neto final queda a cargo de Misa + Nico. El reparto actualizado se detalla a continuación.
+
 **Decisión aprobada por el equipo:** Misa entrega el PUE inicial, la telemetría limpia y las energías total y de TI, con unidades y periodo. Conserva el cálculo base en `src/metricas/pue.py`, el repositorio y la integración.
 
-Nico calcula el ahorro energético, el PUE final proyectado, el balance neto y el impacto en agua y emisiones cuando los datos lo permitan. Es responsable del resto de `src/metricas/` y de consolidar `resultados/numeros_oficiales.json`. Gadiel aporta alertas, consumo esperado y mediciones de CodeCarbon; Leo integra las cifras en la demo y diseña las diapositivas.
+Nico calcula el ahorro energético, el PUE final proyectado y el impacto en agua y emisiones cuando los datos lo permitan. Misa + Nico calculan y validan juntos el balance neto final en `src/metricas/balance_neto.py` (pendiente de implementación). Nico es responsable del resto de `src/metricas/`, salvo el PUE inicial de Misa, y de consolidar `resultados/numeros_oficiales.json`. Gadiel aporta alertas, consumo esperado y mediciones de CodeCarbon; Leo integra las cifras en la demo y diseña las diapositivas.
 
 Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y modelo de negocio del pitch. Su entregable incluye un programa en Python, un ejemplo reproducible y resultados con fuentes y supuestos.
 
-**Tareas:** #2 sigue con Misa, #3 pasa a Nico y #14 continúa con Nico. Los cálculos siguen pendientes de implementación. El PUE final y los ahorros se presentan como proyecciones hasta tener evidencia medida; un balance positivo debe comprobarse.
+**Tareas:** #2 sigue con Misa, #3 pasa a Nico y #14 queda compartida entre Misa + Nico (ajuste D11). Los cálculos siguen pendientes de implementación. El PUE final y los ahorros se presentan como proyecciones hasta tener evidencia medida; un balance positivo debe comprobarse.
 
 **Por qué:** deja claro quién entrega la referencia y quién transforma esa referencia en cifras de impacto. Este acuerdo actualiza los responsables descritos en D8 y D9; esas propuestas conservan su estado pendiente de aprobación.
+
+## D11 · Balance neto final compartido entre Misa + Nico ✅
+
+**Decisión:** Misa + Nico calculan y validan juntos el balance neto final (#14), usando el ahorro estimado por Nico y el consumo del modelo medido por Gadiel. Comparten la responsabilidad del módulo previsto `src/metricas/balance_neto.py`.
+
+**Por qué:** el balance final se construye entre ambos, con unidades, periodos y supuestos acordados. Misa conserva el PUE inicial; Nico conserva el ahorro, el PUE final proyectado, las estimaciones de agua y emisiones y la consolidación de resultados. Este ajuste actualiza D10.
 
 ## Decisiones pendientes
 

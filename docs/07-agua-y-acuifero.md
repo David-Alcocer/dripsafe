@@ -32,13 +32,15 @@ Estructura sugerida para la propuesta:
 | **Gobernanza** | ¿Quién regula y qué permisos aplican? | CONAGUA (concesiones de agua) y normas de descarga; zonas protegidas |
 | **Justicia ambiental** | ¿A quién le quita agua el centro de datos? | Comunidades que dependen del mismo acuífero |
 
-## 4. Balance neto (obligatorio, cálculo a cargo de Nico)
+## 4. Balance neto (obligatorio, cálculo conjunto de Misa + Nico)
 
 **El consumo del modelo de IA debe ser menor que el ahorro que genera.** Las fórmulas están en [05-solucion-tecnica.md](05-solucion-tecnica.md#balance-neto-obligatorio).
 
 **Misa entrega:** PUE inicial, datos limpios y energías total y de TI, con unidades, intervalo y periodo.
 
-**Nico calcula:** ahorro energético, PUE final proyectado y balance neto; estima agua y emisiones cuando haya datos suficientes. Identifica proyecciones, fuentes y supuestos, y consolida los resultados para Leo. El balance positivo se verifica con cifras; los cálculos siguen pendientes de implementación.
+**Nico calcula:** ahorro energético y PUE final proyectado; estima agua y emisiones cuando haya datos suficientes. Identifica proyecciones, fuentes y supuestos, y consolida los resultados para Leo.
+
+**Misa + Nico calculan y validan juntos:** el balance neto final, descontando el consumo del modelo del ahorro estimado con unidades y periodos compatibles. El balance positivo se verifica con cifras; los cálculos siguen pendientes de implementación.
 
 **A Nico le toca conseguir y citar:**
 - [ ] Factor de emisión del Sistema Eléctrico Nacional de México, en su valor oficial más reciente.
@@ -69,7 +71,7 @@ Si faltan datos suficientes, el resultado correspondiente queda pendiente. El an
 
 **Pendiente de implementación y elaboración:**
 
-- **Programa en Python** dentro de `src/metricas/`, usando el PUE inicial que entrega Misa desde `src/metricas/pue.py`. Calcula ahorro, PUE final proyectado, balance neto y, cuando sea posible, impacto en agua y emisiones.
+- **Programa en Python** dentro de `src/metricas/`, usando el PUE inicial que entrega Misa desde `src/metricas/pue.py`. Nico calcula ahorro, PUE final proyectado y, cuando sea posible, impacto en agua y emisiones; incorpora el balance neto final desarrollado junto con Misa en `src/metricas/balance_neto.py`.
 - **Ejemplo reproducible con datos sintéticos**, con instrucciones y escenarios sin ahorro, con balance positivo y con ahorro menor que el costo del modelo.
 - **Resultados consolidados** en `resultados/numeros_oficiales.json`, con origen y responsable de cada cifra; documentación del periodo, unidades, fuentes y supuestos, distinguiendo mediciones de proyecciones.
 - **Análisis del acuífero y propuesta del bono**, con fuentes y condiciones de viabilidad.
