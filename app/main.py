@@ -1,11 +1,11 @@
-"""Dashboard de DripSafe.
+"""Dashboard de DripSafe, con la estructura de Grafana.
 
 Correr desde la raíz del repo:
     streamlit run app/main.py
 
 Solo lee los archivos de los contratos (ver app/cargar.py). Si todavía no existen,
 usa datos simulados y lo indica en la barra lateral («Simulado» en cada fuente).
-Las secciones están en app/paginas.py y las piezas de HTML en app/componentes.py.
+Las secciones están en app/paginas.py y los paneles en app/componentes.py.
 """
 
 import sys
@@ -47,59 +47,54 @@ def datos_en_cache():
 d = datos_en_cache()
 logo = c.logo_base64(CARPETA / "assets/logo.png")
 pagina = st.session_state.setdefault("pagina", "resumen")
+kiosko = st.session_state.setdefault("kiosko", False)
+
+# Modo presentación (como el modo kiosko de Grafana): sin barra lateral ni encabezado de Streamlit.
+if kiosko:
+    st.html("<style>section[data-testid='stSidebar'], header[data-testid='stHeader'], "
+            "[data-testid='stSidebarCollapsedControl'] { display: none !important; }"
+            ".block-container { padding-top: 1.5rem; }</style>")
 
 # ------------------------------------------------------------ barra lateral
 with st.sidebar:
-    st.html(f'<div class="brand"><img src="{logo}" width="40" height="40" alt=""><span>DripSafe</span></div>')
+    st.html(f'<div class="brand"><img src="{logo}" width="32" height="32" alt=""><span>DripSafe</span></div>'
+            '<p class="side-h">Dashboards</p>')
     for clave, (texto, icono) in SECCIONES.items():
         if st.button(texto, icon=icono, key=f"nav-{clave}", width="stretch",
                      type="primary" if clave == pagina else "tertiary"):
             paginas.ir(clave)
-
-    st.html('<div class="sep"></div>')
-    periodo = st.radio("Periodo", ["Semana de evaluación", "Dos semanas completas"], key="periodo")
 
     filas = "".join(
         f'<div class="src"><span>{NOMBRE_FUENTE.get(k, k)}</span>{c.etiqueta_simulado(v == "simulado")}</div>'
         for k, v in d.fuentes.items()
     )
     st.html(f'<div class="sep"></div><p class="side-h">Fuentes de datos</p>{filas}'
-            f'<p class="side-foot">Cifras generadas con el commit '
-            f'<span class="mono">{d.numeros.get("generado_con_commit", "—")}</span></p>')
-    if st.button("Volver a cargar los datos", icon=":material/refresh:", type="tertiary"):
-        st.cache_data.clear()
-        st.rerun()
+            f'<p class="side-foot">Cifras del commit <span class="mono">{d.numeros.get("generado_con_commit", "—")}</span></p>')
 
-# ------------------------------------------------------------ periodo elegido
-solo_evaluacion = periodo == "Semana de evaluación"
-tabla = calculos.periodo(d.tabla, solo_evaluacion)
-ini, fin = tabla["timestamp"].min(), tabla["timestamp"].max()
-nombre_periodo = "Semana de evaluación" if solo_evaluacion else "Dos semanas"
-vista = paginas.Vista(
-    tabla=tabla,
-    eventos=calculos.eventos(tabla),
-    texto=f"{nombre_periodo} · {calculos.fecha(ini, False)} al {calculos.fecha(fin, False)} {fin.year}",
-)
+# ------------------------------------------------------------ barra superior
+periodos = {"evaluacion": True, "completo": False}
+ini_ev = calculos.periodo(d.tabla, True)["timestamp"].min()
+fin = d.tabla["timestamp"].max()
+etiquetas = {
+    "evaluacion": f"{calculos.fecha(ini_ev, False)} – {calculos.fecha(fin, False)} · evaluación",
+    "completo": f"{calculos.fecha(d.tabla['timestamp'].min(), False)} – {calculos.fecha(fin, False)} · completo",
+}
 
-# ------------------------------------------------------------ encabezado y barra de estado
-st.html(
-    f'<div class="title"><div class="title-row"><img class="logo-lg" src="{logo}" width="64" height="64" '
-    'alt="Logo de DripSafe: un rack de servidores con una gota de agua dentro de un anillo"><h1>DripSafe</h1></div>'
-    "<p>Un vigilante para el enfriamiento del centro de datos: ahorra agua y energía, y detecta manipulaciones "
-    "de sensores y PLCs.</p></div>"
-)
-minutos = round(d.tabla["timestamp"].diff().median().total_seconds() / 60)
-n_ataques = int((vista.eventos["tipo_sugerido"] == "posible_ataque").sum())
-n_inef = int((vista.eventos["tipo_sugerido"] == "ineficiencia").sum())
-st.html(
-    '<div class="statusbar">'
-    f'<span class="sb-i"><span class="sb-k">Última lectura</span>{calculos.fecha(d.tabla["timestamp"].max())}</span>'
-    f'<span class="sb-i"><span class="sb-k">Intervalo</span>{minutos} min</span>'
-    f'<span class="sb-i"><span class="sb-k">Carga de TI</span>{c.numero(d.tabla["kw_ti"].mean())} kW promedio · Mérida</span>'
-    f'<span class="sb-i sb-alert"><span class="sev-dot atk"></span>{n_ataques} posibles ataques</span>'
-    f'<span class="sb-i"><span class="sev-dot inef"></span>{n_inef} ineficiencias</span>'
-    "</div>"
-)
+migas, tiempo, recargar, presentar = st.columns([6, 3, 0.6, 0.6], gap="small", vertical_alignment="center")
+migas.html(c.migas(["Dashboards", "DripSafe", SECCIONES[pagina][0]]))
+periodo = tiempo.selectbox("Periodo", list(periodos), format_func=etiquetas.get, key="periodo",
+                           label_visibility="collapsed")
+if recargar.button("", icon=":material/refresh:", help="Volver a cargar los datos", key="recargar", width="stretch"):
+    st.cache_data.clear()
+    st.rerun()
+if presentar.button("", icon=":material/fullscreen_exit:" if kiosko else ":material/tv:", key="kiosko-btn",
+                    help="Salir del modo presentación" if kiosko else "Modo presentación (pantalla completa)",
+                    width="stretch"):
+    st.session_state.kiosko = not kiosko
+    st.rerun()
+
+tabla = calculos.periodo(d.tabla, periodos[periodo])
+vista = paginas.Vista(tabla=tabla, eventos=calculos.eventos(tabla), texto=etiquetas[periodo])
 
 # ------------------------------------------------------------ sección elegida
 if pagina == "resumen":
