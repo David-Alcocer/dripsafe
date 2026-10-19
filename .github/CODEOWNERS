@@ -1,0 +1,14 @@
+# Dueños de cada carpeta (ver docs/11-trabajo-en-paralelo.md).
+# GitHub pide la revisión del dueño automáticamente si el plan de la cuenta lo permite.
+# Pendiente: agregar el usuario de GitHub de Gadiel en /src/modelo/.
+
+*                               @David-Alcocer
+/src/metricas/                  @Nicomoguel
+# La regla específica va después de la carpeta: Misa conserva el PUE inicial.
+/src/metricas/pue.py            @David-Alcocer
+/resultados/numeros_oficiales.json @Nicomoguel
+/src/ataques/                   @Ghosflot
+/docs/06-ciberseguridad-ot.md   @Ghosflot
+/app/                           @Leosanlo30
+/docs/07-agua-y-acuifero.md     @Nicomoguel
+/docs/08-pitch.md               @Nicomoguel

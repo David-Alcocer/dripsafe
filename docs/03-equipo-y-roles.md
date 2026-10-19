@@ -15,7 +15,7 @@
 ## Roles
 
 ###  Leo · Demo y diseño visual
-- Dashboard en **Streamlit**: alertas del modelo, PUE antes y después, gráficas.
+- Dashboard en **Streamlit**: alertas del modelo, PUE inicial y final proyectado, gráficas, usando las cifras consolidadas por Nico.
 - Diseño visual de las diapositivas del pitch.
 - Video de respaldo de la demo, por si algo falla en vivo.
 - **Por qué él:** es fuerte en diseño front y termina lo que empieza.
@@ -23,31 +23,38 @@
 
 ### Misa · Datos e integración
 - Explorar y limpiar el kit de datos.
-- Calcular el **PUE base** (antes de la solución).
+- Calcular el **PUE inicial o base** (antes de la solución) en `src/metricas/pue.py`.
+- Entregar a Nico el PUE inicial, los datos limpios y las energías total y de TI, con unidades, intervalo de muestreo y periodo analizado.
 - Administrar el repo, el tablero de tareas y la integración de las partes.
-- **Por qué ella:** orden, GitHub y saber usar Claude para procesar datos rápido.
+- **Por qué él:** orden, GitHub y saber usar Claude para procesar datos rápido.
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md) y [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ### Gadiel · Modelo de IA
 - Entrenar el detector de anomalías (**Isolation Forest**).
+- Entregar a Nico las alertas y el consumo esperado del enfriamiento para estimar el exceso de energía.
 - Medir la energía y el carbono del modelo con **CodeCarbon**, que es el insumo del balance neto.
 - Explicar por qué el modelo marca cada alerta.
 - **Por qué él:** su fuerte en algoritmos le ayuda a entender y ajustar el modelo.
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md).
 
-###  Nico · Agua, propuesta y pitch
+### Nico · Cálculo de impacto, agua y contenido del pitch
+- Recibir el **PUE inicial de Misa** y calcular el ahorro energético y el **PUE final proyectado**, con los insumos del modelo de Gadiel.
+- Calcular el **balance neto** (obligatorio), descontando el consumo del modelo medido por Gadiel con CodeCarbon.
+- Estimar el impacto en agua y emisiones cuando haya datos y factores suficientes; documentar unidades, periodo, fuentes y supuestos.
+- Desarrollar el programa de impacto en Python y un ejemplo reproducible; consolidar `resultados/numeros_oficiales.json` para el dashboard y el pitch. Los cálculos están pendientes de implementación.
 - Análisis del **impacto en el acuífero de Yucatán** (obligatorio).
-- Cálculo del **balance neto** junto con Gadiel (obligatorio).
 - Propuesta de enfriamiento para el **bono de cero agua dulce**.
 - Estructura del pitch y la parte de modelo de negocio.
 - **Por qué él:** su experiencia en IRAP (investigación de campo en Yucatán y presentación de propuestas) encaja justo con esto.
-- **Lee:** [07-agua-y-acuifero.md](07-agua-y-acuifero.md) y [08-pitch.md](08-pitch.md).
+- **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md), [07-agua-y-acuifero.md](07-agua-y-acuifero.md), [08-pitch.md](08-pitch.md) y [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
 
 ###  Guille · Ciberseguridad OT
 - Entender OT/ICS y por qué protocolos como Modbus son inseguros.
 - Mapear de 3 a 4 técnicas de **MITRE ATT&CK for ICS** que el modelo detectaría.
 - Explicar cómo distinguir una **falla** de un **ataque**.
 - Revisar las especificaciones OT/ICS del kit.
+- Simular ataques y fallas sobre los datos (`src/ataques/`) y medir qué detecta el modelo de Gadiel.
+- Definir cómo se instala el detector sin volverse una puerta de entrada.
 - **Por qué él:** es el único con base en Linux y seguridad, y su inglés alto le sirve porque casi todo el material está en inglés.
 - **Lee:** [06-ciberseguridad-ot.md](06-ciberseguridad-ot.md).
 
@@ -58,7 +65,7 @@
 | **Misa** | Qué datasets vienen, qué columnas traen, frecuencia de muestreo y si alcanza para calcular el PUE |
 | **Gadiel** | Qué variables sirven para detectar anomalías (temperaturas, flujos, consumo de bombas y chillers) y si hay eventos etiquetados |
 | **Guille** | Especificaciones OT/ICS: equipos, protocolos (Modbus, BACnet…) y arquitectura de red |
-| **Nico** | Documentación de contexto: ubicación, fuente de agua, si mencionan el acuífero |
+| **Nico** | Ubicación, fuente de agua y acuífero; datos disponibles para estimar ahorro, agua y emisiones, con unidades y periodo compatibles con el PUE inicial de Misa |
 | **Leo** | Criterios de evaluación del kit y qué debería mostrar la demo para ganarlos |
 
 Al final: **30 minutos juntos** para que cada quien cuente lo que encontró y confirmemos el plan.
