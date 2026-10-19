@@ -15,7 +15,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | 12 | Pitch final | Nico + Leo | #16, #19 | Diapositivas en PDF + guion | ⬜ |
 | 14 | Bono de cero agua dulce | Nico | #15 | Sección del bono en `docs/07` con WUE estimado | ⬜ |
 | 17 | Kit confidencial | Todos | pruebas automáticas | Pruebas automáticas: ningún archivo de datos en el repo | ✅ |
-| 18 | Nada de ataques a sistemas reales | Guille | #9 | Los ataques solo existen como cambios en CSV (`src/ataques/`) | ⬜ |
+| 18 | Nada de ataques a sistemas reales | Guille | #9 | Los ataques solo existen como cambios en CSV (`src/ataques/`) | ✅ |
 
 ## Criterios de evaluación (§ 13)
 
