@@ -1,6 +1,8 @@
 # Configuración de Streamlit para el dashboard de DripSafe.
 
 [server]
+# Solo este equipo puede abrir el dashboard (como pide el kit CIFOX: no publicarlo en la red ni en internet).
+address = "127.0.0.1"
 # Recarga el dashboard en cuanto guardas un archivo.
 runOnSave = true
 # Sirve app/static/ en la ruta app/static/ (ahí viven las fuentes, para no depender de internet).
@@ -10,12 +12,16 @@ enableStaticServing = true
 # Sin estadísticas de uso: la demo debe funcionar sin internet.
 gatherUsageStats = false
 
+[client]
+# Sin el botón «Deploy» ni el menú de desarrollo: en la demo solo se ve el dashboard.
+toolbarMode = "minimal"
+
 [theme]
-# Paleta Grafana: fondo oscuro de centro de control y azul para los datos.
+# Paleta profesional sobria: fondo gris azulado oscuro, azul acero para los datos y alertas en tonos apagados.
 base = "dark"
-primaryColor = "#3d71d9"
-backgroundColor = "#111217"
-secondaryBackgroundColor = "#181b1f"
+primaryColor = "#3f7cc4"
+backgroundColor = "#0f1419"
+secondaryBackgroundColor = "#161c24"
 textColor = "#ccccdc"
 
 # Tipografía: Inter para texto y títulos, JetBrains Mono para código.

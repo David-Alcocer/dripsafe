@@ -1,10 +1,11 @@
-"""Dashboard de DripSafe, con la estructura de Grafana.
+"""Dashboard de DripSafe, con la estructura de Grafana, sobre el kit CIFOX.
 
 Correr desde la raíz del repo:
     streamlit run app/main.py
 
-Solo lee los archivos de los contratos (ver app/cargar.py). Si todavía no existen,
-usa datos simulados y lo indica en la barra lateral («Simulado» en cada fuente).
+Lee el CSV del kit desde fuera del repo (app/kit.py; nunca se sube a GitHub). Si no lo
+encuentra, usa datos de ejemplo con el mismo formato y lo indica arriba. La barra lateral
+dice de dónde sale cada cosa: telemetría, detector (del equipo o vista previa) y cifras.
 Las secciones están en app/paginas.py y los paneles en app/componentes.py.
 """
 
@@ -22,6 +23,7 @@ import streamlit as st
 from app import calculos, paginas
 from app import componentes as c
 from app.cargar import cargar
+from app.textos import SITIOS
 
 CARPETA = Path(__file__).parent
 st.set_page_config(page_title="DripSafe", page_icon=str(CARPETA / "assets/logo.png"), layout="wide")
@@ -32,11 +34,18 @@ SECCIONES = {
     "resumen": ("Resumen", ":material/dashboard:"),
     "demo": ("Demo de ataque", ":material/play_circle:"),
     "monitoreo": ("Monitoreo", ":material/monitoring:"),
+    "evaluacion": ("Evaluación", ":material/fact_check:"),
     "ciber": ("Ciberseguridad OT", ":material/verified_user:"),
     "balance": ("Balance neto", ":material/bar_chart:"),
     "agua": ("Agua y acuífero", ":material/water_drop:"),
+    "datos": ("Datos y supuestos", ":material/description:"),
 }
-NOMBRE_FUENTE = {"escenarios": "Telemetría", "alertas": "Alertas del modelo", "numeros": "Números oficiales"}
+FUENTES = {
+    "telemetria": ("Telemetría", {"kit": ("Kit CIFOX", "sim"), "ejemplo": ("Ejemplo", "sim")}),
+    "detector": ("Detector", {"vista_previa": ("Vista previa", "sim"), "modelo": ("Del equipo", "ok")}),
+    "numeros": ("Cifras", {"ejemplo": ("Ejemplo", "sim"), "oficial": ("Oficial", "ok")}),
+}
+PERIODOS = {"evaluacion": "evaluación", "completo": "completo", "referencia": "referencia"}
 
 
 @st.cache_data(show_spinner="Cargando datos…")
@@ -65,24 +74,31 @@ with st.sidebar:
             paginas.ir(clave)
 
     filas = "".join(
-        f'<div class="src"><span>{NOMBRE_FUENTE.get(k, k)}</span>{c.etiqueta_simulado(v == "simulado")}</div>'
-        for k, v in d.fuentes.items()
+        f'<div class="src"><span>{nombre}</span>{c.etiqueta(*estados.get(d.fuentes.get(k), ("—", "sim")))}</div>'
+        for k, (nombre, estados) in FUENTES.items()
     )
     st.html(f'<div class="sep"></div><p class="side-h">Fuentes de datos</p>{filas}'
-            f'<p class="side-foot">Cifras del commit <span class="mono">{d.numeros.get("generado_con_commit", "—")}</span></p>')
+            '<p class="side-foot">Los datos del kit se leen fuera del repo y nunca se suben a GitHub.</p>')
 
 # ------------------------------------------------------------ barra superior
-periodos = {"evaluacion": True, "completo": False}
-ini_ev = calculos.periodo(d.tabla, True)["timestamp"].min()
-fin = d.tabla["timestamp"].max()
+t = d.tabla
 etiquetas = {
-    "evaluacion": f"{calculos.fecha(ini_ev, False)} – {calculos.fecha(fin, False)} · evaluación",
-    "completo": f"{calculos.fecha(d.tabla['timestamp'].min(), False)} – {calculos.fecha(fin, False)} · completo",
+    p: f"{calculos.fecha(s['timestamp'].min(), False)} – {calculos.fecha(s['timestamp'].max(), False)} · {texto}"
+    for p, texto in PERIODOS.items()
+    for s in [t if p == "completo" else t[t["split"] == p]]
 }
+# Además, cada día por separado (UTC, las 24 horas completas), como el filtro de fechas del kit.
+for dia in sorted(t["timestamp"].dt.date.unique()):
+    etiquetas[f"dia:{dia}"] = f"{calculos.fecha(dia, False)} · un día (UTC)"
 
-migas, tiempo, recargar, presentar = st.columns([6, 3, 0.6, 0.6], gap="small", vertical_alignment="center")
-migas.html(c.migas(["Dashboards", "DripSafe", SECCIONES[pagina][0]]))
-periodo = tiempo.selectbox("Periodo", list(periodos), format_func=etiquetas.get, key="periodo",
+# La ruta y el sello «DATOS SIMULADOS» comparten columna: así el sello nunca choca con los selectores.
+migas, sitio_col, tiempo, recargar, presentar = st.columns(
+    [3.4, 2.0, 2.6, 0.55, 0.55], gap="small", vertical_alignment="center")
+migas.html(f'<div class="barra-izq">{c.migas(["DripSafe", SECCIONES[pagina][0]])}{c.sello_simulado()}</div>')
+sitio = sitio_col.selectbox("Sitio", ["Todos", *sorted(t["site_id"].unique())], key="sitio",
+                            format_func=lambda s: "Todos los sitios" if s == "Todos" else SITIOS.get(s, s),
+                            label_visibility="collapsed")
+periodo = tiempo.selectbox("Periodo", list(etiquetas), format_func=etiquetas.get, key="periodo",
                            label_visibility="collapsed")
 if recargar.button("", icon=":material/refresh:", help="Volver a cargar los datos", key="recargar", width="stretch"):
     st.cache_data.clear()
@@ -93,8 +109,26 @@ if presentar.button("", icon=":material/fullscreen_exit:" if kiosko else ":mater
     st.session_state.kiosko = not kiosko
     st.rerun()
 
-tabla = calculos.periodo(d.tabla, periodos[periodo])
-vista = paginas.Vista(tabla=tabla, eventos=calculos.eventos(tabla), texto=etiquetas[periodo])
+tabla_sitio = t if sitio == "Todos" else t[t["site_id"] == sitio]
+if periodo == "completo":
+    tabla = tabla_sitio
+elif periodo.startswith("dia:"):
+    tabla = tabla_sitio[tabla_sitio["timestamp"].dt.date.astype(str) == periodo.removeprefix("dia:")]
+else:
+    tabla = tabla_sitio[tabla_sitio["split"] == periodo]
+vista = paginas.Vista(tabla=tabla, tabla_sitio=tabla_sitio, eventos=calculos.eventos(tabla), texto=etiquetas[periodo])
+
+# Si el kit no está en esta laptop, que nadie confunda los datos de ejemplo con los del kit.
+if d.fuentes.get("telemetria") != "kit":
+    st.html(c.aviso_fuerte(
+        "<b>No se encontró el kit CIFOX en esta laptop.</b> Se muestran datos de <b>ejemplo inventados</b>, "
+        "solo para probar la interfaz. Copia el kit a <span class='mono'>~/hackathon/Kit Stack Tecnológico/</span> "
+        "o define la variable <span class='mono'>DRIPSAFE_KIT</span> con su carpeta (ver app/README.md)."))
+for texto in d.avisos:
+    st.html(c.aviso_fuerte(texto))
+if tabla.empty:
+    st.html(c.aviso("No hay datos para este sitio y periodo. Elige otro filtro arriba."))
+    st.stop()
 
 # ------------------------------------------------------------ sección elegida
 if pagina == "resumen":
@@ -103,9 +137,13 @@ elif pagina == "demo":
     paginas.demo(d)
 elif pagina == "monitoreo":
     paginas.monitoreo(d, vista)
+elif pagina == "evaluacion":
+    paginas.evaluacion(d)
 elif pagina == "ciber":
-    paginas.ciberseguridad(d)
+    paginas.ciberseguridad(d, vista)
 elif pagina == "balance":
-    paginas.balance(d)
+    paginas.balance(d, vista)
 elif pagina == "agua":
     paginas.agua(d, vista)
+elif pagina == "datos":
+    paginas.datos(d)
