@@ -131,9 +131,15 @@ def detector_tipo(d: Datos) -> str:
 def aviso_ejemplo(d: Datos) -> str:
     if not d.cifras_de_ejemplo:
         return ""
-    return c.aviso("<b>Cifras de ejemplo.</b> Todavía no existe <span class='mono'>resultados/numeros_oficiales.json</span>: "
+    return c.aviso("<b>Cifras de ejemplo.</b> Todavía no hay resultados oficiales verificados: "
                    "las cifras marcadas como <b>Ejemplo</b> son ficticias y solo prueban la interfaz. "
                    "Nunca van al pitch.")
+
+
+def mostrar_aviso_ejemplo(d: Datos) -> None:
+    aviso = aviso_ejemplo(d)
+    if aviso:
+        st.html(aviso)
 
 
 def items_alertas(eventos: pd.DataFrame) -> list[dict]:
@@ -249,7 +255,7 @@ def resumen(d: Datos, v: Vista) -> None:
                 c.stat("PUE si se corta el exceso", c.numero(ex["pue_sin_exceso"], 3), color="azul",
                        sub=con_tag(f'hoy {c.numero(ex["pue"], 3)} · cota, no ahorro', tipo_det)),
             ], minimo=200)
-    st.html(aviso_ejemplo(d))
+    mostrar_aviso_ejemplo(d)
 
 
 # ------------------------------------------------------------ demo de ataque
@@ -481,7 +487,7 @@ def evaluacion(d: Datos) -> None:
                 [[f["condicion"], f["metodo"], f'{f["detectados"]} de {f["total"]}', c.numero(f["falsas_por_dia"], 1)]
                  for f in robustez], numericas=(2, 3)),
                 "El agua del kit no tiene ruido: la prueba agrega ruido para no detectar algo trivial."))
-    st.html(aviso_ejemplo(d))
+    mostrar_aviso_ejemplo(d)
 
 
 # ------------------------------------------------------------ ciberseguridad
@@ -644,7 +650,7 @@ def balance(d: Datos, v: Vista) -> None:
                      for k, x in d.numeros.items() if isinstance(x, dict) and isinstance(x.get("valor"), (int, float))]
             st.html(c.panel("Cifras del contrato 4", c.tabla(["Cifra", "Valor", "Responsable", "Tipo"], filas, numericas=(1,)),
                             "Las cifras del pitch salen solo de resultados/numeros_oficiales.json."))
-    st.html(aviso_ejemplo(d))
+    mostrar_aviso_ejemplo(d)
 
 
 # ------------------------------------------------------------ agua y acuífero
@@ -713,7 +719,7 @@ def agua(d: Datos, v: Vista) -> None:
                 '<p class="txt-d">Pendiente: horas de respaldo por época (Misael, bono).</p>'
             st.html(c.panel("Horas de respaldo al año", cuerpo,
                             "Horas en que el enfriador seco no basta y entra el chiller de apoyo (sube el PUE)."))
-    st.html(aviso_ejemplo(d))
+    mostrar_aviso_ejemplo(d)
 
 
 # ------------------------------------------------------------ datos y supuestos

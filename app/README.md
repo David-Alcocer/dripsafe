@@ -14,6 +14,10 @@ La barra lateral lo dice siempre:
 | Detector | `data/resultados/alertas.csv` (Gadiel + Guille), columnas de `app/linea_base.COLUMNAS` | **Vista previa** de `app/linea_base.py` |
 | Cifras | `resultados/numeros_oficiales.json` (Nico) | `app/ejemplos/numeros_ejemplo.json`, **valores ficticios** marcados «Ejemplo» |
 
+Si `numeros_oficiales.json` existe pero su `_meta` lo identifica como borrador
+con valores de ejemplo, la app sigue usando el archivo de ejemplo y no lo
+presenta como oficial.
+
 Cada cifra lleva una etiqueta: **Observado**, **Medido**, **Estimado**, **Proyectado**, **Vista previa** o
 **Ejemplo**. La propuesta de forma del JSON está en `app/ejemplos/README.md`.
 

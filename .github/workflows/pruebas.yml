@@ -24,7 +24,7 @@ jobs:
           cache: pip
 
       - name: Instalar dependencias
-        run: pip install pandas numpy scikit-learn pytest ruff
+        run: pip install pandas numpy scikit-learn scipy pytest ruff
 
       - name: Lint (ruff)
         run: ruff check .
