@@ -96,7 +96,13 @@ def cargar() -> Datos:
     tabla = unir(datos, detector)
 
     if RUTAS["numeros"].exists():
-        numeros, fuentes["numeros"] = json.loads(RUTAS["numeros"].read_text(encoding="utf-8")), "oficial"
+        numeros = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
+        meta = numeros.get("_meta", {})
+        es_borrador = (meta.get("generado_con_commit") == "ejemplo-sin-commit"
+                      or "VALORES DE EJEMPLO" in meta.get("aviso", "").upper())
+        if es_borrador:
+            numeros = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8"))
+        fuentes["numeros"] = "ejemplo" if es_borrador else "oficial"
     else:
         numeros, fuentes["numeros"] = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8")), "ejemplo"
 

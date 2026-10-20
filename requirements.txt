@@ -1,6 +1,7 @@
 pandas>=2.2
 numpy>=1.26
 scikit-learn>=1.4
+scipy>=1.11
 codecarbon>=2.7
 streamlit>=1.38
 plotly>=5.22
