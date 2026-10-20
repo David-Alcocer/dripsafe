@@ -1,0 +1,267 @@
+{
+  "_meta": {
+    "aviso": "DATOS SIMULADOS · VALORES DE EJEMPLO · no son resultados finales",
+    "generado_con_commit": "ejemplo-sin-commit",
+    "generado_el": "2026-10-19T20:00:00Z",
+    "periodo": {
+      "inicio": "2026-10-12T00:00:00Z",
+      "fin": "2026-10-18T23:00:00Z",
+      "sitios": ["SIM-A", "SIM-B", "SIM-C"],
+      "horas": 504,
+      "intervalo": "1h"
+    },
+    "fuente_datos": "cifox_kits/data/operaciones_simuladas.csv (kit CIFOX, no se sube)"
+  },
+
+  "pue": {
+    "antes": {
+      "valor": 1.2676,
+      "unidad": "",
+      "tipo": "medido",
+      "origen": "data/kit/reference_metrics.json (kit) + src/metricas/pue.py",
+      "responsable": "Misa (#2)",
+      "nota": "Sobre las 216 filas de referencia (72 h × 3 sitios). Cociente de sumas, no promedio de PUE horarios."
+    },
+    "despues_proyectado": {
+      "valor": null,
+      "unidad": "",
+      "tipo": "proyectado",
+      "origen": "src/metricas/pue_proyectado.py (pendiente, Nico)",
+      "responsable": "Nico (#3)",
+      "nota": "PUE si se corta el exceso en cada alerta. NO es un ahorro observado."
+    }
+  },
+
+  "wue": {
+    "antes": {
+      "valor": 0.366,
+      "unidad": "L/kWh",
+      "tipo": "medido",
+      "origen": "data/kit/reference_metrics.json (kit)",
+      "responsable": "Misa",
+      "nota": "water_l del kit = captación in situ, NO huella hídrica total."
+    },
+    "despues_proyectado": {
+      "valor": null,
+      "unidad": "L/kWh",
+      "tipo": "proyectado",
+      "origen": "pendiente",
+      "responsable": "Nico"
+    }
+  },
+
+  "energia": {
+    "it_kwh": {
+      "valor": 35509.846,
+      "unidad": "kWh",
+      "tipo": "medido",
+      "origen": "data/kit/reference_metrics.json",
+      "responsable": "Misa",
+      "nota": "Energía de TI acumulada en el periodo de referencia (216 h-sitio)."
+    },
+    "total_kwh": {
+      "valor": 45010.9549,
+      "unidad": "kWh",
+      "tipo": "medido",
+      "origen": "data/kit/reference_metrics.json",
+      "responsable": "Misa"
+    },
+    "no_ti_kwh": {
+      "valor": 9501.1089,
+      "unidad": "kWh",
+      "tipo": "medido",
+      "origen": "calculado: total - IT (ver D18, no decir 'enfriamiento')",
+      "responsable": "Misa",
+      "nota": "D18: energía no TI (overhead), no 'enfriamiento' — el kit no desglosa auxiliares/UPS/iluminación."
+    },
+    "agua_l": {
+      "valor": 13013.0147,
+      "unidad": "L",
+      "tipo": "medido",
+      "origen": "data/kit/reference_metrics.json",
+      "responsable": "Misa",
+      "nota": "Captación in situ. No incluye huella hídrica de la electricidad."
+    }
+  },
+
+  "exceso_estimado": {
+    "kwh_sobre_evaluacion": {
+      "valor": null,
+      "unidad": "kWh",
+      "tipo": "estimado",
+      "origen": "src/metricas/exceso.py (pendiente, Nico)",
+      "responsable": "Nico (N3)",
+      "nota": "Suma de residuos positivos sobre las 288 h de evaluación × 3 sitios."
+    },
+    "litros_sobre_evaluacion": {
+      "valor": null,
+      "unidad": "L",
+      "tipo": "estimado",
+      "origen": "pendiente",
+      "responsable": "Nico (N3)"
+    }
+  },
+
+  "balance_neto": {
+    "costo_detector_kwh_anual": {
+      "valor": null,
+      "unidad": "kWh/año",
+      "tipo": "medido",
+      "origen": "CodeCarbon (10 repeticiones, Fase 2)",
+      "responsable": "Gadiel (#7, G3)",
+      "nota": "Entrenamiento + inferencia horaria 8760 × + reentrenamiento por temporada."
+    },
+    "ahorro_proyectado_kwh_anual": {
+      "valor": null,
+      "unidad": "kWh/año",
+      "tipo": "proyectado",
+      "origen": "src/metricas/balance_neto.py (pendiente, Misa+Nico)",
+      "responsable": "Misa + Nico (#14, M3+N3)",
+      "supuestos": {
+        "N_horas_ineficiencia_al_año": "editable en dashboard",
+        "exceso_tipico_pct": "editable en dashboard",
+        "tiempo_hasta_correccion_h": "editable en dashboard"
+      }
+    },
+    "co2_evitado_kg_anual": {
+      "valor": null,
+      "unidad": "kgCO2e/año",
+      "tipo": "proyectado",
+      "origen": "pendiente",
+      "responsable": "Nico",
+      "supuestos": {
+        "factor_emision_sen_kgco2e_kwh": "pendiente (Nico, CRE/SEMARNAT vigente)"
+      }
+    },
+    "agua_evitada_l_anual": {
+      "valor": null,
+      "unidad": "L/año",
+      "tipo": "proyectado",
+      "origen": "pendiente",
+      "responsable": "Nico",
+      "supuestos": {
+        "intensidad_hidrica_sen_l_kwh": "pendiente (Nico, Macknick NREL 2012 × mezcla SEN)",
+        "aplica_solo_a_evaporativo": true
+      }
+    },
+    "razon_ahorro_costo": {
+      "valor": null,
+      "unidad": "veces",
+      "tipo": "proyectado",
+      "origen": "ahorro / costo",
+      "responsable": "Misa + Nico"
+    },
+    "umbral_equilibrio": {
+      "descripcion": "Costo anual del detector comparado con el exceso de UNA sola hora de ineficiencia típica. Si el balance es positivo con una detección al año, no depende de que el ahorro proyectado sea exacto.",
+      "detecciones_necesarias_al_año": null,
+      "responsable": "Misa + Nico"
+    }
+  },
+
+  "deteccion": {
+    "metodo": "linea_base_regresion + umbral_residuo + mm_4h (MVP · D15)",
+    "ablacion_isolation_forest": {
+      "incluida": false,
+      "nota": "IF se reporta como ampliación; se incluye solo si el MVP termina a tiempo."
+    },
+    "comparacion_contra_reglas_kit": {
+      "episodios_originales_kit": {
+        "dripsafe_tp": null,
+        "dripsafe_fp": null,
+        "dripsafe_fn": null,
+        "reglas_tp": null,
+        "reglas_fp": null,
+        "reglas_fn": null,
+        "nota_esperada": "empate: ambos detectan las 21 anomalías del kit, se reporta tal cual"
+      },
+      "rejilla_inyecciones": {
+        "descripcion": "Curva: horas-hasta-detectar y kWh/L no vistos, por magnitud de inyección",
+        "configuracion": {
+          "energia_pct": [10, 20, 40, 80],
+          "duracion_h": 4,
+          "agua_pct": [25, 50],
+          "escalon_sin_log": true,
+          "config_con_efecto_8h_despues": true
+        },
+        "datos_curva": null
+      },
+      "robustez_ruido": {
+        "aplica_a_mvp": true,
+        "ruido_energia_x": 2,
+        "ruido_agua_pct": 4,
+        "magnitud_evaluada_pct": 20,
+        "resultado": null
+      }
+    },
+    "falsas_alarmas_por_dia": {
+      "valor": null,
+      "intervalo_confianza_95": null,
+      "sobre_horas_limpias": null,
+      "responsable": "Nico (N2, D17)"
+    },
+    "clases_ot_conteo": {
+      "incidente_ot_con_efecto": null,
+      "cambio_no_autorizado": null,
+      "escalon_sin_registro": null,
+      "intento_de_acceso": null,
+      "nota": "D16: 4 clases oficiales"
+    },
+    "latencia_horas_hasta_detectar_por_episodio": null
+  },
+
+  "bono_zero_freshwater": {
+    "wue_potable_meta": {
+      "valor": 0,
+      "unidad": "L/kWh",
+      "tipo": "proyectado",
+      "nota": "El kit no separa agua potable de no potable; con el kit solo se demuestra el método."
+    },
+    "respaldo_principal": "B (chiller mecánico, cero agua, sube el PUE durante respaldo)",
+    "horas_respaldo_mérida_al_año": {
+      "umbral_27c": null,
+      "umbral_30c": null,
+      "umbral_33c": null,
+      "umbral_35c": null,
+      "tipo": "estimado",
+      "responsable": "Nico (N4)",
+      "fuente": "SMN horarias (preferido) o ERA5 vía Open-Meteo (fallback)"
+    },
+    "pue_con_bono": {
+      "valor": null,
+      "nota": "Se reporta con y sin bono para que el jurado vea el intercambio agua↔energía."
+    }
+  },
+
+  "fuentes_externas": {
+    "factor_emision_sen": {
+      "valor": null,
+      "unidad": "kgCO2e/kWh",
+      "fuente": "CRE/SEMARNAT aviso vigente",
+      "responsable": "Nico"
+    },
+    "intensidad_hidrica_sen": {
+      "valor": null,
+      "unidad": "L/kWh",
+      "fuente": "Macknick et al. NREL 2012 × mezcla SEN",
+      "responsable": "Nico"
+    },
+    "disponibilidad_acuifero_3105": {
+      "valor": null,
+      "fuente": "DOF, acuerdo vigente",
+      "responsable": "Nico (N4)"
+    },
+    "normales_smn_mérida": {
+      "estado": "pendiente",
+      "fallback": "ERA5 vía Open-Meteo",
+      "responsable": "Nico (N4)"
+    }
+  },
+
+  "limites_declarados": [
+    "Datos simulados: 3 sitios, 7 días. La validación demuestra el método, no su eficacia en plantas reales.",
+    "Sin balance de calor: no se detectan sensores falsificados por balance físico (T0856, T0832).",
+    "Sin estacionalidad: 72 h de referencia no la cubren.",
+    "Ineficiencia crónica: si la referencia ya es ineficiente, la línea base la aprende como normal.",
+    "Cambio sin registro vs falla brusca: con datos de proceso no se distinguen; ambos van a verificar configuración."
+  ]
+}
