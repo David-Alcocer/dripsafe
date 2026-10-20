@@ -142,6 +142,26 @@ La misma tabla está en `.github/CODEOWNERS`, para que GitHub pida la revisión 
 
 El reparto de métricas fue aprobado en **D10 y ajustado en D11**: #2 sigue con Misa, #3 pasa a Nico y #14 queda compartida entre Misa + Nico. `src/metricas/balance_neto.py` es el módulo previsto para el trabajo conjunto; las rutas de métricas y resultados señalan el destino de los entregables pendientes, sin cambiar los formatos de intercambio. Asignar un dueño no significa que ya estén implementados.
 
+## Reglas de entrega entre personas (plan-ejecucion)
+
+- Cada tarea se entrega con **ejemplo de entrada**, **salida**, **unidades** y **forma de ejecutarla**; el receptor confirma que la pudo consumir.
+- Misael registra cualquier cambio de columnas o rutas en el contrato y avisa a los cuatro **antes** de integrarlo.
+- Gadiel entrega resultados **por sitio y hora**; Guillermo añade la **clase y acción**; Nico agrega resultados **por episodio y periodo**; Leo solo los presenta.
+- Las etiquetas del kit (`etiqueta_*`) sirven para separar ajuste/calibración/prueba y evaluar; **nunca como predictores**. `src/contrato.py:columnas_del_modelo()` las excluye.
+- El kit y sus filas derivadas permanecen fuera de Git. Solo código, pruebas sintéticas y agregados autorizados.
+- Si dos piezas discrepan en una cifra, se corrige el cálculo o el contrato **antes** de modificar el pitch.
+
+## Criterio de evaluación por episodio (D17)
+
+Se cuenta **una alerta verdadera por episodio**, no una por hora alertada. Un episodio tiene su ventana en el manifiesto de inyecciones (U2).
+
+**Métricas oficiales:** TP, FP, FN, precisión, recall, **falsas alarmas por día con intervalo de confianza** y **horas hasta detectar**.
+
+**Reglas:**
+- Ventanas superpuestas se fusionan en un solo episodio.
+- Inyecciones sobre anomalías originales del kit: episodios distintos solo si no se solapan; si se solapan, cuenta la inyección.
+- Horas limpias = toda hora fuera de un episodio del manifiesto; sobre ellas se calcula la tasa de falsas alarmas.
+
 ## Cómo queda trazado todo
 
 Cada pieza de trabajo deja este rastro:

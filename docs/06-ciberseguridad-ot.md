@@ -79,12 +79,30 @@ Son datos sintéticos: los números finales salen del kit.
 **Mensaje clave para el pitch:**
 > "DripSafe funciona como **primera capa de detección**: no reemplaza un firewall ni un SOC, pero detecta cuando los datos físicos del enfriamiento no tienen sentido, que es justo lo que pasa cuando alguien manipula sensores o controladores."
 
-## 4. Cómo distinguir falla de ataque
+## 4. Las 4 clases oficiales de alerta (D16, MVP)
 
-- **Falla o ineficiencia:** suele afectar varias variables de forma **coherente** y aparece de forma gradual (desgaste o suciedad en intercambiadores).
-- **Ataque:** suele mostrar **incoherencias** (un sensor dice una cosa y el resto otra), cambios **bruscos**, o actividad **fuera de horario**.
+En vez de clasificar en "falla vs ataque" (una heurística que falla en los casos interesantes), **DripSafe clasifica el cruce entre el registro OT y los residuos físicos** en 4 clases:
 
-Esto se diseña con Gadiel. Ver [05-solucion-tecnica.md](05-solucion-tecnica.md).
+| Clase | Condición | Acción | ¿En el kit? |
+|---|---|---|---|
+| **Incidente OT con efecto** | Evento OT **y** residuo físico desde el inicio del evento hasta 24 h después | Máxima: restaurar config aprobada; modo seguro manual | Se inyecta (prueba U2) |
+| **Cambio no autorizado** | `cambio_config_no_autorizado`, con o sin efecto | Alta: comparar contra config aprobada; vigilar 24 h | Sí (SIM-C) |
+| **Escalón sin registro** | Un residuo supera el umbral de golpe (en ≤ 1 h) sin evento OT | Alta: comparar setpoints; **si es agua, inspección física en paralelo** | Sí (SIM-A energía, SIM-B agua) |
+| **Intento de acceso** | Solo `login_fallido`, residuos normales | Media: revisar accesos y cuentas | Sí (SIM-C) |
+
+**Dos reglas de oro:**
+1. **Ningún exceso sin explicar va directo a mantenimiento.** Un ataque que cambia un setpoint sin dejar registro (T0836 sin log) se ve igual que una falla brusca; se trata como posible cambio no autorizado hasta comprobar la configuración.
+2. **Ningún cambio no autorizado es "sin urgencia"**, aunque no tenga efecto físico aún. Puede notarse en el siguiente pico de calor.
+
+**Ventana de 24 h:** en el kit el cambio de configuración ocurre de madrugada (04:00–05:00 UTC) con carga baja; un setpoint alterado puede notarse hasta la tarde. Un residuo que ya existía **antes** del evento se marca `coincidente, no causal`.
+
+**Extra, si sobra tiempo:**
+- **Incoherencia física:** sube la temperatura de entrada y baja la energía no TI (sensor descompuesto o manipulado).
+- **Deriva gradual:** la media móvil sube sin escalón (degradación lenta).
+
+### Mensaje honesto para el pitch
+
+> *"DripSafe no afirma que un residuo pruebe un ciberataque. Clasifica cuatro cosas distintas: un intento (login fallido), un cambio (sin confirmar que haya efecto), un escalón sin registro (podría ser falla o ataque, requiere comparar config) y un incidente con efecto (evento OT + residuo físico medible)."*
 
 ## 5. Recomendaciones de defensa (para la propuesta)
 

@@ -157,11 +157,77 @@ Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y
 
 **Implementado en:** rama `feat/datos-kit-v2`, cierra #1. Incluye `src/datos/cargar.py` para transformar el kit al contrato v2 y pruebas en `tests/test_datos.py`.
 
+## D15 · MVP = línea base + umbrales; Isolation Forest pasa a ampliación ✅ (19 oct)
+
+**Decisión:** el MVP de detección es **línea base física por sitio (regresión lineal) + umbral por residuo + media móvil de 4 h**. Isolation Forest y CUSUM se mantienen como **ampliación** condicionada a que el MVP corra de punta a punta.
+
+**Por qué:**
+- La propuesta v7 lo justifica (§3.2): en el kit los ruidos son independientes y acotados, así que una combinación "rara" no es rara y los umbrales la atrapan antes. **Diseñar una prueba para que IF gane sería hacer trampa.**
+- La línea base ajustada por carga y clima es M&V estándar (ASHRAE Guideline 14, IPMVP) y es auditable.
+- El MVP se implementa en pocas líneas; deja tiempo para la evaluación honesta.
+
+**Este ajuste matiza D2:** IF sigue siendo "hecho por nosotros" y se mantiene como capa para datos reales donde las variables sí están correlacionadas; en el kit se reporta su **ablación** sin venderla.
+
+**Dueño del cambio:** Gadiel (modelo); Misa confirma que el contrato lo soporta.
+
+## D16 · Cuatro clases OT (fusión evento–efecto) ✅ (19 oct)
+
+**Decisión:** las clases oficiales de alerta son **cuatro**, basadas en el cruce entre el registro OT y los residuos físicos:
+
+| Clase | Condición | Acción | ¿En el kit? |
+|---|---|---|---|
+| **Incidente OT con efecto** | Evento OT **y** residuo físico desde el inicio del evento hasta 24 h después | Máxima: restaurar config aprobada; modo seguro manual | Se inyecta |
+| **Cambio no autorizado** | `cambio_config_no_autorizado`, con o sin efecto | Alta: comparar contra config aprobada; vigilar 24 h | Sí (SIM-C) |
+| **Escalón sin registro** | Residuo supera umbral de golpe sin evento OT | Alta: comparar setpoints; si es agua, inspección física | Sí (SIM-A/B) |
+| **Intento de acceso** | Solo `login_fallido`, residuos normales | Media: revisar accesos | Sí (SIM-C) |
+
+**Dos reglas de oro:**
+1. Ningún exceso sin explicar va directo a mantenimiento (podría ser cambio sin registro).
+2. Ningún cambio no autorizado es "sin urgencia" (puede notarse en el siguiente pico de calor).
+
+**Extra, si sobra tiempo:** `incoherencia física` y `deriva gradual`.
+
+**Dueño:** Guille (reglas); Nico (lógica); Gadiel (residuos disponibles).
+
+## D17 · Criterio de evaluación por episodio, no por hora ✅ (19 oct)
+
+**Decisión:** se cuenta **una alerta verdadera por episodio**, no una por hora alertada. Un episodio tiene su ventana definida en el manifiesto de inyecciones (U2). Las métricas son TP, FP, FN, precisión, recall, falsas alarmas por día **con intervalo de confianza** y **horas hasta detectar**.
+
+**Por qué:** contar cada hora como caso independiente infla el recall artificialmente y no refleja lo que un operador vería (una sola alarma por evento, con una duración).
+
+**Reglas:**
+- Ventanas superpuestas: se fusionan en un solo episodio.
+- Inyecciones sobre anomalías originales del kit: se tratan como episodios distintos solo si no se solapan; si se solapan, cuenta la inyección.
+- Horas limpias: toda hora fuera de un episodio del manifiesto. Sobre ellas se calcula la tasa de falsas alarmas.
+
+**Dueño:** Nico.
+
+## D18 · "Energía no TI" en vez de "energía de enfriamiento" ✅ (19 oct)
+
+**Decisión:** `energy_total_kwh − energy_it_kwh` se llama **energía no TI** (overhead) en todo el repo, no "energía de enfriamiento". Solo se puede llamar "enfriamiento" si el kit confirma que no incluye otros consumos (UPS, iluminación, auxiliares).
+
+**Por qué:** honestidad metodológica. El kit no desglosa el overhead; asumir enfriamiento sobreestima el valor de las alertas.
+
+**Dueño:** Misa (contrato y nombres de variables); Nico (textos de métricas).
+
+## D19 · Repo canónico ✅ (19 oct)
+
+**Decisión:** el repositorio canónico es **`dripsafe/`** (este). Cualquier variante `dripsafe-reestructura/` queda archivada; no se trabaja sobre ella.
+
+**Por qué:** evitar trabajo duplicado y confusión sobre qué rama tiene las interfaces oficiales.
+
 ## Decisiones pendientes
 
 - [ ] ¿Quién presenta el pitch? Candidatos: Nico (presentó propuestas en IRAP) y Leo (líder).
 - [ ] Duración del pitch: preguntarle a CIFOX.
 - [x] Confirmar las variables exactas del modelo al ver el kit → ver D12.
 - [x] Aprobar el contrato v2 (D14) → PR de la rama `feat/datos-kit-v2`.
-- [ ] Confirmar en la reunión el enfoque híbrido (D12).
+- [x] Confirmar en la reunión el enfoque híbrido → ajustado por D15: IF a ampliación.
+- [x] Repositorio canónico → D19.
+- [x] MVP de detección → D15.
+- [x] Clases OT finales → D16.
+- [x] Criterio de evaluación → D17.
+- [x] Nombre "energía no TI" → D18.
 - [ ] ¿Quién es el representante oficial ante CIFOX?
+- [ ] Confirmar estado del dashboard (Leo) y punto de corte el 20 a mediodía.
+- [ ] Fuentes externas (Nico): SMN horario, factor SEN vigente, intensidad hídrica, disponibilidad acuífero 3105, JAPAY.

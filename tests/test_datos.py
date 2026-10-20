@@ -91,3 +91,15 @@ def test_validar_detecta_timestamp_duplicado_por_sitio(df):
     duplicado.loc[2, "site_id"] = "SIM-A"
     problemas = contrato.validar(duplicado)
     assert any("SIM-A" in p and "duplicado" in p for p in problemas), problemas
+
+
+def test_etiquetas_del_kit_no_entran_al_modelo(df):
+    # M1 (plan-ejecucion): tras cargar el kit, ninguna columna 'etiqueta_*' ni
+    # las columnas crudas del kit (scenario/split/simulated_anomaly) deben
+    # entrar como variable del modelo.
+    columnas = contrato.columnas_del_modelo(df)
+    assert not any(c.startswith("etiqueta_") for c in columnas), (
+        f"Fuga de etiquetas: {[c for c in columnas if c.startswith('etiqueta_')]}"
+    )
+    for prohibida in ("scenario", "split", "simulated_anomaly", "is_simulated"):
+        assert prohibida not in columnas, f"'{prohibida}' llegó al modelo"

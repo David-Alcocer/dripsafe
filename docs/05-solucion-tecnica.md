@@ -29,42 +29,48 @@
 
 **Entregable que sugiere el kit:** demo local de 3 minutos, README reproducible, cambios y tests, ficha de datos y supuestos, resultados con incertidumbre, tres límites y la siguiente validación necesaria.
 
-## Concepto: un vigilante, dos beneficios
+## Concepto: línea base + fusión evento–efecto
+
+> **MVP (D15):** línea base física por sitio + umbral por residuo + media móvil de 4 h. **Ampliación:** Isolation Forest con ablación.
 
 ```text
- Sensores del enfriamiento            Modelo ligero                    Dos tipos de alerta
- (torres, bombas, chillers,   ──▶   de anomalías        ──▶   ① Ineficiencia → ajustar enfriamiento → baja PUE/WUE
-  flujo, temperatura, energía)      (Isolation Forest)        ② Manipulación sospechosa → alerta de ciberseguridad
-  vía Modbus / BACnet
+CSV del kit (6 medidores + registro OT)
+   │
+   ├─▶ 1. Línea base física por sitio (aprendida en 48 h de la referencia)
+   ├─▶ 2. Residuos = real − esperado (%)
+   │       ├─ Umbral por residuo + media móvil de 4 h   → excesos sostenidos
+   │       └─ Isolation Forest por sitio (AMPLIACIÓN)   → combinaciones raras
+   ├─▶ 3. Registro OT  →  reglas
+   ├─▶ 4. Fusión evento–efecto  →  4 clases (D16)
+   └─▶ 5. Cola de alertas en el dashboard: kWh y L en riesgo por hora
 ```
 
-1. El modelo **aprende el comportamiento normal** del sistema de enfriamiento a partir de los datos históricos del kit.
-2. Marca como **anomalía** lo que se sale de ese patrón.
-3. Clasificamos cada anomalía:
-   - **Ineficiencia:** se gasta más energía o agua de lo normal para el mismo calor → oportunidad de ahorro.
-   - **Posible ataque:** las lecturas o comandos **no cuadran con la física** del sistema → alerta de seguridad.
+1. **La línea base** aprende cómo debería comportarse cada sitio según su **carga** (energía de TI) y su **clima** (pérdida de enfriamiento gratuito arriba de 20 °C).
+2. **El residuo** (real menos esperado) delata los excesos sostenidos. El umbral se calibra con 24 h extra de referencia.
+3. **Las 4 clases OT (D16)** cruzan el registro OT con los residuos: incidente con efecto, cambio no autorizado, escalón sin registro e intento de acceso.
+4. **La prioridad es por litros del acuífero** (ver [07-agua-y-acuifero.md](07-agua-y-acuifero.md)).
 
 ## Pipeline
 
 ```text
-data/ (kit)  →  limpieza (pandas)  →  features  →  Isolation Forest  →  alertas  →  métricas (PUE, balance neto)  →  dashboard (Streamlit)
+data/ (kit)  →  src/datos/cargar.py  →  src/modelo/ (baseline + residuos)  →  src/fusion/ (reglas + 4 clases)
+                                                                          →  src/metricas/  →  resultados/numeros_oficiales.json  →  app/ (Streamlit)
 ```
 
-| Paso | Responsable | Herramienta |
-|---|---|---|
-| Cargar y limpiar datos | Misa | pandas |
-| PUE inicial, energías total y de TI, unidades y periodo | Misa | pandas |
-| Variables por sitio y detector híbrido (reglas + Isolation Forest) | Gadiel | scikit-learn |
-| Comparación justa: calidad frente a costo del detector | Nico | scikit-learn + `tools/compare_detectors.py` del kit |
-| Alertas y consumo esperado del enfriamiento | Gadiel | scikit-learn |
-| Consumo del modelo | Gadiel | CodeCarbon |
-| Clasificar anomalías (falla o ataque) | Gadiel + Guille | reglas + modelo |
-| Ahorro energético y PUE final proyectado | Nico | pandas |
-| Cálculo y validación del balance neto final | Misa + Nico | pandas |
-| Impacto en agua y emisiones, cuando los datos lo permitan | Nico | pandas + fuentes citadas |
-| Consolidar cifras para dashboard y pitch | Nico | `resultados/numeros_oficiales.json` |
-| Integrar datos, modelo, métricas y demo | Misa | Python |
-| Dashboard | Leo | Streamlit |
+| Paso | Responsable | Herramienta | Fase |
+|---|---|---|---|
+| Cargar kit y validar contrato | Misa (M1) | pandas + `src/contrato.py` | 0 |
+| Partición 48/24, regresión por sitio, residuos, umbral, MM 4 h | Gadiel (G1) | pandas + numpy | 0 |
+| Rejilla de inyecciones + 4 clases OT | Guille (U1) | pandas | 0 |
+| PUE/WUE, exceso estimado, episodios | Nico (N1) | pandas | 0 |
+| JSON ejemplo y pantallas con estados vacíos | Leo (L1) | Streamlit | 0 |
+| **Integración y punto de corte** | Todos (Fase 1) | — | 1 |
+| Congelar parámetros, rejilla, tabla y curva | G2+U2+N2 | — | 2 |
+| CodeCarbon (10 repeticiones) y umbral de equilibrio | Gadiel (G3) + Misa | CodeCarbon | 2 |
+| Balance neto compartido | Misa + Nico (M3/N3) | pandas | 2 |
+| Acuífero + bono + fuentes | Nico (N4) | — | 2 |
+| Integración final, ensayo cronometrado | Misa (M4) | — | 2 |
+| Dashboard integrado + diapositivas | Leo (L2) | Streamlit | 2 |
 
 **Entrega entre Misa y Nico:** Misa entrega el PUE inicial junto con la telemetría limpia y las energías total y de TI en kWh, indicando unidades, intervalo y periodo. El PUE por sí solo no basta para calcular kWh ahorrados. Nico usa esa referencia, las alertas, el consumo esperado y las mediciones de CodeCarbon de Gadiel para calcular el impacto posterior. Los formatos de intercambio siguen definidos en [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
 
@@ -85,65 +91,70 @@ source .venv/bin/activate
 pip install pandas numpy scikit-learn codecarbon streamlit plotly jupyter
 ```
 
-## El modelo: Isolation Forest
+## El detector (MVP: línea base; ampliación: Isolation Forest)
 
-**Idea en una línea:** construye árboles que parten los datos al azar. Los puntos raros quedan aislados con pocos cortes, y eso los delata como anomalías.
+### 1. Línea base física por sitio (MVP)
 
-**Por qué este modelo:**
-- No necesita datos etiquetados: aprende solo lo "normal".
-- Entrena en segundos o minutos en una laptop; su balance neto se comprobará con las mediciones de Gadiel y los cálculos conjuntos de Misa + Nico.
-- Es fácil de explicar al jurado.
+Para cada sitio, una **regresión lineal** con dos variables físicas:
+- **Calor a disipar:** `energy_it_kwh`.
+- **Pérdida de enfriamiento gratuito:** `energy_it_kwh × max(0, outdoor_temp_c − 20)`. Arriba de 20 °C el aire exterior ya no ayuda y cada grado cuesta energía o agua.
 
-**Esqueleto (se adapta a las columnas reales del kit):**
+Con eso se predice la **energía no TI** (`energy_total − energy_it`, ver D18) y el agua. La **temperatura de entrada** depende del clima y no del tamaño de la carga, así que su línea base usa solo `max(0, outdoor_temp_c − 20)` y una constante. **El setpoint y la configuración no entran como variables:** si alguien los altera, el consumo real se separa de lo esperado y se ve.
 
-```python
-import pandas as pd
-from sklearn.ensemble import IsolationForest
-from codecarbon import EmissionsTracker
+**Transparencia:** la forma coincide con la del generador del kit. Lo declaramos: la elegimos porque representa la física, y para no depender de esa coincidencia la validación prueba **una forma mal especificada** (solo TI y temperatura) y **datos con ruido extra** (§4 de la propuesta).
 
-df = pd.read_csv("data/kit/enfriamiento.csv", parse_dates=["timestamp"])  # nombre de ejemplo
+Cada alerta se explica en una frase: *"SIM-A gasta 31 % más energía no TI de lo esperado para su carga y clima."*
 
-features = ["temp_entrada", "temp_salida", "flujo_agua", "kw_chiller", "kw_bombas", "kw_ti"]  # ejemplo
-X = df[features].dropna()
+### 2. Detectores sobre los residuos (MVP)
 
-tracker = EmissionsTracker(project_name="dripsafe")
-tracker.start()
+1. **Umbral por residuo** (energía, agua, entrada): alerta si el residuo supera el máximo observado en las 24 h de calibración más un **margen del 50 %**, fijado antes de ver la evaluación.
+2. **Media móvil de 4 h** de cada residuo, con su propio umbral igual. Atrapa excesos pequeños pero sostenidos. Son unas 5 líneas con pandas.
 
-model = IsolationForest(n_estimators=200, contamination=0.01, random_state=42)
-model.fit(X)
-df.loc[X.index, "anomalia"] = model.predict(X) == -1      # True = anomalía
-df.loc[X.index, "score"] = model.decision_function(X)     # más bajo = más raro
+### 3. Isolation Forest (AMPLIACIÓN, D15)
 
-emisiones_kg = tracker.stop()   # kg CO2e; la energía (kWh) queda en emissions.csv
-```
+- **Por qué IF y no un z-score:** el z-score mira una variable a la vez, el IF ve la combinación.
+- **Lo comprobamos, no lo suponemos:** la tabla se reporta con y sin IF (ablación).
+- **Es opcional y va fuera del MVP.** En el kit los ruidos son independientes y acotados, así que una combinación "rara" no es rara y los umbrales la atrapan antes. **Diseñar una prueba para que IF gane sería hacer trampa** (propuesta v7, §3.2).
+- Se mantiene (D2) como capa para datos reales, donde las variables sí están correlacionadas.
 
-**Features útiles** (si el kit las trae):
-- Diferencia de temperatura entrada-salida (ΔT).
-- Energía de enfriamiento ÷ energía de TI, que es casi el PUE por instante.
-- Agua consumida ÷ energía de TI, que es casi el WUE por instante.
-- Hora del día y día de la semana (el patrón normal cambia).
-- Promedios móviles y diferencias contra la lectura anterior.
+*Extra si sobra tiempo:* **CUSUM** para derivas de días.
 
-**Línea base:** comparar contra un método simple (z-score por variable). Si el Isolation Forest no le gana, algo está mal.
+**Límite mínimo detectable** (estimación analítica que se verifica en la prueba de robustez):
+- El ruido del kit sobre la energía total es de ±1.5 % de la energía de TI. En el sitio líquido eso equivale a ~4.4 % de la energía no TI por hora.
+- **Detector 1, en una hora:** detecta un exceso de ~+15 %.
+- **Detector 2, sostenido 4 h:** detecta uno de ~+10 %.
+- Las reglas del kit **no ven ninguno de los dos**.
 
-## ¿Falla o ataque?
+## Las 4 clases OT (D16)
 
-Esto lo diseñan juntos Gadiel y Guille. Algunas pistas físicas:
+El diagnóstico sale de cruzar el **registro OT** con los **residuos físicos**. Diseño de Guille y Gadiel, lógica revisada por Nico.
 
-| Señal | Más probable |
-|---|---|
-| Varias variables cambian juntas y de forma coherente (sube la carga de TI, sube el consumo del chiller, sube ΔT) | Operación normal o ineficiencia |
-| Un sensor reporta algo que **no cuadra** con los demás (dice que la temperatura bajó, pero el chiller no consume más) | **Posible manipulación** del sensor |
-| Cambio brusco de un parámetro de control fuera de horario | **Posible comando no autorizado** |
-| Consumo alto sostenido sin cambio en la carga de TI | Ineficiencia (equipo degradado o mal configurado) |
+| Clase | Condición | Acción |
+|---|---|---|
+| **Incidente OT con efecto** | Evento OT **y** residuo físico desde el inicio del evento hasta 24 h después | Máxima: restaurar config aprobada; modo seguro manual |
+| **Cambio no autorizado** | `cambio_config_no_autorizado`, con o sin efecto | Alta: comparar contra config aprobada; vigilar 24 h |
+| **Escalón sin registro** | Un residuo supera el umbral de golpe sin evento OT | Alta: comparar setpoints; si es agua, inspección física |
+| **Intento de acceso** | Solo `login_fallido`, residuos normales | Media: revisar accesos |
+
+**Dos reglas de oro:**
+1. Ningún exceso sin explicar va directo a mantenimiento.
+2. Ningún cambio no autorizado es "sin urgencia".
+
+**Ventana de 24 h:** en el kit el cambio de configuración ocurre de madrugada; un setpoint alterado puede notarse hasta la tarde. Un residuo que ya existía **antes** del evento se marca `coincidente, no causal`, salvo que dé un escalón dentro de la ventana. Se reporta cuántas coincidencias al azar habría combinando eventos OT con residuos en la evaluación limpia.
+
+*Extra si sobra tiempo:* `incoherencia física` (sube entrada y baja energía no TI) y `deriva gradual`.
 
 ## Métricas
 
+**Siempre cocientes de sumas, nunca promedios de cocientes horarios.**
+
 ```text
-PUE = energía total de la instalación (kWh) / energía de TI (kWh)
-WUE = agua consumida en sitio (L)           / energía de TI (kWh)
-CUE = emisiones CO2e (kg)                   / energía de TI (kWh)  =  factor de emisión de la red × PUE
+PUE = Σ energía total (kWh) / Σ energía de TI (kWh)
+WUE = Σ agua in situ (L)    / Σ energía de TI (kWh)
+CUE = Σ emisiones CO2e (kg) / Σ energía de TI (kWh)  =  factor de emisión de la red × PUE
 ```
+
+**Umbral de equilibrio (D15 + propuesta §5):** el **número central** del balance no es "el ahorro proyectado anual". Es el **costo anual del detector** (CodeCarbon × 10 repeticiones, inferencia horaria 8760 veces + reentrenamiento por temporada) comparado con **el exceso de una sola hora de ineficiencia típica**. Si el costo son unos pocos Wh y una hora de ineficiencia son decenas de kWh, **basta una detección al año** para que el balance sea positivo. Este número no depende de que el ahorro proyectado sea exacto.
 
 **PUE inicial y final proyectado:**
 - **Inicial (Misa):** PUE calculado con los datos limpios del kit, para un periodo definido.
