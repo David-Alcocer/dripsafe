@@ -1,0 +1,246 @@
+{
+  "_ejemplo": true,
+  "_nota": "VALORES FICTICIOS para probar el dashboard. No son resultados del proyecto y nunca van al pitch. La forma es la propuesta de Leo para el contrato 4 (ver app/ejemplos/README.md); la define Misael con Nico (M2).",
+  "generado": {
+    "fecha": "2026-10-19",
+    "commit": "ejemplo"
+  },
+  "pue_antes": {
+    "valor": 1.27,
+    "unidad": "",
+    "tipo": "observado",
+    "origen": "src/metricas/pue.py",
+    "responsable": "Misael",
+    "nota": "Σ energía total ÷ Σ energía IT de la evaluación"
+  },
+  "wue_antes": {
+    "valor": 0.4,
+    "unidad": "L/kWh",
+    "tipo": "observado",
+    "origen": "src/metricas/pue.py",
+    "responsable": "Misael"
+  },
+  "punto_ciego_pct": {
+    "valor": 140,
+    "unidad": "%",
+    "tipo": "observado",
+    "origen": "src/evaluacion/",
+    "responsable": "Nico",
+    "nota": "cuánto puede subir la energía de enfriamiento del sitio líquido, en su hora más caliente, sin cruzar PUE 1.6"
+  },
+  "exceso_energia_kwh": {
+    "valor": 650,
+    "unidad": "kWh",
+    "tipo": "estimado",
+    "origen": "src/metricas/",
+    "responsable": "Nico",
+    "nota": "real − esperado durante las alertas"
+  },
+  "exceso_agua_l": {
+    "valor": 1900,
+    "unidad": "L",
+    "tipo": "estimado",
+    "origen": "src/metricas/",
+    "responsable": "Nico"
+  },
+  "pue_sin_exceso": {
+    "valor": 1.25,
+    "unidad": "",
+    "tipo": "estimado",
+    "origen": "src/metricas/",
+    "responsable": "Nico",
+    "nota": "cota: si cada exceso se cortara al llegar su alerta"
+  },
+  "detector_cpu_ms": {
+    "valor": 9.5,
+    "unidad": "ms",
+    "tipo": "medido",
+    "origen": "src/evaluacion/",
+    "responsable": "Gadiel",
+    "dispersion": 0.8,
+    "repeticiones": 10,
+    "nota": "ajuste + inferencia de los 3 sitios, MacBook del equipo"
+  },
+  "detector_kwh_anual": {
+    "valor": 0.0008,
+    "unidad": "kWh/año",
+    "tipo": "estimado",
+    "origen": "src/evaluacion/",
+    "responsable": "Gadiel",
+    "supuestos": "30 W, una corrida por hora (8 760 al año)"
+  },
+  "detector_gco2e_anual": {
+    "valor": 0.36,
+    "unidad": "g CO₂e/año",
+    "tipo": "estimado",
+    "origen": "src/evaluacion/",
+    "responsable": "Gadiel",
+    "supuestos": "factor del SEN vigente (CRE/SEMARNAT)"
+  },
+  "equilibrio_horas": {
+    "valor": 0.0001,
+    "unidad": "h/año",
+    "tipo": "estimado",
+    "origen": "src/metricas/balance_neto.py",
+    "responsable": "Misael + Nico",
+    "nota": "horas de exceso que pagan la energía anual del detector"
+  },
+  "comparacion": {
+    "tipo": "observado",
+    "origen": "src/evaluacion/",
+    "responsable": "Nico",
+    "nota": "21 anomalías originales del kit, horas de evaluación",
+    "filas": [
+      {
+        "metodo": "DripSafe",
+        "tp": 21,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "falsas_por_dia": 0.0,
+        "latencia_h": 0
+      },
+      {
+        "metodo": "Reglas del kit",
+        "tp": 21,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "falsas_por_dia": 0.0,
+        "latencia_h": 0
+      }
+    ]
+  },
+  "curva_sensibilidad": {
+    "tipo": "observado",
+    "origen": "src/evaluacion/",
+    "responsable": "Nico",
+    "nota": "rejilla fija de inyecciones, energía no TI durante 4 h, 3 sitios",
+    "filas": [
+      {
+        "magnitud_pct": 10,
+        "metodo": "DripSafe",
+        "detectados": 1,
+        "total": 3,
+        "horas_hasta_detectar": 3,
+        "kwh_no_vistos": 20
+      },
+      {
+        "magnitud_pct": 20,
+        "metodo": "DripSafe",
+        "detectados": 3,
+        "total": 3,
+        "horas_hasta_detectar": 1,
+        "kwh_no_vistos": 6
+      },
+      {
+        "magnitud_pct": 40,
+        "metodo": "DripSafe",
+        "detectados": 3,
+        "total": 3,
+        "horas_hasta_detectar": 0,
+        "kwh_no_vistos": 0
+      },
+      {
+        "magnitud_pct": 80,
+        "metodo": "DripSafe",
+        "detectados": 3,
+        "total": 3,
+        "horas_hasta_detectar": 0,
+        "kwh_no_vistos": 0
+      },
+      {
+        "magnitud_pct": 10,
+        "metodo": "Reglas del kit",
+        "detectados": 0,
+        "total": 3,
+        "horas_hasta_detectar": null,
+        "kwh_no_vistos": 25
+      },
+      {
+        "magnitud_pct": 20,
+        "metodo": "Reglas del kit",
+        "detectados": 0,
+        "total": 3,
+        "horas_hasta_detectar": null,
+        "kwh_no_vistos": 50
+      },
+      {
+        "magnitud_pct": 40,
+        "metodo": "Reglas del kit",
+        "detectados": 0,
+        "total": 3,
+        "horas_hasta_detectar": null,
+        "kwh_no_vistos": 100
+      },
+      {
+        "magnitud_pct": 80,
+        "metodo": "Reglas del kit",
+        "detectados": 1,
+        "total": 3,
+        "horas_hasta_detectar": 0,
+        "kwh_no_vistos": 140
+      }
+    ]
+  },
+  "robustez": {
+    "tipo": "observado",
+    "origen": "src/evaluacion/",
+    "responsable": "Nico",
+    "nota": "+20 % de energía no TI durante 4 h",
+    "filas": [
+      {
+        "condicion": "Ruido del kit",
+        "metodo": "DripSafe",
+        "detectados": 3,
+        "total": 3,
+        "falsas_por_dia": 0.0
+      },
+      {
+        "condicion": "Ruido gaussiano del doble",
+        "metodo": "DripSafe",
+        "detectados": 2,
+        "total": 3,
+        "falsas_por_dia": 0.5
+      }
+    ]
+  },
+  "bono_horas_respaldo": {
+    "tipo": "estimado",
+    "origen": "docs/07-agua-y-acuifero.md",
+    "responsable": "Misael",
+    "supuestos": "clase W40; horas por encima de cada umbral en Mérida (SMN o ERA5)",
+    "filas": [
+      {
+        "umbral_c": 27,
+        "horas_anio": 2400
+      },
+      {
+        "umbral_c": 30,
+        "horas_anio": 1300
+      },
+      {
+        "umbral_c": 33,
+        "horas_anio": 600
+      },
+      {
+        "umbral_c": 35,
+        "horas_anio": 250
+      }
+    ]
+  },
+  "escenario_anual": {
+    "tipo": "proyectado",
+    "origen": "src/metricas/",
+    "responsable": "Nico",
+    "nota": "valores iniciales del escenario editable",
+    "parametros": {
+      "fallas": 6,
+      "exceso_pct": 20,
+      "horas_sin": 72,
+      "horas_con": 4
+    }
+  }
+}

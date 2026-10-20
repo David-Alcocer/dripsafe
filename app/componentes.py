@@ -14,11 +14,16 @@ from html import escape
 from pathlib import Path
 from urllib.parse import quote
 
-# Colores de umbral de Grafana.
+from app.textos import CLASES, TIPOS_CIFRA
+
+# Colores de umbral (paleta profesional sobria; mismos valores que app/estilo.css y app/graficas.py).
 COLORES = {
-    "verde": "#73bf69", "amarillo": "#fade2a", "naranja": "#ff9830", "rojo": "#f2495c",
-    "azul": "#5794f2", "gris": "#ccccdc",
+    "verde": "#3fa37a", "amarillo": "#a8b3c4", "naranja": "#d39a2c", "rojo": "#d0545f",
+    "azul": "#4c8bd6", "gris": "#ccccdc", "morado": "#8a7fc4",
 }
+# Clase CSS de la etiqueta de procedencia de cada tipo de cifra.
+_TAG_TIPO = {"observado": "ok", "medido": "ok", "estimado": "est", "proyectado": "proy", "ejemplo": "sim",
+             "vista_previa": "sim"}
 
 # ------------------------------------------------------------ íconos (estilo Lucide, sin emojis)
 _SVG = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' "
@@ -185,16 +190,17 @@ def barras(filas: list[tuple[str, float, float, str, str]]) -> str:
 
 
 def lista_alertas(items: list[dict]) -> str:
-    """Panel «Alert list»: cada item = {tipo, titulo, detalle, cuando}."""
+    """Panel «Alert list»: cada item = {clase, titulo, detalle, cuando}."""
     if not items:
         return f'<div class="al-vacia">{icono("ok", 16)} Sin alertas en el periodo</div>'
     filas = ""
     for it in items:
-        critica = it["tipo"] == "posible_ataque"
-        clase, texto = ("crit", "Crítica") if critica else ("media", "Media")
-        filas += (f'<div class="al-i"><span class="al-ico {clase}">{icono("alerta" if critica else "medidor", 14)}</span>'
+        _, severidad, color, _, _ = CLASES[it["clase"]]
+        clase = {"rojo": "crit", "naranja": "media", "amarillo": "baja"}[color]
+        ico = "alerta" if color == "rojo" else "medidor"
+        filas += (f'<div class="al-i"><span class="al-ico {clase}">{icono(ico, 14)}</span>'
                   f'<div class="al-c"><div class="al-t">{escape(it["titulo"])}</div>'
-                  f'<div class="al-d"><span class="al-sev {clase}">{texto}</span>{escape(it["detalle"])}</div>'
+                  f'<div class="al-d"><span class="al-sev {clase}">{severidad}</span>{escape(it["detalle"])}</div>'
                   f'<div class="al-w">{escape(it["cuando"])}</div></div></div>')
     return f'<div class="alertlist">{filas}</div>'
 
@@ -202,11 +208,17 @@ def lista_alertas(items: list[dict]) -> str:
 def leyenda(series: list[tuple[str, str, str]], calculos: list[str] | None = None) -> str:
     """Leyenda de Grafana en modo tabla: (tipo de muestra, nombre, valores ya formateados por cálculo).
 
-    tipo: 'line', 'dash', 'atk', 'inef'. `calculos` son los encabezados, por ejemplo ['Media', 'Máx'].
+    tipo: 'line', 'dash', 'atk', 'inef', o un color '#rrggbb' (línea de ese color, para cada sitio).
+    `calculos` son los encabezados, por ejemplo ['Media', 'Máx'].
     """
+    def muestra(t: str) -> str:
+        if t.startswith("#"):
+            return f'<i class="sw line" style="background: {t}"></i>'
+        return f'<i class="sw {t}"></i>'
+
     enc = "".join(f"<th>{c}</th>" for c in (calculos or []))
     filas = "".join(
-        f'<tr><td><i class="sw {t}"></i>{escape(n)}</td>' + "".join(f"<td>{x}</td>" for x in vals) + "</tr>"
+        f"<tr><td>{muestra(t)}{escape(n)}</td>" + "".join(f"<td>{x}</td>" for x in vals) + "</tr>"
         for t, n, vals in series
     )
     return f'<table class="legend"><thead><tr><th></th>{enc}</tr></thead><tbody>{filas}</tbody></table>'
@@ -215,12 +227,12 @@ def leyenda(series: list[tuple[str, str, str]], calculos: list[str] | None = Non
 # ------------------------------------------------------------ texto, etiquetas y tablas
 
 def chip(tipo: str) -> str:
-    """Etiqueta con ícono y texto (el color nunca va solo)."""
+    """Etiqueta con ícono y texto (el color nunca va solo). `tipo` puede ser una clase de alerta."""
+    if tipo in CLASES:
+        nombre, _, color, _, _ = CLASES[tipo]
+        clase = {"rojo": "atk", "naranja": "inef", "amarillo": "baja"}[color]
+        return f'<span class="chip {clase}">{icono("alerta" if color == "rojo" else "medidor", 12)}{escape(nombre)}</span>'
     fichas = {
-        "posible_ataque": ("atk", "alerta", "Posible ataque"),
-        "ineficiencia": ("inef", "medidor", "Ineficiencia"),
-        "ataque": ("atk", "alerta", "Ataque"),
-        "falla": ("falla", "medidor", "Falla"),
         "si": ("ok", "palomita", "Sí"),
         "no": ("no", "tache", "No"),
     }
@@ -228,15 +240,37 @@ def chip(tipo: str) -> str:
     return f'<span class="chip {clase}">{icono(ico, 12)}{texto}</span>'
 
 
-def celda_severidad(tipo: str) -> str:
+def celda_severidad(clase_alerta: str) -> str:
     """Celda con fondo de color (modo «color background» de las tablas de Grafana)."""
-    if tipo == "posible_ataque":
-        return '<span class="cell-bg crit">Crítica</span>'
-    return '<span class="cell-bg media">Media</span>'
+    _, severidad, color, _, _ = CLASES[clase_alerta]
+    css = {"rojo": "crit", "naranja": "media", "amarillo": "baja"}[color]
+    return f'<span class="cell-bg {css}">{severidad}</span>'
+
+
+def etiqueta(texto: str, tipo: str = "sim") -> str:
+    """Etiqueta pequeña: 'sim' (amarilla, ejemplo o provisional), 'ok' (verde), 'est' (azul) o 'proy' (morada)."""
+    return f'<span class="tag-{tipo}">{escape(texto)}</span>'
+
+
+def procedencia(tipo: str) -> str:
+    """Etiqueta de qué tan firme es una cifra: observado, medido, estimado, proyectado o ejemplo."""
+    texto, explicacion = TIPOS_CIFRA[tipo]
+    return f'<span class="tag-{_TAG_TIPO[tipo]}" title="{escape(explicacion)}">{texto}</span>'
 
 
 def etiqueta_simulado(simulado: bool) -> str:
-    return '<span class="tag-sim">Simulado</span>' if simulado else '<span class="tag-ok">Oficial</span>'
+    return etiqueta("Simulado") if simulado else etiqueta("Oficial", "ok")
+
+
+def sello_simulado() -> str:
+    """Sello «DATOS SIMULADOS» de la barra superior: la guía del kit pide tenerlo siempre visible."""
+    return (f'<span class="sello-sim" title="Datos simulados del kit CIFOX: no son mediciones reales">'
+            f'{icono("info", 11)}DATOS SIMULADOS</span>')
+
+
+def aviso_fuerte(texto_html: str) -> str:
+    """Aviso que no se puede pasar por alto (por ejemplo, datos que no son del kit)."""
+    return f'<div class="alert fuerte" role="alert">{icono("alerta", 18)}<div>{texto_html}</div></div>'
 
 
 def aviso(texto_html: str, tipo: str = "info") -> str:
