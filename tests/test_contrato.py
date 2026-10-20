@@ -28,8 +28,15 @@ def test_validar_detecta_columnas_fuera_del_contrato():
 
 
 def test_el_modelo_nunca_ve_etiquetas():
-    df = generar(dias=1).assign(etiqueta_tipo="normal")
+    df = generar(dias=1).assign(
+        etiqueta_tipo="normal",
+        etiqueta_escenario="",
+        etiqueta_tecnica="",
+        etiqueta_particion="entrenamiento",
+    )
     columnas = contrato.columnas_del_modelo(df)
-    assert "etiqueta_tipo" not in columnas
+    assert not any(c.startswith("etiqueta_") for c in columnas), (
+        f"Fuga de etiquetas al modelo: {[c for c in columnas if c.startswith('etiqueta_')]}"
+    )
     assert "timestamp" not in columnas
     assert "kw_ti" in columnas
