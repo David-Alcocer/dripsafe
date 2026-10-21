@@ -207,3 +207,52 @@ def test_accion_del_detector_llega_al_evento(datos):
     assert (eventos["accion"] == "acción para " + eventos["clase"]).all()
     sin_accion = calculos.eventos(cargar.unir(datos, linea_base.detectar(datos)))
     assert (sin_accion["accion"] == "").all()  # la vista previa no trae acción: el dashboard usa su texto fijo
+
+
+def _oficial_inventado() -> dict:
+    """numeros_oficiales.json con la forma de resultados/README.md y valores inventados."""
+    def curva(nombre, metodo, pct, horas, no_visto):
+        return {"nombre": nombre, "variable": "energia", "magnitud_pct": int(nombre.split("+")[-1]) if "+" in nombre else 20,
+                "metodo": metodo, "inyecciones": 10, "pct_efectos_vistos": pct,
+                "mediana_horas_ver_efecto": horas, "no_visto": no_visto, "unidad": "kWh"}
+    return {
+        "_meta": {"aviso": "DATOS SIMULADOS"},
+        "pue": {"antes": {"valor": 1.3, "tipo": "medido"}},
+        "punto_ciego_pct": {"valor": 50, "unidad": "%", "tipo": "observado"},
+        "deteccion": {"comparacion_contra_reglas_kit": {
+            "rejilla_inyecciones": {"nota": "inventada", "datos_curva": [
+                curva("energia_+10", "dripsafe", 50.0, 1.0, 5.0),
+                curva("energia_+10", "reglas_kit", 0.0, None, 30.0),
+                curva("cambio_sin_registro", "dripsafe", 100.0, 0.0, 0.0),  # no es parte de la curva de 4 h
+            ]},
+            "robustez_ruido": {"falsas_alarmas_por_dia_sitio_media": 0.05, "resultado": [
+                {"nombre": "energia_+20", "metodo": "dripsafe", "semillas": 5, "pct_efectos_vistos_media": 80.0,
+                 "pct_efectos_vistos_min": 70.0, "pct_efectos_vistos_max": 90.0},
+                {"nombre": "energia_+20", "metodo": "reglas_kit", "semillas": 5, "pct_efectos_vistos_media": 0.0,
+                 "pct_efectos_vistos_min": 0.0, "pct_efectos_vistos_max": 0.0},
+            ]},
+        }},
+        "bono_zero_freshwater": {"horas_respaldo_mérida_al_año": {
+            "umbral_27c": 900, "umbral_30c": None, "tipo": "estimado"}},
+    }
+
+
+def test_json_oficial_se_adapta_a_las_claves_del_dashboard():
+    n = cargar.adaptar_oficial(_oficial_inventado())
+    assert cargar.cifra(n, "punto_ciego_pct") == 50  # las claves de primer nivel pasan tal cual
+    curva = n["curva_sensibilidad"]["filas"]
+    assert [(f["metodo"], f["detectados"], f["total"]) for f in curva] == [("DripSafe", 5, 10), ("Reglas del kit", 0, 10)]
+    assert curva[1]["horas_hasta_detectar"] is None and curva[1]["kwh_no_vistos"] == 30.0
+    robustez = n["robustez"]["filas"]
+    assert robustez[0]["condicion"] == "Doble de ruido · Energía +20 %"
+    assert (robustez[0]["pct"], robustez[0]["falsas_por_dia"], robustez[1]["falsas_por_dia"]) == (80.0, 0.05, None)
+    assert n["bono_horas_respaldo"]["filas"] == [{"umbral_c": 27, "horas_anio": 900}]  # el null se queda pendiente
+    assert cargar.tipo_cifra(n, "curva_sensibilidad", ejemplo=False) == "observado"
+
+
+def test_json_oficial_sin_datos_no_inventa_cifras():
+    vacio = {"_meta": {}, "deteccion": {"comparacion_contra_reglas_kit": {
+        "rejilla_inyecciones": {"datos_curva": None}, "robustez_ruido": {"resultado": None}}},
+        "bono_zero_freshwater": {"horas_respaldo_mérida_al_año": {"umbral_27c": None}}}
+    n = cargar.adaptar_oficial(vacio)
+    assert not {"curva_sensibilidad", "robustez", "bono_horas_respaldo"} & set(n)

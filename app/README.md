@@ -18,6 +18,11 @@ Si `numeros_oficiales.json` existe pero su `_meta` lo identifica como borrador
 con valores de ejemplo, la app sigue usando el archivo de ejemplo y no lo
 presenta como oficial.
 
+El JSON oficial tiene secciones anidadas (`resultados/README.md`); `cargar.adaptar_oficial()` las
+pasa a las claves que lee la app (curva de la rejilla, robustez, horas del bono). Lo que sigue en
+`null` se muestra como **Pendiente**. Las claves de primer nivel con `valor`, como
+`punto_ciego_pct` o `equilibrio_horas`, pasan tal cual.
+
 Cada cifra lleva una etiqueta: **Observado**, **Medido**, **Estimado**, **Proyectado**, **Vista previa** o
 **Ejemplo**. La propuesta de forma del JSON está en `app/ejemplos/README.md`.
 

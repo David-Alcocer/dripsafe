@@ -484,9 +484,16 @@ def evaluacion(d: Datos) -> None:
             "Las etiquetas del kit solo se usan aquí, para calificar. Nunca entran al detector."))
         robustez = (d.numeros.get("robustez") or {}).get("filas") or []
         if robustez:
-            st.html(c.panel("Robustez (+20 % durante 4 h)", c.tabla(
+            # El JSON oficial da % de efectos vistos con su rango entre semillas; el ejemplo, «n de total».
+            def detectadas(f):
+                if "pct" in f:
+                    rango = f' ({c.numero(f["pct_min"])}–{c.numero(f["pct_max"])})' if f["pct_min"] != f["pct_max"] else ""
+                    return f'{c.numero(f["pct"])} %{rango}'
+                return f'{f["detectados"]} de {f["total"]}'
+            st.html(c.panel("Robustez con más ruido", c.tabla(
                 ["Condición", "Método", "Detectadas", "Falsas por día"],
-                [[f["condicion"], f["metodo"], f'{f["detectados"]} de {f["total"]}', c.numero(f["falsas_por_dia"], 1)]
+                [[f["condicion"], f["metodo"], detectadas(f),
+                  c.numero(f["falsas_por_dia"], 2) if f["falsas_por_dia"] is not None else "—"]
                  for f in robustez], numericas=(2, 3)),
                 "El agua del kit no tiene ruido: la prueba agrega ruido para no detectar algo trivial."))
     mostrar_aviso_ejemplo(d)
