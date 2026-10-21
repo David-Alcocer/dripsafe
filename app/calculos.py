@@ -80,7 +80,7 @@ def _clase_principal(clases: pd.Series) -> str:
 
 def eventos(df: pd.DataFrame) -> pd.DataFrame:
     """Junta las horas con alerta de cada sitio en eventos (horas seguidas), con su clase más grave."""
-    columnas = ["sitio", "inicio", "fin", "horas", "clase", "clases", "motivo", "escenario", "ot_event",
+    columnas = ["sitio", "inicio", "fin", "horas", "clase", "clases", "motivo", "accion", "escenario", "ot_event",
                 "exceso_kwh", "exceso_l", "confianza_baja"]
     filas = []
     for sitio, g in df[df["alerta"]].sort_values("timestamp").groupby("site_id"):
@@ -92,14 +92,19 @@ def eventos(df: pd.DataFrame) -> pd.DataFrame:
             pico = con_motivo.loc[(con_motivo["exceso_kwh"] + con_motivo["exceso_l"]).idxmax()] if len(con_motivo) else None
             # Los eventos OT en el orden en que ocurrieron: «Login fallido → Cambio de configuración…».
             ot = list(dict.fromkeys(EVENTOS_OT_TEXTO[x] for x in v["ot_event"] if x in EVENTOS_OT_TEXTO))
+            # La acción del detector es la de la primera hora con la clase más grave del evento.
+            clase = _clase_principal(v["clase"])
+            acciones = v.loc[v["clase"] == clase, "accion"] if "accion" in v.columns else pd.Series(dtype=str)
+            acciones = acciones[acciones != ""]
             filas.append({
                 "sitio": sitio,
                 "inicio": v["timestamp"].iloc[0],
                 "fin": v["timestamp"].iloc[-1] + pd.Timedelta(hours=1),
                 "horas": len(v),
-                "clase": _clase_principal(v["clase"]),
+                "clase": clase,
                 "clases": sorted(set(v["clase"]) - {"normal"}),
                 "motivo": (f'pico: {pico["motivo"]}' if pico is not None else " → ".join(ot)),
+                "accion": acciones.iloc[0] if len(acciones) else "",
                 "escenario": v["scenario"].mode().iloc[0],
                 "ot_event": " → ".join(ot),
                 "exceso_kwh": float(v["exceso_kwh"].sum()),

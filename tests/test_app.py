@@ -183,3 +183,27 @@ def test_alertas_con_otro_formato_avisan_y_no_se_ignoran(sin_kit, monkeypatch, t
     d = cargar.cargar()
     assert d.fuentes["detector"] == "vista_previa"
     assert d.avisos and "site_id" in d.avisos[0]
+
+
+def test_salidas_del_equipo_no_se_mezclan_con_datos_de_ejemplo(sin_kit, monkeypatch, tmp_path):
+    """Sin el kit, alertas.csv y consumo_modelo.json (calculados con el kit) no se usan: no cuadrarían."""
+    alertas = tmp_path / "alertas.csv"
+    linea_base.detectar(kit.ejemplo()).to_csv(alertas, index=False)
+    consumo = tmp_path / "consumo_modelo.json"
+    consumo.write_text(json.dumps({"ms_mediana": 5.0}), encoding="utf-8")
+    monkeypatch.setitem(cargar.RUTAS, "alertas", alertas)
+    monkeypatch.setitem(cargar.RUTAS, "consumo", consumo)
+    d = cargar.cargar()
+    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "ejemplo"}
+    assert d.consumo == {}
+
+
+def test_accion_del_detector_llega_al_evento(datos):
+    """La acción la decide src/ot/clases.py; el evento usa la de su clase más grave."""
+    detector = linea_base.detectar(datos)
+    detector["accion"] = detector["clase"].map(lambda k: "" if k == "normal" else f"acción para {k}")
+    eventos = calculos.eventos(cargar.unir(datos, detector))
+    assert len(eventos)
+    assert (eventos["accion"] == "acción para " + eventos["clase"]).all()
+    sin_accion = calculos.eventos(cargar.unir(datos, linea_base.detectar(datos)))
+    assert (sin_accion["accion"] == "").all()  # la vista previa no trae acción: el dashboard usa su texto fijo

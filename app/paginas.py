@@ -345,7 +345,9 @@ def demo(d: Datos) -> None:
     if paso >= 2:
         st.html(c.aviso(f"<b>Qué se ve.</b> {guion['huella']} {CLASES[e['clase']][3]}"))
     if paso >= 3:
-        st.html(c.aviso(f"<b>Qué hacer.</b> {CLASES[e['clase']][4]} DripSafe solo avisa: la decisión es del operador."))
+        # La acción del detector (src/ot/clases.py) manda; el texto fijo es para la vista previa.
+        accion = e["accion"] or CLASES[e["clase"]][4]
+        st.html(c.aviso(f"<b>Qué hacer.</b> {accion} DripSafe solo avisa: la decisión es del operador."))
 
     _, atras, adelante = st.columns([4, 1, 1], gap="small")
     atras.button("Anterior", icon=":material/chevron_left:", disabled=paso == 0, width="stretch",
@@ -551,7 +553,11 @@ def _posicion_log(valor: float) -> float:
 def balance(d: Datos, v: Vista) -> None:
     # Costo del detector: tiempo medido por el equipo (Gadiel, G3) o, mientras tanto, la corrida del kit.
     ms = cifra(d.numeros, "detector_cpu_ms")
-    if ms is not None:
+    if d.consumo.get("ms_mediana") is not None:
+        # Contrato 3: el equipo midió el tiempo con repeticiones (consumo_modelo.json).
+        segundos, tipo_t = d.consumo["ms_mediana"] / 1000, "medido"
+        origen_t = f'mediana de {d.consumo.get("repeticiones", "varias")} corridas · consumo_modelo.json'
+    elif ms is not None:
         segundos, tipo_t, origen_t = ms / 1000, tipo_de(d, "detector_cpu_ms"), "medición del equipo"
     else:
         segundos = d.benchmarks.get("isolation_forest", {}).get("wall_seconds", 1.0)
