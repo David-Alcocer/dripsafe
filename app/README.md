@@ -12,16 +12,9 @@ La barra lateral lo dice siempre:
 |---|---|---|
 | Telemetría | CSV del kit, fuera del repo | Datos de ejemplo inventados (aviso naranja arriba) |
 | Detector | `data/resultados/alertas.csv` (Gadiel + Guille), columnas de `app/linea_base.COLUMNAS` | **Vista previa** de `app/linea_base.py` |
-| Cifras | `resultados/numeros_oficiales.json` (Nico) | `app/ejemplos/numeros_ejemplo.json`, **valores ficticios** marcados «Ejemplo» |
+| Cifras | `resultados/numeros_oficiales.json` (fuente canónica) y `app/ejemplos/numeros_ejemplo.json` (vista plana de Leo) | `app/ejemplos/numeros_demo.json`, ficticio y marcado «Ejemplo» |
 
-Si `numeros_oficiales.json` existe pero su `_meta` lo identifica como borrador
-con valores de ejemplo, la app sigue usando el archivo de ejemplo y no lo
-presenta como oficial.
-
-El JSON oficial tiene secciones anidadas (`resultados/README.md`); `cargar.adaptar_oficial()` las
-pasa a las claves que lee la app (curva de la rejilla, robustez, horas del bono). Lo que sigue en
-`null` se muestra como **Pendiente**. Las claves de primer nivel con `valor`, como
-`punto_ciego_pct` o `equilibrio_horas`, pasan tal cual.
+Con kit, la app lee la vista oficial plana de Leo y muestra `Pendiente de Gadiel/Misa/Guille` para las cifras sin medición o fuente. Sin kit, solo usa la telemetría y las cifras ficticias de demo, con un aviso visible. El generador del Contrato 4 está documentado en `resultados/README.md`.
 
 Cada cifra lleva una etiqueta: **Observado**, **Medido**, **Estimado**, **Proyectado**, **Vista previa** o
 **Ejemplo**. La propuesta de forma del JSON está en `app/ejemplos/README.md`.

@@ -26,8 +26,6 @@ from app.textos import (
     ESTADO_TECNICA,
     EVENTOS_OT,
     EVENTOS_OT_TEXTO,
-    HECHOS_ACUIFERO,
-    IMPACTO_ACUIFERO,
     KIT_VS_EQUIPO,
     LIMITES,
     NOMBRE_VIGILADA,
@@ -125,7 +123,17 @@ def tipo_de(d: Datos, clave: str) -> str:
 
 def detector_tipo(d: Datos) -> str:
     """Las cifras que la app calcula con la salida del detector: estimadas, o vista previa."""
+    if d.cifras_de_ejemplo:
+        return "ejemplo"
     return "estimado" if d.fuentes.get("detector") == "modelo" else "vista_previa"
+
+
+def telemetria_tipo(d: Datos) -> str:
+    return "ejemplo" if d.cifras_de_ejemplo else "observado"
+
+
+def evaluacion_completa(v: Vista) -> bool:
+    return len(v.tabla) == 288 and set(v.tabla["split"]) == {"evaluacion"} and v.tabla["site_id"].nunique() == 3
 
 
 def aviso_ejemplo(d: Datos) -> str:
@@ -204,7 +212,7 @@ def resumen(d: Datos, v: Vista) -> None:
     tipo_det = detector_tipo(d)
 
     rejilla([
-        c.gauge("PUE", m["pue"], 1.0, 2.0, PASOS_PUE, 3, sub=con_tag("Σ total ÷ Σ IT del periodo", "observado"),
+        c.gauge("PUE", m["pue"], 1.0, 2.0, PASOS_PUE, 3, sub=con_tag("Σ total ÷ Σ IT del periodo", telemetria_tipo(d)),
                 descripcion="Suma de energía total entre suma de energía IT del periodo. La regla fija del kit alerta arriba de 1.6."),
         c.stat("Incidentes y cambios OT", str(ot), color="rojo" if ot else "verde", fondo=bool(ot),
                sub=f'{n.get("incidente_ot", 0)} con efecto físico · {n.get("cambio_no_autorizado", 0)} sin efecto aún'),
@@ -249,11 +257,14 @@ def resumen(d: Datos, v: Vista) -> None:
                 st.html(c.panel("Fallas detectadas según su tamaño", '<p class="txt-d">Pendiente: curva de N2 (Nico).</p>'))
         with der:
             horas = cifra(d.numeros, "equilibrio_horas")
+            pue_proj = cifra(d.numeros, "pue_sin_exceso") if evaluacion_completa(v) else ex["pue_sin_exceso"]
             rejilla([
-                c.stat("Umbral de equilibrio", *tiempo_corto(horas), "verde",
-                       sub=con_tag("de exceso detectado pagan el detector un año", tipo_de(d, "equilibrio_horas"))),
-                c.stat("PUE si se corta el exceso", c.numero(ex["pue_sin_exceso"], 3), color="azul",
-                       sub=con_tag(f'hoy {c.numero(ex["pue"], 3)} · cota, no ahorro', tipo_det)),
+                c.stat("Umbral de equilibrio", *(tiempo_corto(horas) if horas is not None else
+                       ("Pendiente de Gadiel", "")), "gris" if horas is None else "azul",
+                       sub=con_tag("requiere energía medida del detector", tipo_de(d, "equilibrio_horas"))),
+                c.stat("PUE si se corta el exceso", c.numero(pue_proj, 3), color="azul",
+                       sub=con_tag(f'hoy {c.numero(ex["pue"], 3)} · contrafactual, no ahorro',
+                                   tipo_de(d, "pue_sin_exceso") if evaluacion_completa(v) else tipo_det)),
             ], minimo=200)
     mostrar_aviso_ejemplo(d)
 
@@ -433,14 +444,24 @@ def evaluacion(d: Datos) -> None:
         c.stat("DripSafe en el kit", f'{rd["escenarios_detectados"]}/{rd["escenarios_totales"]}', "escenarios", "azul",
                sub=con_tag(f'{rd["tp"]} horas acertadas · {rd["fp"]} falsas', detector_tipo(d))),
         c.stat("Reglas fijas del kit", f'{rr["escenarios_detectados"]}/{rr["escenarios_totales"]}', "escenarios", "gris",
-               sub=con_tag(f'{rr["tp"]} horas acertadas · {rr["fp"]} falsas', "observado")),
+               sub=con_tag(f'{rr["tp"]} horas acertadas · {rr["fp"]} falsas', telemetria_tipo(d))),
         c.stat("Punto ciego de las reglas", c.numero(cifra(d.numeros, "punto_ciego_pct")), "%", "naranja",
-               sub=con_tag("más energía de enfriamiento en el sitio líquido sin cruzar PUE 1.6",
+               sub=con_tag("más energía no TI en horas limpias del sitio líquido sin cruzar PUE 1.6",
                            tipo_de(d, "punto_ciego_pct"))),
     ], minimo=260)
-    st.html(c.aviso("<b>En los 3 episodios anómalos del kit (21 horas) se espera un empate</b> y se reporta tal cual: "
-                    "el kit los diseñó para que las reglas los vean. El aporte se mide con fallas más pequeñas, "
-                    "en la curva de abajo."))
+    if d.cifras_de_ejemplo:
+        st.html(c.aviso("<b>Ejemplo ficticio.</b> La comparación por episodio del kit aparece al cargarlo. "
+                        "La curva inferior también es ilustrativa."))
+    else:
+        st.html(c.aviso("<b>En los 3 episodios anómalos del kit (21 horas) hay un empate</b> y se reporta tal cual: "
+                        "el kit los diseñó para que las reglas los vean. El aporte se mide con fallas más pequeñas, "
+                        "en la curva de abajo."))
+    episodios = (d.numeros.get("comparacion") or {}).get("filas") or []
+    if episodios and not d.cifras_de_ejemplo:
+        st.html(c.panel("Comparación oficial por episodio", c.tabla(
+            ["Método", "Episodios detectados", "Falsas", "Omitidos"],
+            [[f["metodo"], str(f["tp"]), str(f["fp"]), str(f["fn"])] for f in episodios],
+            numericas=(1, 2, 3)), "Son 3 episodios que abarcan 21 horas; la tabla inferior cuenta horas."))
 
     with fila("Curva de sensibilidad (rejilla fija de inyecciones)", "curva"):
         if curva:
@@ -469,14 +490,14 @@ def evaluacion(d: Datos) -> None:
             _fila_resumen("DripSafe", rd, "vista previa de la app" if detector_tipo(d) == "vista_previa"
                           else "salida del detector", c.procedencia(detector_tipo(d))),
             _fila_resumen("Reglas fijas del kit", rr, "PUE > 1.6, agua > 1.5, entrada > 29 °C o evento OT",
-                          c.procedencia("observado")),
+                          c.procedencia(telemetria_tipo(d))),
         ]
         if_kit = d.benchmarks.get("isolation_forest")
         if if_kit:
             s = if_kit["scores"]
             filas.append([
                 "Isolation Forest del kit", str(s["tp"]), str(s["fp"]), str(s["fn"]), f'{s["precision"]:.0%}',
-                f'{s["recall"]:.0%}', "—", f'<span class="tags">{c.procedencia("observado")}'
+                f'{s["recall"]:.0%}', "—", f'<span class="tags">{c.procedencia(telemetria_tipo(d))}'
                 '<span>corrida de ejemplo del kit; 6 variables, sin OT</span></span>'])
         st.html(c.panel("Por hora, en las 96 h de evaluación", c.tabla(
             ["Método", "Aciertos", "Falsas", "Omitidas", "Precisión", "Recall", "Falsas por día", "Nota"],
@@ -558,111 +579,68 @@ def _posicion_log(valor: float) -> float:
 
 
 def balance(d: Datos, v: Vista) -> None:
-    # Costo del detector: tiempo medido por el equipo (Gadiel, G3) o, mientras tanto, la corrida del kit.
-    ms = cifra(d.numeros, "detector_cpu_ms")
-    if d.consumo.get("ms_mediana") is not None:
-        # Contrato 3: el equipo midió el tiempo con repeticiones (consumo_modelo.json).
-        segundos, tipo_t = d.consumo["ms_mediana"] / 1000, "medido"
-        origen_t = f'mediana de {d.consumo.get("repeticiones", "varias")} corridas · consumo_modelo.json'
-    elif ms is not None:
-        segundos, tipo_t, origen_t = ms / 1000, tipo_de(d, "detector_cpu_ms"), "medición del equipo"
-    else:
-        segundos = d.benchmarks.get("isolation_forest", {}).get("wall_seconds", 1.0)
-        tipo_t, origen_t = "observado", "corrida de ejemplo del kit"
-
-    st.html('<p class="lead"><b>Supuestos editables.</b> El tiempo de CPU se mide; la energía y el CO₂ del detector se '
-            '<b>estiman</b> con watts y gCO₂e/kWh supuestos. Cambia los valores para ver qué tan sensible es el balance.</p>')
-    v1, v2, v3 = st.columns(3, gap="small")
-    watts = v1.number_input("Potencia supuesta (W)", 1.0, 500.0, 30.0, 5.0)
-    factor = v2.number_input("Emisión (gCO₂e/kWh)", 1.0, 1500.0, 450.0, 25.0,
-                             help="Usar el factor vigente del SEN (CRE/SEMARNAT) cuando esté en el JSON oficial.")
-    corridas = v3.number_input("Corridas al año", 1, 1_000_000, 8760, 100, help="8 760 = una corrida cada hora")
-
-    costo = calculos.consumo_detector(segundos, watts, factor, int(corridas))
-    tipo_costo = mas_debil("estimado", tipo_t)
-    origen_costo = f"{watts:g} W × {c.numero(corridas)} corridas"
-    if d.consumo.get("kwh_inferencia_anual") is not None:
-        # Contrato 3: medición de Gadiel con CodeCarbon (en macOS, CodeCarbon estima la potencia).
-        costo["kwh_anio"] = d.consumo["kwh_inferencia_anual"] + d.consumo.get("kwh_entrenamiento", 0)
-        tipo_costo, origen_costo = "estimado", "CodeCarbon (consumo_modelo.json)"
-    ex = calculos.exceso(v.tabla_sitio[v.tabla_sitio["split"] == "evaluacion"])
-    horas = calculos.equilibrio(costo["kwh_anio"], ex["kwh_por_hora"])
-    tipo_equilibrio = mas_debil(tipo_costo, detector_tipo(d))
-
+    """Balance contractual: un costo ausente nunca produce una razón o umbral positivo."""
+    ejemplo = d.cifras_de_ejemplo
+    tiempo = cifra(d.numeros, "detector_cpu_ms")
+    costo = cifra(d.numeros, "detector_kwh_anual")
+    equilibrio = cifra(d.numeros, "equilibrio_horas")
+    proy = cifra(d.numeros, "ahorro_proyectado_kwh_anual")
+    co2 = cifra(d.numeros, "co2_proyectado_kg_anual")
+    etiqueta = "Ejemplo" if ejemplo else "Pendiente de Gadiel"
+    st.html('<p class="lead"><b>Balance del detector.</b> La energía, el tiempo y las emisiones '
+            'medidas se incorporarán cuando Gadiel entregue sus corridas. El exceso del kit y '
+            'el escenario anual son estimaciones separadas, no ahorro observado.</p>')
     rejilla([
-        c.stat("Tiempo del detector", c.numero(segundos * 1000, 1), "ms", "gris",
-               sub=con_tag(f"por corrida · {origen_t}", tipo_t)),
-        c.stat("Energía del detector", c.numero(costo["kwh_anio"], 4), "kWh/año", "gris",
-               sub=con_tag(origen_costo, tipo_costo)),
-        c.stat("Exceso por hora de alerta", c.numero(ex["kwh_por_hora"], 1), "kWh", "naranja",
-               sub=con_tag("energía no TI sobre lo esperado, evaluación", detector_tipo(d))),
-        c.stat("Umbral de equilibrio", *tiempo_corto(horas), "verde",
-               sub=con_tag("de exceso detectado pagan la energía del detector", tipo_equilibrio)),
+        c.stat("Tiempo del detector", c.numero(tiempo, 1) if tiempo is not None else etiqueta,
+               "ms" if tiempo is not None else "", "gris",
+               sub=con_tag("medición con repeticiones" if tiempo is not None else "falta medición", tipo_de(d, "detector_cpu_ms"))),
+        c.stat("Energía del detector", c.numero(costo, 4) if costo is not None else etiqueta,
+               "kWh/año" if costo is not None else "", "gris",
+               sub=con_tag("CodeCarbon" if costo is not None else "falta medición", tipo_de(d, "detector_kwh_anual"))),
+        c.stat("Umbral de equilibrio", *tiempo_corto(equilibrio) if equilibrio is not None else
+               (etiqueta, ""), "gris" if equilibrio is None else "azul",
+               sub=con_tag("costo ÷ exceso típico; requiere Gadiel", tipo_de(d, "equilibrio_horas"))),
+        c.stat("CO₂ evitado", c.numero(co2, 1) if co2 is not None else
+               ("Ejemplo" if ejemplo else "Pendiente de factor SEN"),
+               "kgCO₂e/año" if co2 is not None else "", "gris",
+               sub=con_tag("proyección con factor externo verificado", tipo_de(d, "co2_proyectado_kg_anual"))),
     ])
-    st.html(c.aviso("<b>El número central es el umbral de equilibrio.</b> No depende de que el ahorro proyectado sea "
-                    "exacto: basta con que DripSafe detecte a tiempo unos segundos de exceso al año para pagar su "
-                    "propia energía.", "ok"))
+    if costo is None and not ejemplo:
+        st.html(c.aviso("<b>Balance neto pendiente de Gadiel.</b> Falta la medición repetida de tiempo y energía del "
+                        "detector; por eso no se publica razón ahorro/costo ni umbral de equilibrio."))
 
     with fila("Escenario anual (proyectado, editable)", "escenario"):
         param = ((d.numeros.get("escenario_anual") or {}).get("parametros")) or {}
         e1, e2, e3, e4 = st.columns(4, gap="small")
-        fallas = e1.number_input("Fallas al año", 0, 365, int(param.get("fallas", 6)), 1)
+        fallas = e1.number_input("Fallas por sitio y año", 0, 365, int(param.get("fallas", 6)), 1)
         pct = e2.number_input("Exceso por falla (%)", 1.0, 200.0, float(param.get("exceso_pct", 20)), 5.0)
-        sin = e3.number_input("Horas sin DripSafe", 1.0, 2000.0, float(param.get("horas_sin", 72)), 12.0,
-                              help="Horas que tarda alguien en notar la falla sin DripSafe")
-        con = e4.number_input("Horas con DripSafe", 0.0, 200.0, float(param.get("horas_con", 4)), 1.0,
-                              help="Horas hasta corregirla con la alerta de DripSafe")
+        sin = e3.number_input("Horas sin DripSafe", 1.0, 2000.0, float(param.get("horas_sin", 72)), 12.0)
+        con = e4.number_input("Horas con DripSafe", 0.0, 200.0, float(param.get("horas_con", 4)), 1.0)
         base = v.tabla_sitio[v.tabla_sitio["split"] == "referencia"]
         horas_sitio = base["timestamp"].nunique() or 1
         no_ti_h = base["energia_no_ti_kwh"].sum() / horas_sitio
         agua_h = base.loc[base["cooling_type"] == "evaporativa", "water_l"].sum() / horas_sitio
         esc = calculos.escenario_anual(int(fallas), pct, sin, con, no_ti_h, agua_h)
         rejilla([
-            c.stat("Energía evitada", c.numero(esc["kwh"]), "kWh/año", "azul", sub=con_tag(
-                f'{c.numero(esc["horas_evitadas"])} h de exceso evitadas', "proyectado")),
-            c.stat("Agua evitada", c.numero(esc["litros"]), "L/año", "azul",
-                   sub=con_tag("solo sitios evaporativos", "proyectado")),
+            c.stat("Energía evitable (escenario)", c.numero(esc["kwh"]), "kWh/año", "azul",
+                   sub=con_tag("hipótesis editable; no ahorro observado", "ejemplo" if ejemplo else "proyectado")),
+            c.stat("Agua in situ evitable", c.numero(esc["litros"]), "L/año", "azul",
+                   sub=con_tag("solo sitio evaporativo; hipótesis editable", "ejemplo" if ejemplo else "proyectado")),
         ], minimo=320)
-        st.html(c.aviso("<b>Proyección, no ahorro observado.</b> Usa la energía no TI y el agua por hora de las horas de "
-                        "referencia del sitio elegido arriba. Cambia los supuestos para ver el rango."))
-
-    with fila("Lo que cuesta contra lo que ahorra", "barras"):
-        marcas = "".join(f'<span style="left: {_posicion_log(x):.1f}%">{c.numero(x, 4 if x < 1 else 0)}</span>'
-                         for x in (0.0001, 0.01, 1, 100, 10000, 1000000))
-        st.html(c.panel("kWh por año (escala logarítmica)", c.barras([
-            ("Energía estimada del detector", _posicion_log(costo["kwh_anio"]), 100, "gris",
-             f'{c.numero(costo["kwh_anio"], 4)} kWh'),
-            ("Energía evitada (escenario)", _posicion_log(esc["kwh"]), 100, "azul", f'{c.numero(esc["kwh"])} kWh'),
-        ]) + f'<div class="logax">{marcas}</div>'))
-        def equilibrio_texto(w: float, k: int) -> str:
-            valor, unidad = tiempo_corto(calculos.equilibrio(calculos.consumo_detector(segundos, w, factor, k)["kwh_anio"],
-                                                             ex["kwh_por_hora"]))
-            return f"{valor} {unidad.removesuffix('/año')}"
-
-        sens = [[f"{w:g} W"] + [equilibrio_texto(w, k) for k in (8760, 35040, 525600)] for w in (10, 30, 65, 150)]
-        st.html(c.panel("Sensibilidad del umbral de equilibrio", c.tabla(
-            ["Potencia supuesta", "Cada hora", "Cada 15 min", "Cada minuto"], sens, numericas=(1, 2, 3)),
-            "Tiempo de exceso detectado al año que paga la energía del detector, con distintos supuestos de potencia "
-            "y frecuencia. Aun en el peor caso, sigue siendo poco."))
+        if not ejemplo and v.tabla_sitio["site_id"].nunique() == 3 and proy is not None:
+            st.html(c.aviso(f"Cifra oficial con los supuestos iniciales: {c.numero(proy)} kWh/año proyectados. "
+                            "Al editar parámetros se recalcula la simulación local."))
+        st.html(c.aviso("Proyección, no ahorro observado. No se resta el costo del detector hasta recibir su medición."))
 
     with fila("De dónde sale cada número", "calculo"):
-        izq, der = st.columns(2, gap="small")
-        with izq:
-            st.html(c.panel("Cómo se calcula",
-                            '<div class="formula"><span>energía_detector = W supuestos × segundos ÷ 3 600 000 × corridas</span>'
-                            '<span>CO₂ = energía_detector × gCO₂e/kWh supuestos</span>'
-                            '<span>exceso = energía no TI real − esperada (horas con alerta física)</span>'
-                            '<span>equilibrio = energía_detector ÷ exceso por hora</span>'
-                            '<span>escenario = fallas × (horas sin − horas con) × exceso % × energía no TI por hora</span></div>'
-                            '<p class="txt-d">Mismo método de energía que tools/compare_detectors.py del kit. No incluye '
-                            'fabricación, red, almacenamiento ni agua del detector.</p>'))
-        with der:
-            filas = [[f'<span class="mono">{k}</span>',
-                      c.numero(x["valor"], 4 if abs(x["valor"]) < 1 else 2 if abs(x["valor"]) < 10 else 0) + f' {x.get("unidad", "")}',
-                      x.get("responsable", "—"), c.procedencia(tipo_de(d, k))]
-                     for k, x in d.numeros.items() if isinstance(x, dict) and isinstance(x.get("valor"), (int, float))]
-            st.html(c.panel("Cifras del contrato 4", c.tabla(["Cifra", "Valor", "Responsable", "Tipo"], filas, numericas=(1,)),
-                            "Las cifras del pitch salen solo de resultados/numeros_oficiales.json."))
+        filas = [[f'<span class="mono">{k}</span>',
+                  (c.numero(x["valor"], 4 if abs(x["valor"]) < 1 else 2) + f' {x.get("unidad", "")}')
+                  if isinstance(x.get("valor"), (int, float)) else x.get("motivo_pendiente", "Pendiente"),
+                  x.get("responsable", "—"), c.procedencia(tipo_de(d, k))]
+                 for k, x in d.numeros.items() if isinstance(x, dict) and "valor" in x]
+        st.html(c.panel("Cifras del contrato 4", c.tabla(["Cifra", "Valor o pendiente", "Responsable", "Tipo"],
+                                                       filas, numericas=(1,)),
+                        "La vista de Leo se genera de resultados/numeros_oficiales.json."))
     mostrar_aviso_ejemplo(d)
 
 
@@ -671,14 +649,16 @@ def balance(d: Datos, v: Vista) -> None:
 def agua(d: Datos, v: Vista) -> None:
     m = calculos.metricas(v.tabla)
     ex = calculos.exceso(v.tabla)
+    wue_proy = cifra(d.numeros, "wue_sin_exceso") if evaluacion_completa(v) else ex["wue_sin_exceso"]
     rejilla([
         c.stat("Agua por energía IT", c.numero(m["wue"], 2), "L/kWh", c.umbral(m["wue"], PASOS_WUE),
-               sub=con_tag("Σ agua ÷ Σ energía IT", "observado")),
-        c.stat("Agua captada", c.numero(m["agua_l"]), "L", "azul", sub=con_tag("en el periodo y sitios elegidos", "observado")),
+               sub=con_tag("Σ agua ÷ Σ energía IT", telemetria_tipo(d))),
+        c.stat("Agua captada", c.numero(m["agua_l"]), "L", "azul", sub=con_tag("en el periodo y sitios elegidos", telemetria_tipo(d))),
         c.stat("Agua en exceso", c.numero(ex["litros"]), "L", "naranja" if ex["litros"] else "verde",
                sub=con_tag("real − esperada durante las alertas", detector_tipo(d))),
-        c.stat("Agua por kWh IT sin el exceso", c.numero(ex["wue_sin_exceso"], 2), "L/kWh", "azul",
-               sub=con_tag(f'hoy {c.numero(ex["wue"], 2)} · cota si se corta en cada alerta', detector_tipo(d))),
+        c.stat("Agua por kWh IT sin el exceso", c.numero(wue_proy, 2), "L/kWh", "azul",
+               sub=con_tag(f'hoy {c.numero(ex["wue"], 2)} · contrafactual',
+                           tipo_de(d, "wue_sin_exceso") if evaluacion_completa(v) else detector_tipo(d))),
     ])
 
     with fila("Agua: real contra esperado", "agua-rve"):
@@ -697,20 +677,16 @@ def agua(d: Datos, v: Vista) -> None:
                           "nulo en el de aire. Los sitios son simulados: la diferencia no prueba que una tecnología sea mejor.")))
 
     with fila("Acuífero de Yucatán", "acuifero"):
-        rejilla([c.panel(t, f'<p class="txt">{x}</p>') for t, x in HECHOS_ACUIFERO], minimo=280)
-        st.html(c.panel("Impacto de DripSafe en el acuífero",
-                        c.tabla(["Aspecto", "Pregunta", "Cómo ayuda DripSafe"],
-                                [[f"<b>{a}</b>", q, x] for a, q, x in IMPACTO_ACUIFERO]),
-                        "Fuentes por citar antes del pitch (Guille, #13; ver ~/hackathon/Papers)."))
+        st.html(c.panel("Acuífero 3105", '<p class="txt-d">Pendiente de Guille: confirmar la fuente, '
+                        'el año y la disponibilidad del acuífero antes de publicar cifras o conclusiones.</p>'))
 
     with fila("Las épocas del año en Yucatán", "epocas"):
         st.html(c.panel("Por qué una sola semana no basta", c.tabla(
             ["Época", "Meses", "Clima", "Qué le pasa al enfriamiento"],
             [[f"<b>{e}</b>", m_, cl, ef] for e, m_, cl, ef in EPOCAS])
-            + c.aviso("El kit cubre una semana de octubre con 15 a 31 °C. DripSafe usa una línea base por época que se "
-                      "recalibra cada semana; fuera del clima aprendido duplica el margen y alerta con «confianza baja», "
-                      "sin apagar nunca las alertas."),
-            "Rangos por confirmar con las normales y datos horarios del SMN o ERA5."))
+            + c.aviso("El kit cubre una semana de octubre. Fuera del clima aprendido, el detector duplica el margen "
+                      "y alerta con «confianza baja»."),
+            "Perfil estacional cualitativo; la serie horaria ERA5 2025 sustenta los umbrales de la sección bono."))
 
     with fila("Bono · Cero agua potable", "bono"):
         izq, der = st.columns([3, 2], gap="small")
@@ -730,8 +706,18 @@ def agua(d: Datos, v: Vista) -> None:
                       + f'<div class="tags">{c.procedencia(tipo_de(d, "bono_horas_respaldo"))}'
                         '<span class="txt-d">Mérida, clase W40</span></div>') if horas else \
                 '<p class="txt-d">Pendiente: horas de respaldo por época (Misael, bono).</p>'
-            st.html(c.panel("Horas de respaldo al año", cuerpo,
-                            "Horas en que el enfriador seco no basta y entra el chiller de apoyo (sube el PUE)."))
+            st.html(c.panel("Horas de respaldo · Ejemplo" if d.cifras_de_ejemplo else
+                            "Horas cálidas por umbral · proxy ERA5", cuerpo,
+                            "Valores ficticios para probar la interfaz." if d.cifras_de_ejemplo else
+                            "Horas exteriores por encima del umbral ilustrativo en Mérida (2025). No son horas medidas "
+                            "de operación del chiller; Misa debe confirmar su curva de rendimiento."))
+    if not d.cifras_de_ejemplo:
+        rejilla([
+            c.stat("PUE con bono", "Pendiente de Misa", color="gris",
+                   sub=con_tag("requiere rendimiento del chiller", "proyectado")),
+            c.stat("Acuífero 3105", "Pendiente de Guille", color="gris",
+                   sub=con_tag("requiere fuente y año confirmados", "observado")),
+        ])
     mostrar_aviso_ejemplo(d)
 
 

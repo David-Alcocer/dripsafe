@@ -65,7 +65,8 @@ def test_cifras_de_ejemplo_siempre_avisadas(at):
 
 def test_procedencia_y_clases_visibles(at):
     texto = html(at)
-    assert ">Observado<" in texto and ">Vista previa<" in texto
+    assert ">Ejemplo<" in texto
+    assert ">Observado<" not in texto
     ir(at, pagina="ciber")
     texto = html(at)
     for nombre in ["Incidente OT con efecto", "Cambio no autorizado", "Escalón sin registro", "Intento de acceso"]:
@@ -75,7 +76,7 @@ def test_procedencia_y_clases_visibles(at):
 def test_evaluacion_muestra_curva_y_empate(at):
     ir(at, pagina="evaluacion")
     texto = html(at)
-    assert "se espera un empate" in texto
+    assert "Ejemplo ficticio." in texto
     assert "Detalle de la curva" in texto
     assert len(at.get("plotly_chart")) >= 2
 
