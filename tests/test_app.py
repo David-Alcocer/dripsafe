@@ -256,3 +256,26 @@ def test_json_oficial_sin_datos_no_inventa_cifras():
         "bono_zero_freshwater": {"horas_respaldo_mérida_al_año": {"umbral_27c": None}}}
     n = cargar.adaptar_oficial(vacio)
     assert not {"curva_sensibilidad", "robustez", "bono_horas_respaldo"} & set(n)
+
+
+def test_motivo_sin_exceso_es_el_de_la_clase_mas_grave():
+    """Logins y luego un cambio, sin exceso físico: el evento se explica con el cambio, no con el login."""
+    horas = pd.date_range("2026-10-18 01:00", periods=3, freq="h", tz="UTC")
+    df = pd.DataFrame({
+        "timestamp": horas, "site_id": "SIM-C", "alerta": True, "scenario": "evento_ot", "accion": "",
+        "clase": ["intento_acceso", "intento_acceso", "cambio_no_autorizado"],
+        "motivo": ["login fallido sin efecto físico"] * 2 + ["cambio de configuración no autorizado sin efecto físico"],
+        "ot_event": ["login_fallido", "login_fallido", "cambio_config_no_autorizado"],
+        "exceso_kwh": 0.0, "exceso_l": 0.0, "clima_no_visto": False,
+    })
+    e = calculos.eventos(df).iloc[0]
+    assert e["clase"] == "cambio_no_autorizado"
+    assert e["motivo"] == "cambio de configuración no autorizado sin efecto físico"
+
+
+def test_cifra_oficial_que_falta_se_marca_pendiente():
+    n = cargar.adaptar_oficial({"_meta": {}, "pue": {"antes": {"valor": 1.3, "tipo": "medido"}},
+                                "equilibrio_horas": {"valor": None, "tipo": "estimado"}})
+    assert cargar.tipo_cifra(n, "punto_ciego_pct", ejemplo=False) == "pendiente"   # no existe
+    assert cargar.tipo_cifra(n, "equilibrio_horas", ejemplo=False) == "pendiente"  # existe, pero en null
+    assert cargar.mas_debil("medido", "pendiente") == "pendiente"

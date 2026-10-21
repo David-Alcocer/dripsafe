@@ -78,6 +78,7 @@ TIPOS_CIFRA = {
     "proyectado": ("Proyectado", "Escenario a futuro con parámetros editables: no es un ahorro observado."),
     "ejemplo": ("Ejemplo", "Valor ficticio para probar la interfaz. No va al pitch."),
     "vista_previa": ("Vista previa", "Calculado por la app mientras llega la cifra oficial."),
+    "pendiente": ("Pendiente", "Todavía no está en resultados/numeros_oficiales.json."),
 }
 
 # Para cada escenario del kit: qué ve el operador, qué variable delata el problema y qué se aprende.
