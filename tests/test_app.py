@@ -199,6 +199,18 @@ def test_salidas_del_equipo_no_se_mezclan_con_datos_de_ejemplo(sin_kit, monkeypa
     assert d.consumo == {}
 
 
+def test_kit_distinto_no_recibe_cifras_n2_ni_alertas_del_kit_fijado(monkeypatch, tmp_path):
+    ruta = tmp_path / "operaciones_simuladas.csv"
+    ruta.write_text("contenido de otro kit", encoding="utf-8")
+    monkeypatch.setattr(kit, "disponible", lambda: True)
+    monkeypatch.setattr(kit, "ruta_csv", lambda: ruta)
+    monkeypatch.setattr(kit, "leer", kit.ejemplo)
+    d = cargar.cargar()
+    assert d.fuentes == {"telemetria": "kit", "detector": "vista_previa", "numeros": "ejemplo"}
+    assert d.numeros["_ejemplo"] is True
+    assert any("no coincide con el kit fijado" in aviso for aviso in d.avisos)
+
+
 def test_accion_del_detector_llega_al_evento(datos):
     """La acción la decide src/ot/clases.py; el evento usa la de su clase más grave."""
     detector = linea_base.detectar(datos)

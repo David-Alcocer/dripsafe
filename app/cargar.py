@@ -11,6 +11,7 @@ Fuentes, de la más oficial a la de respaldo:
 El dashboard no inventa cifras oficiales: solo las muestra y dice de dónde salió cada una.
 """
 
+import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -67,6 +68,24 @@ def _detector_oficial(avisos: list) -> pd.DataFrame | None:
     return al[linea_base.COLUMNAS + ["accion"]]
 
 
+def _kit_fijado(avisos: list) -> bool:
+    """Evita mostrar las cifras N2 sobre un CSV distinto del kit evaluado."""
+    ruta = kit.ruta_csv()
+    if not ruta.is_file():
+        return True  # pruebas que sustituyen kit.leer() sin un archivo local
+    fijacion = RAIZ / "resultados/n2_congelamiento.json"
+    if not fijacion.is_file():
+        avisos.append("Falta resultados/n2_congelamiento.json; no se pueden verificar las cifras oficiales N2.")
+        return False
+    esperado = json.loads(fijacion.read_text(encoding="utf-8"))["kit"]["csv_sha256"]
+    actual = hashlib.sha256(ruta.read_bytes()).hexdigest()
+    if actual != esperado:
+        avisos.append("El CSV local no coincide con el kit fijado en N2. Se muestran cifras de ejemplo "
+                      "hasta regenerar y revisar los JSON oficiales con este kit.")
+        return False
+    return True
+
+
 def unir(datos: pd.DataFrame, detector: pd.DataFrame) -> pd.DataFrame:
     """Telemetría + reglas del kit (para comparar) + salida del detector, con el exceso de cada hora."""
     t = kit.reglas(datos).rename(columns={"alerta": "alerta_reglas", "motivo": "motivo_reglas"})
@@ -93,14 +112,15 @@ def cargar() -> Datos:
     # Las salidas del equipo se calculan con el kit: con datos de ejemplo no se mezclan (no cuadrarían).
     del_kit = fuentes["telemetria"] == "kit"
     avisos = []
-    detector = _detector_oficial(avisos) if del_kit else None
-    if detector is not None and del_kit:
+    kit_fijado = del_kit and _kit_fijado(avisos)
+    detector = _detector_oficial(avisos) if kit_fijado else None
+    if detector is not None:
         fuentes["detector"] = "modelo"
     else:
         detector, fuentes["detector"] = linea_base.detectar(datos), "vista_previa"
     tabla = unir(datos, detector)
 
-    if del_kit and RUTAS["leo"].exists() and RUTAS["numeros"].exists():
+    if kit_fijado and RUTAS["leo"].exists() and RUTAS["numeros"].exists():
         numeros = json.loads(RUTAS["leo"].read_text(encoding="utf-8"))
         canonico = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
         from src.metricas.generar_numeros import plano
@@ -117,7 +137,7 @@ def cargar() -> Datos:
     evaluacion = {"dripsafe": calculos.evaluacion(tabla, "alerta"),
                   "reglas": calculos.evaluacion(tabla, "alerta_reglas")}
     consumo = {}
-    if RUTAS["consumo"].exists() and del_kit:
+    if RUTAS["consumo"].exists() and kit_fijado:
         consumo = json.loads(RUTAS["consumo"].read_text(encoding="utf-8"))
     return Datos(tabla, calculos.eventos(tabla), evaluacion, numeros, fuentes, consumo, avisos)
 

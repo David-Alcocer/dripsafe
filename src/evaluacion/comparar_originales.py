@@ -90,6 +90,8 @@ def comparar(datos: pd.DataFrame, alertas_por_metodo: dict[str, pd.DataFrame]
                     "latencia_media_h": float(latencias.mean()) if len(latencias) else None,
                     "latencia_max_h": float(latencias.max()) if len(latencias) else None,
                     "falsas_alarmas_por_dia_sitio": resumen["falsas_alarmas_por_dia_sitio"],
+                    "ic95_falsas_inferior": resumen["ic_falsas_alarmas_por_dia_sitio"][0],
+                    "ic95_falsas_superior": resumen["ic_falsas_alarmas_por_dia_sitio"][1],
                     **horas}
             filas.append(fila)
             if sitio == "TOTAL":

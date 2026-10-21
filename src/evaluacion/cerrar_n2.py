@@ -112,7 +112,9 @@ def _comparar_bases(datos: pd.DataFrame, manifiesto: dict, limpia: pd.DataFrame
                                  ("detectados_kit", r["tp_episodios"]),
                                  ("falsas_alarmas", r["fp_episodios"]),
                                  ("horas_limpias_sitio", r["horas_limpias_sitio"]),
-                                 ("falsas_alarmas_por_dia_sitio", r["falsas_alarmas_por_dia_sitio"])):
+                                 ("falsas_alarmas_por_dia_sitio", r["falsas_alarmas_por_dia_sitio"]),
+                                 ("ic95_inferior", r["ic95_falsas_inferior"]),
+                                 ("ic95_superior", r["ic95_falsas_superior"])):
                 if not np.isclose(float(e[campo]), float(valor), rtol=0, atol=1e-6):
                     raise ValueError(f"Base limpia discordante: {condicion}/{semilla}/{metodo}/{campo}")
             latencias = detalle[detalle["metodo"] == metodo]["horas_hasta_detectar"].tolist()
@@ -229,10 +231,11 @@ def construir(datos: pd.DataFrame, manifiesto: dict, por_inyeccion: pd.DataFrame
                       "fn_episodios", "precision_episodios", "recall_episodios", "latencia_media_h",
                       "latencia_max_h", "horas_evaluacion_sitio", "horas_anomalas", "horas_limpias_sitio",
                       "tp_horas", "fp_horas", "fn_horas", "precision_horas", "recall_horas",
-                      "falsas_alarmas_por_dia_sitio"]]
+                      "falsas_alarmas_por_dia_sitio", "ic95_falsas_inferior", "ic95_falsas_superior"]]
     falsas = evaluaciones[["condicion", "semilla", "metodo", "site_id", "episodios_verdaderos",
                           "tp_episodios", "fp_episodios", "fn_episodios", "precision_episodios",
                           "recall_episodios", "horas_limpias_sitio", "falsas_alarmas_por_dia_sitio",
+                          "ic95_falsas_inferior", "ic95_falsas_superior",
                           "tp_horas", "fp_horas", "fn_horas"]]
     total = tabla[(tabla["condicion"] == "base")].groupby("metodo").agg(
         inyecciones=("ejecutadas", "sum"), tp_episodios=("tp_episodios", "sum"),

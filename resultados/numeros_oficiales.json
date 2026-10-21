@@ -424,7 +424,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329
           },
           {
             "metodo": "dripsafe",
@@ -445,7 +447,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329
           },
           {
             "metodo": "dripsafe",
@@ -466,7 +470,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846
           },
           {
             "metodo": "dripsafe",
@@ -487,7 +493,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467
           },
           {
             "metodo": "reglas_kit",
@@ -508,7 +516,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329
           },
           {
             "metodo": "reglas_kit",
@@ -529,7 +539,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329
           },
           {
             "metodo": "reglas_kit",
@@ -550,7 +562,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846
           },
           {
             "metodo": "reglas_kit",
@@ -571,7 +585,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467
           }
         ]
       },
@@ -1176,7 +1192,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329
           },
           {
             "metodo": "dripsafe",
@@ -1197,7 +1215,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329
           },
           {
             "metodo": "dripsafe",
@@ -1218,7 +1238,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846
           },
           {
             "metodo": "dripsafe",
@@ -1239,7 +1261,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467
           },
           {
             "metodo": "reglas_kit",
@@ -1260,7 +1284,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329
           },
           {
             "metodo": "reglas_kit",
@@ -1281,7 +1307,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329
           },
           {
             "metodo": "reglas_kit",
@@ -1302,7 +1330,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846
           },
           {
             "metodo": "reglas_kit",
@@ -1323,7 +1353,9 @@
             "fn_horas": 0,
             "precision_horas": 1.0,
             "recall_horas": 1.0,
-            "falsas_alarmas_por_dia_sitio": 0.0
+            "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467
           }
         ],
         "rejilla_base_por_sitio_escenario": [
@@ -3258,6 +3290,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3275,6 +3309,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3292,6 +3328,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3309,6 +3347,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3326,6 +3366,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3343,6 +3385,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3360,6 +3404,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3377,6 +3423,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3394,6 +3442,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.2727272727,
+            "ic95_falsas_inferior": 0.0069048567,
+            "ic95_falsas_superior": 1.5195391066,
             "tp_horas": 8,
             "fp_horas": 1,
             "fn_horas": 0
@@ -3411,6 +3461,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.2727272727,
+            "ic95_falsas_inferior": 0.0069048567,
+            "ic95_falsas_superior": 1.5195391066,
             "tp_horas": 8,
             "fp_horas": 1,
             "fn_horas": 0
@@ -3428,6 +3480,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3445,6 +3499,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.1797752809,
+            "ic95_falsas_inferior": 0.0217716205,
+            "ic95_falsas_superior": 0.6494101274,
             "tp_horas": 21,
             "fp_horas": 2,
             "fn_horas": 0
@@ -3462,6 +3518,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3479,6 +3537,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3496,6 +3556,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3513,6 +3575,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3530,6 +3594,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3547,6 +3613,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3564,6 +3632,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3581,6 +3651,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3598,6 +3670,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3615,6 +3689,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3632,6 +3708,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3649,6 +3727,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3666,6 +3746,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3683,6 +3765,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3700,6 +3784,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3717,6 +3803,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3734,6 +3822,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3751,6 +3841,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3768,6 +3860,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3785,6 +3879,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3802,6 +3898,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3819,6 +3917,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3836,6 +3936,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.5274725275,
+            "ic95_falsas_inferior": 0.0638793702,
+            "ic95_falsas_superior": 1.9054121321,
             "tp_horas": 5,
             "fp_horas": 2,
             "fn_horas": 0
@@ -3853,6 +3955,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.1797752809,
+            "ic95_falsas_inferior": 0.0217716205,
+            "ic95_falsas_superior": 0.6494101274,
             "tp_horas": 21,
             "fp_horas": 2,
             "fn_horas": 0
@@ -3870,6 +3974,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3887,6 +3993,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3904,6 +4012,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3921,6 +4031,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3938,6 +4050,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3955,6 +4069,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3972,6 +4088,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -3989,6 +4107,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
@@ -4006,6 +4126,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -4023,6 +4145,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 88,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 1.0060580329,
             "tp_horas": 8,
             "fp_horas": 0,
             "fn_horas": 0
@@ -4040,6 +4164,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 91,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.9728912846,
             "tp_horas": 5,
             "fp_horas": 0,
             "fn_horas": 0
@@ -4057,6 +4183,8 @@
             "recall_episodios": 1.0,
             "horas_limpias_sitio": 267,
             "falsas_alarmas_por_dia_sitio": 0.0,
+            "ic95_falsas_inferior": 0.0,
+            "ic95_falsas_superior": 0.33158467,
             "tp_horas": 21,
             "fp_horas": 0,
             "fn_horas": 0
