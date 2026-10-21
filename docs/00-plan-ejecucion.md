@@ -13,7 +13,7 @@ Este es un reparto propuesto para el equipo. El kit es confidencial y los datos 
 5. PUE/WUE, exceso estimado de kWh y litros, costo energético del detector, balance neto y análisis del acuífero, con procedencia y supuestos.
 6. Dashboard y pitch alimentados por las cifras consolidadas, con una ruta de demostración que funcione sin el kit.
 
-Isolation Forest, CUSUM, las clases extra y la optimización detallada del bono son ampliaciones. No bloquean el MVP.
+CUSUM, las clases extra y la optimización detallada del bono son ampliaciones. No bloquean el MVP. El detector acordado se limita a la línea base, los umbrales, la media móvil y la clasificación OT (D20).
 
 ## Dependencia principal
 
@@ -87,11 +87,11 @@ Para no esperar el contrato definitivo, cada quien puede desarrollar la lógica 
 ## Decisiones que deben cerrarse antes del primer merge
 
 1. **Repositorio canónico.** Esta copia contiene `dripsafe/` y `dripsafe-reestructura/`; elegir uno para evitar trabajo duplicado.
-2. **Contrato v7.** El contrato actual todavía usa columnas de la propuesta anterior y las salidas antiguas de Isolation Forest. Actualizarlo junto con `docs/11-trabajo-en-paralelo.md`, las decisiones y la propiedad de archivos antes de conectar módulos.
+2. **Contrato v7.** El contrato actual todavía usa columnas de la propuesta anterior. Actualizarlo junto con `docs/11-trabajo-en-paralelo.md`, las decisiones y la propiedad de archivos antes de conectar módulos.
 3. **Nombre de la energía.** `energy_total − energy_it` solo puede llamarse energía de enfriamiento si el kit confirma que no incluye otros consumos; en caso contrario, usar **energía no TI**.
 4. **Criterio de evaluación.** Definir una alerta verdadera por episodio, no contar cada hora alertada como un caso independiente; fijar de antemano el tratamiento de ventanas superpuestas y de inyecciones sobre anomalías originales.
 5. **Estado del dashboard.** La propuesta dice que Leo ya tiene una base, pero no aparece una carpeta `app/` en estas dos copias. Si está en otra rama o equipo, incorporarla al repositorio canónico antes del 20 por la tarde.
 
 ## Si el tiempo se reduce
 
-Conservar, en este orden: contrato y exclusión de etiquetas → línea base y umbrales → cuatro clases OT básicas → comparación con reglas fijas → PUE y balance neto → acuífero → demo sencilla. Dejar la cuantificación detallada del bono, Isolation Forest, CUSUM y pantallas adicionales para cuando todo eso funcione.
+Conservar, en este orden: contrato y exclusión de etiquetas → línea base y umbrales → cuatro clases OT básicas → comparación con reglas fijas → PUE y balance neto → acuífero → demo sencilla. Dejar la cuantificación detallada del bono, CUSUM y pantallas adicionales para cuando todo eso funcione.

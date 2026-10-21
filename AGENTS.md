@@ -10,7 +10,7 @@ Hacer que la infraestructura de IA (centros de datos) sea más segura, eficiente
 
 ## Decisiones clave
 - **Sub-reto 3:** detección de anomalías con IA en sistemas de enfriamiento y gestión hídrica. Métrica principal: **PUE**.
-- **Modelo:** Isolation Forest (scikit-learn). Ligero y explicable. **Sin LLM** dentro de la solución.
+- **Modelo:** línea base por sitio con mínimos cuadrados, umbrales de residuos y media móvil; reglas OT para clasificar. **Sin LLM** dentro de la solución.
 - **Doble uso:** el mismo modelo detecta ineficiencias (ahorro de energía y agua) y posibles manipulaciones de sensores o PLCs (ciberseguridad OT).
 - **Demo:** Streamlit.
 - **Bono:** enfriamiento híbrido (circuito cerrado + agua residual tratada) para lograr cero agua dulce potable.
@@ -21,7 +21,7 @@ Hacer que la infraestructura de IA (centros de datos) sea más segura, eficiente
 2. **Impacto en el acuífero de Yucatán:** acuífero kárstico, nivel freático somero, cenotes y gobernanza.
 
 ## Stack
-Python 3.11+, pandas, numpy, scikit-learn, codecarbon, streamlit, plotly y jupyter.
+Python 3.11+, pandas, numpy, scipy, codecarbon, streamlit, plotly y jupyter.
 
 ## Restricciones
 - El kit de datos (en `data/`) es **confidencial**: nunca subirlo ni compartirlo.
@@ -40,7 +40,7 @@ Python 3.11+, pandas, numpy, scikit-learn, codecarbon, streamlit, plotly y jupyt
 - `scenario` y `simulated_anomaly` **nunca** son entrada del detector. Se ajusta con `split == referencia` y se evalúa con `evaluacion`.
 - No hay sensores por equipo; el contrato v2 (D14) está pendiente de aprobación. No cambies `src/contrato.py` fuera de ese PR.
 - Mostrar siempre "DATOS SIMULADOS". Energía y emisiones son estimaciones con supuestos. Nada de litros por consulta ni de ahorros hipotéticos presentados como observados.
-- Enfoque: detector híbrido (reglas + Isolation Forest con variables por sitio) y comparación justa con las reglas del kit.
+- Enfoque vigente (D20): línea base por sitio, umbrales, media móvil y clasificación OT; comparación por episodio con las reglas del kit.
 
 ## Reparto vigente (D13, 19 oct)
 - Gadiel construye el detector; Nico lo evalúa (calidad frente a costo), calcula el ahorro y el PUE final proyectados y consolida `numeros_oficiales.json`.

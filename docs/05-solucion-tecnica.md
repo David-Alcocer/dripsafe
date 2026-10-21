@@ -21,9 +21,9 @@
 
 **Qué cambia respecto al plan original:**
 - **No hay sensores por equipo** (chiller, bombas, torre, temperaturas del agua, caudal). La "coherencia física" se hace a nivel agregado por sitio: energía auxiliar (total − IT) y agua esperadas según carga, temperatura exterior y tipo de enfriamiento.
-- **Las reglas del kit ya detectan todo en su ejemplo**, y el Isolation Forest del ejemplo, con 6 variables y sin OT, se queda en 38% de precisión y 48% de recall. El kit aclara que esa comparación **no es justa**. Por eso:
-  - **Gadiel** construye un **detector híbrido**: reglas explicables más Isolation Forest con variables derivadas por sitio (PUE horario, L/kWh, residuos frente a lo esperado), ajustado solo con referencia.
-  - **Nico** hace la **comparación justa**: mismas entradas para todos los métodos, ajuste y evaluación separados, varias corridas y la calidad reportada junto al costo. Si las reglas bastan, se dice. *El método más ligero que funciona es el argumento Green AI.*
+- **Las reglas del kit ya detectan todo en su ejemplo.** Por eso:
+  - **Gadiel** construye una línea base por sitio con umbrales de residuo y media móvil, ajustada solo con referencia; las reglas OT clasifican cada alerta.
+  - **Nico** compara ese detector con las reglas del kit por episodio, con ajuste y evaluación separados, varias corridas y calidad reportada junto al costo. Si las reglas bastan, se dice. *El método más ligero que funciona es el argumento Green AI.*
 - **Stack:** el Stack A (Streamlit) del kit es la referencia y se usa **Python 3.12**. Las herramientas del kit (`common/cifox.py` y `tools/compare_detectors.py`) se pueden reutilizar citando que vienen del kit (licencia MIT).
 - **Reglas de presentación del kit:** "DATOS SIMULADOS" siempre visible. Energía y emisiones como **estimación con supuestos** (watts y gCO₂e/kWh editables, con análisis de sensibilidad). Nada de litros por consulta. Los ahorros son **proyecciones**, no observaciones. Hay que explicar **qué venía en el kit y qué aportamos**.
 
@@ -31,7 +31,7 @@
 
 ## Concepto: línea base + fusión evento–efecto
 
-> **MVP (D15):** línea base física por sitio + umbral por residuo + media móvil de 4 h. **Ampliación:** Isolation Forest con ablación.
+> **Alcance vigente (D20):** línea base física por sitio + umbral por residuo + media móvil de 4 h y clasificación OT.
 
 ```text
 CSV del kit (6 medidores + registro OT)
@@ -39,7 +39,6 @@ CSV del kit (6 medidores + registro OT)
    ├─▶ 1. Línea base física por sitio (aprendida en 48 h de la referencia)
    ├─▶ 2. Residuos = real − esperado (%)
    │       ├─ Umbral por residuo + media móvil de 4 h   → excesos sostenidos
-   │       └─ Isolation Forest por sitio (AMPLIACIÓN)   → combinaciones raras
    ├─▶ 3. Registro OT  →  reglas
    ├─▶ 4. Fusión evento–efecto  →  4 clases (D16)
    └─▶ 5. Cola de alertas en el dashboard: kWh y L en riesgo por hora
@@ -80,7 +79,6 @@ data/ (kit)  →  src/datos/cargar.py  →  src/modelo/ (baseline + residuos)  �
 
 - **Python 3.11+**
 - `pandas`, `numpy`: datos
-- `scikit-learn`: modelo
 - `codecarbon`: energía y CO₂ del modelo
 - `streamlit`, `plotly`: demo
 - `jupyter`: exploración
@@ -88,10 +86,10 @@ data/ (kit)  →  src/datos/cargar.py  →  src/modelo/ (baseline + residuos)  �
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install pandas numpy scikit-learn codecarbon streamlit plotly jupyter
+pip install pandas numpy scipy codecarbon streamlit plotly jupyter
 ```
 
-## El detector (MVP: línea base; ampliación: Isolation Forest)
+## El detector: línea base, umbrales y media móvil
 
 ### 1. Línea base física por sitio (MVP)
 
@@ -109,13 +107,6 @@ Cada alerta se explica en una frase: *"SIM-A gasta 31 % más energía no TI de l
 
 1. **Umbral por residuo** (energía, agua, entrada): alerta si el residuo supera el máximo observado en las 24 h de calibración más un **margen del 50 %**, fijado antes de ver la evaluación.
 2. **Media móvil de 4 h** de cada residuo, con su propio umbral igual. Atrapa excesos pequeños pero sostenidos. Son unas 5 líneas con pandas.
-
-### 3. Isolation Forest (AMPLIACIÓN, D15)
-
-- **Por qué IF y no un z-score:** el z-score mira una variable a la vez, el IF ve la combinación.
-- **Lo comprobamos, no lo suponemos:** la tabla se reporta con y sin IF (ablación).
-- **Es opcional y va fuera del MVP.** En el kit los ruidos son independientes y acotados, así que una combinación "rara" no es rara y los umbrales la atrapan antes. **Diseñar una prueba para que IF gane sería hacer trampa** (propuesta v7, §3.2).
-- Se mantiene (D2) como capa para datos reales, donde las variables sí están correlacionadas.
 
 *Extra si sobra tiempo:* **CUSUM** para derivas de días.
 

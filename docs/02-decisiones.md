@@ -1,6 +1,6 @@
 # 02 · Decisiones tomadas y por qué
 
-> Registro de las decisiones del equipo. Si alguien quiere cambiar una, que la discuta con todos **antes del 19 en la noche**. Después ya no hay tiempo para cambiar de rumbo.
+> Registro de las decisiones del equipo. D20 recoge la decisión vigente sobre el detector; las propuestas anteriores se conservan solo como historial.
 
 ## D1 · Sub-reto 3: detección de anomalías con IA ✅
 
@@ -15,21 +15,9 @@
 
 **Pendiente:** confirmarla al leer el kit el 19. Si los datos del sub-reto 3 vinieran muy incompletos, lo platicamos.
 
-## D2 · Modelo ligero, hecho por nosotros ✅
+## D2 · Modelo ligero, hecho por nosotros (histórico; sustituido por D20)
 
-**Decisión:** **Isolation Forest** de scikit-learn, entrenado con los datos del kit. No usaremos un LLM para analizar los datos.
-
-**Por qué:**
-- Se entrena en minutos en una laptop y buscamos un consumo bajo → el **balance neto positivo** obligatorio se verificará con las mediciones de Gadiel y los cálculos conjuntos de Misa + Nico (D11).
-- Es explicable: podemos decir por qué marcó una alerta.
-- Los LLM son malos analizando miles de lecturas numéricas, cuestan energía y los jueces quieren ver nuestro trabajo, no el de una API.
-- "Hecho por nosotros" no es "desde cero": scikit-learn trae el algoritmo listo. Son unas 20 líneas.
-
-**Uso permitido de LLM:**
-- Como asistente para programar, investigar y entender el kit (Claude, etc.).
-- *Opcional:* en la demo, para explicar una alerta en lenguaje natural. Si se hace, su consumo **se suma al balance neto**.
-
-**Alternativas si el Isolation Forest no basta:** One-Class SVM, un autoencoder pequeño o umbrales estadísticos (z-score) como línea base.
+La propuesta inicial contemplaba un modelo de bosque de anomalías. El equipo lo descartó el 20 de octubre. La arquitectura vigente y el alcance de N2 están en D20.
 
 ## D3 · Demo en Streamlit, no Grafana ✅
 
@@ -102,26 +90,14 @@ Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y
 
 **Por qué:** el balance final se construye entre ambos, con unidades, periodos y supuestos acordados. Misa conserva el PUE inicial; Nico conserva el ahorro, el PUE final proyectado, las estimaciones de agua y emisiones y la consolidación de resultados. Este ajuste actualiza D10.
 
-## D12 · El kit cambia el enfoque del modelo (19 oct, confirmar en la reunión)
+## D12 · El kit cambia el enfoque del modelo (19 oct; actualizado por D20)
 
-**Lo que trae el kit** (detalle en [05-solucion-tecnica.md](05-solucion-tecnica.md#lo-que-trae-el-kit-19-oct)):
-- Un solo CSV **totalmente simulado** con 3 sitios ficticios (aire, evaporativa y líquida) × 168 horas, con intervalos de **1 hora**. Trae energía IT y total en kWh, agua en L, carga, temperatura exterior y de entrada, y un **evento OT resumido**.
-- Ya vienen **anomalías etiquetadas** (ineficiencia, fuga de agua y eventos OT) y una partición **referencia/evaluación**. Las columnas `scenario` y `simulated_anomaly` están **prohibidas como entrada** del detector.
-- **No** trae variables por equipo (chiller, bombas, torre, temperaturas del agua, caudal, setpoint) ni protocolos.
-- En el ejemplo del kit, las **reglas fijas** aciertan todo y el **Isolation Forest** con 6 variables tiene 38% de precisión y 48% de recall. El kit aclara que esa comparación **no es justa**: las reglas ven el evento OT y el modelo no, y las anomalías se diseñaron para ser visibles a las reglas.
-- El kit pide: mostrar **"DATOS SIMULADOS"** siempre, presentar energía y emisiones como **estimaciones con supuestos**, no calcular litros por consulta, no presentar ahorros hipotéticos como observados, y explicar **qué venía en el kit y qué aportamos**.
-
-**Decisión:**
-- **Detector híbrido:** reglas explicables (las del kit, mejoradas) más Isolation Forest con **variables derivadas por sitio**: PUE por hora, L/kWh IT, y la diferencia entre la energía auxiliar o el agua reales y lo esperado según carga, temperatura y tipo de enfriamiento. El modelo se ajusta **solo con referencia**. Cada alerta conserva un motivo legible.
-- **La comparación justa es parte del entregable:** mismas entradas, ajuste y evaluación separados, y varias corridas con dispersión. Si las reglas bastan, lo decimos. *El método más ligero que funciona es el argumento Green AI.*
-- La **coherencia física** se aplica a nivel agregado: energía auxiliar (total − IT) y agua esperadas para cada sitio.
-- El PUE final, los ahorros y el balance neto se presentan como **proyecciones con supuestos explícitos y análisis de sensibilidad**. `tools/compare_detectors.py` del kit sirve como referencia de cómo medir.
-- Usamos el **Stack A (Streamlit)** del kit como referencia, con **Python 3.12**.
+El kit contiene tres sitios simulados con 168 horas por sitio, datos de energía, agua, carga, temperaturas y eventos OT; las etiquetas solo sirven para evaluación. No hay sensores por equipo. Las reglas didácticas del kit detectan sus anomalías originales. El equipo decidió comparar el detector propio contra esas reglas por episodio y con inyecciones adicionales. La decisión final sobre el detector está en D20.
 
 ## D13 · Reparto ajustado: Nico se suma al modelo ✅ (19 oct)
 
 **Decisión:**
-- **Gadiel** construye el detector híbrido (#5, #6, #8) y mide su consumo con CodeCarbon (#7).
+- **Gadiel** construye el detector por sitio (#5, #6, #8) y mide su consumo con CodeCarbon (#7).
 - **Nico** se encarga de la **evaluación justa y Green AI** (costo frente a calidad del detector), del ahorro y el PUE final proyectado (#3), de consolidar `numeros_oficiales.json` y del balance neto con Misa (#14). **Deja** el acuífero, el bono y el guion.
 - **Guille** conserva ciberseguridad (#9–#12) y **toma el acuífero y la gobernanza** (#13).
 - **Misa** conserva datos, PUE inicial e integración (#1, #2, #4), el balance neto con Nico (#14), y **toma la comparación de refrigeración y el bono** (#15). Es el reto 3 del kit.
@@ -157,18 +133,9 @@ Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y
 
 **Implementado en:** rama `feat/datos-kit-v2`, cierra #1. Incluye `src/datos/cargar.py` para transformar el kit al contrato v2 y pruebas en `tests/test_datos.py`.
 
-## D15 · MVP = línea base + umbrales; Isolation Forest pasa a ampliación ✅ (19 oct)
+## D15 · MVP = línea base + umbrales (19 oct; actualizado por D20)
 
-**Decisión:** el MVP de detección es **línea base física por sitio (regresión lineal) + umbral por residuo + media móvil de 4 h**. Isolation Forest y CUSUM se mantienen como **ampliación** condicionada a que el MVP corra de punta a punta.
-
-**Por qué:**
-- La propuesta v7 lo justifica (§3.2): en el kit los ruidos son independientes y acotados, así que una combinación "rara" no es rara y los umbrales la atrapan antes. **Diseñar una prueba para que IF gane sería hacer trampa.**
-- La línea base ajustada por carga y clima es M&V estándar (ASHRAE Guideline 14, IPMVP) y es auditable.
-- El MVP se implementa en pocas líneas; deja tiempo para la evaluación honesta.
-
-**Este ajuste matiza D2:** IF sigue siendo "hecho por nosotros" y se mantiene como capa para datos reales donde las variables sí están correlacionadas; en el kit se reporta su **ablación** sin venderla.
-
-**Dueño del cambio:** Gadiel (modelo); Misa confirma que el contrato lo soporta.
+La línea base por sitio, los umbrales de residuo y la media móvil de cuatro horas pasaron de MVP a arquitectura definitiva del detector. La ampliación del modelo propuesta inicialmente se descartó según D20.
 
 ## D16 · Cuatro clases OT (fusión evento–efecto) ✅ (19 oct)
 
@@ -216,13 +183,19 @@ Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y
 
 **Por qué:** evitar trabajo duplicado y confusión sobre qué rama tiene las interfaces oficiales.
 
+## D20 · Detector definitivo para N2 ✅ (20 oct)
+
+**Decisión del equipo:** se descarta Isolation Forest por completo. No forma parte del detector, la comparación N2, las ampliaciones ni la demo. Esta decisión sustituye las propuestas de D2, D12 y D15 que lo contemplaban.
+
+**Alcance vigente:** regresión por sitio sobre la referencia, umbrales de residuos calibrados antes de evaluación y media móvil de 4 h; el registro OT se usa para clasificar las alertas. N2 lo compara con las reglas didácticas del kit por episodio, latencia y falsas alarmas. Gadiel mide este detector con CodeCarbon; su medición sigue pendiente.
+
 ## Decisiones pendientes
 
 - [ ] ¿Quién presenta el pitch? Candidatos: Nico (presentó propuestas en IRAP) y Leo (líder).
 - [ ] Duración del pitch: preguntarle a CIFOX.
 - [x] Confirmar las variables exactas del modelo al ver el kit → ver D12.
 - [x] Aprobar el contrato v2 (D14) → PR de la rama `feat/datos-kit-v2`.
-- [x] Confirmar en la reunión el enfoque híbrido → ajustado por D15: IF a ampliación.
+- [x] Confirmar el detector definitivo → D20; descartada la ampliación propuesta inicialmente.
 - [x] Repositorio canónico → D19.
 - [x] MVP de detección → D15.
 - [x] Clases OT finales → D16.

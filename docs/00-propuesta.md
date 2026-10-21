@@ -4,6 +4,8 @@
 
 > DATOS SIMULADOS. Todo lo que sale del kit CIFOX (3 sitios ficticios, 7 días) se usa para **demostrar el método**, no como evidencia de que una tecnología sea mejor que otra (el `DATA_DICTIONARY` del kit lo prohíbe). Lo medido, lo estimado y lo proyectado se marcan por separado.
 
+> **Alcance actualizado por D20 (20 oct):** el detector se limita a línea base por sitio, umbrales, media móvil y clasificación OT.
+
 ## 1. El problema
 
 1. **Agua.** En Yucatán el acuífero kárstico Península de Yucatán (clave CONAGUA 3105) es prácticamente la única fuente de agua: nivel freático somero, cenotes conectados y sin ríos. Un centro de datos con enfriamiento evaporativo extrae y evapora agua de ahí, y su purga con sales concentradas se puede infiltrar.
@@ -32,7 +34,6 @@ CSV del kit (6 medidores + registro OT)
    ├─▶ 1. Línea base física por sitio (aprendida en 48 h de la referencia)
    ├─▶ 2. Residuos = real − esperado (%)
    │       ├─ Umbral por residuo + media móvil de 4 h  → excesos de una variable y sostenidos
-   │       └─ Isolation Forest por sitio               → combinaciones raras entre residuos
    ├─▶ 3. Registro OT  →  reglas
    ├─▶ 4. Fusión evento–efecto  →  4 clases (MVP) + 2 extra
    └─▶ 5. Cola de alertas en el dashboard: kWh y litros en riesgo por hora
@@ -52,13 +53,8 @@ Cada alerta se explica en una frase: *"SIM-A gasta 31 % más energía de enfriam
 ### 3.2 Detectores sobre los residuos (MVP: 1 y 2)
 1. **Umbral por residuo** (energía, agua, entrada): alerta si el residuo supera el máximo observado en las 24 h de calibración más un **margen del 50 %**, fijado antes de ver la evaluación. Con 24 puntos no se puede estimar un percentil 99 y no lo fingimos.
 2. **Media móvil de 4 h** de cada residuo, con su propio umbral calibrado igual. Atrapa excesos pequeños pero sostenidos. Son unas 5 líneas con pandas.
-3. **Isolation Forest (scikit-learn) por sitio** sobre el vector de residuos, para **combinaciones** que ningún umbral individual ve. Ejemplo: la temperatura de entrada sube 0.4 °C mientras la energía de enfriamiento **baja** 5 %. Cada residuo, por separado, está dentro de su ruido normal, pero juntos dicen que el enfriamiento trabaja menos justo cuando hace falta más, por una falla de control o una lectura falsa.
-   - **Por qué IF y no un z-score:** el z-score mira una variable a la vez, y el IF ve la combinación.
-   - **Lo comprobamos, no lo suponemos:** la tabla de resultados se reporta con y sin IF (ablación).
-   - **Es opcional y va fuera del MVP.** El MVP son la línea base y los umbrales.
-   - **Lo que esperamos, dicho antes de medir:** en el kit el IF **no puede lucirse**. Los ruidos del generador son independientes y acotados, así que una combinación "rara" en datos sin correlación no es rara, y los umbrales la atrapan antes. Diseñar una prueba para que el IF gane sería hacer trampa.
-   - **Por eso el núcleo de la detección son la línea base y los umbrales.** El IF se mantiene (decisión D2) como capa para datos reales, donde las variables sí están correlacionadas, y en el kit solo se reporta su ablación sin venderla.
-   - **Decisión para el equipo:** esto ajusta D2. Con el kit, la detección central no necesita IF; se presenta como capa para datos reales.
+
+La decisión D20 fija esta arquitectura como detector completo para N2; no se añade un tercer método.
 
 *Extra si sobra tiempo:* CUSUM para derivas de días. Los residuos horarios están autocorrelacionados, así que sus falsas alarmas se reportan por separado.
 
@@ -225,7 +221,7 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
 | **MVP** | Tabla (a), curva (b) y robustez (c) básica → `numeros_oficiales.json` | Nico + Misa | 21 oct |
 | **MVP** | Commit del dashboard actual; luego clases, residuos en %, curva de sensibilidad y escenario paramétrico, trabajando con un JSON de ejemplo desde el 20 | Leo (ya tiene la base) | 20–21 oct |
 | **MVP** | Acuífero con fuentes, purga y bono (respaldo B) con las horas de respaldo | Nico | 21 oct |
-| Extra | Isolation Forest con ablación, incoherencia física, deriva, CUSUM, robustez (c) completa, cola por litros | Gadiel / Guille / Leo | Si sobra tiempo |
+| Extra | Incoherencia física, deriva, CUSUM, robustez (c) completa, cola por litros | Gadiel / Guille / Leo | Si sobra tiempo |
 
 **Punto de corte:** si el 20 a mediodía el MVP no corre de punta a punta, se congela la detección y el resto del tiempo se usa en la validación y las cifras. Ninguna cifra va al pitch sin su supuesto o su fuente.
 

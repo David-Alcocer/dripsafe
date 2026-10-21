@@ -26,6 +26,8 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
+from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -183,7 +185,7 @@ def _base_limpia(telemetria: pd.DataFrame, banderas: dict, episodios_kit: pd.Dat
 
 
 def correr(telemetria: pd.DataFrame, semillas_ruido=(1, 2, 3, 4, 5), rejilla_=None,
-           inicios_h=rejilla.INICIOS_H):
+           inicios_h=rejilla.INICIOS_H, progreso: Callable[[str], None] | None = None):
     """Corre la rejilla en la condición base y con ruido extra (una vez por semilla).
 
     Regresa (por_inyeccion, base_limpia, coincidencias, manifiesto).
@@ -195,7 +197,10 @@ def correr(telemetria: pd.DataFrame, semillas_ruido=(1, 2, 3, 4, 5), rejilla_=No
                   "sin_ot_previo_h": rejilla.SIN_OT_PREVIO_H,
                   "ruido": {"energia_pct_ti": rejilla.RUIDO_ENERGIA_PCT_TI, "agua_pct": rejilla.RUIDO_AGUA_PCT},
                   "corridas": []}
-    for condicion, semilla in condiciones:
+    for numero_corrida, (condicion, semilla) in enumerate(condiciones, start=1):
+        if progreso:
+            progreso(f"Corrida {numero_corrida}/{len(condiciones)}: {condicion}"
+                     + (f", semilla {semilla}" if semilla is not None else ""))
         base = rejilla._preparar(telemetria) if semilla is None else rejilla.con_ruido(telemetria, semilla)
         parametros = detector.entrenar(base)
         banderas_base = _banderas(base)
@@ -205,15 +210,21 @@ def correr(telemetria: pd.DataFrame, semillas_ruido=(1, 2, 3, 4, 5), rejilla_=No
         limpia += filas_limpia
         coincidencias.append(coinc)
         corrida = {"condicion": condicion, "semilla": semilla, "inyecciones": [], "omitidas": []}
+        planeadas = base["site_id"].nunique() * len(rejilla_ or rejilla.REJILLA) * len(inicios_h)
+        procesadas = 0
         for copia, ficha in rejilla.generar(base, rejilla_ or rejilla.REJILLA, inicios_h):
+            procesadas += 1
             if copia is None:
                 corrida["omitidas"].append(rejilla.ficha_publica(ficha))
-                continue
-            if not _mismos_parametros(parametros, detector.entrenar(copia)):
-                raise AssertionError("La inyección cambió lo que aprende el detector: tocó ajuste o calibración")
-            ficha = {**ficha, "condicion": condicion, "semilla": semilla}
-            por_inyeccion += medir(ficha, copia, _banderas(copia), episodios_kit)
-            corrida["inyecciones"].append(rejilla.ficha_publica(ficha))
+            else:
+                if not _mismos_parametros(parametros, detector.entrenar(copia)):
+                    raise AssertionError("La inyección cambió lo que aprende el detector: tocó ajuste o calibración")
+                ficha = {**ficha, "condicion": condicion, "semilla": semilla}
+                por_inyeccion += medir(ficha, copia, _banderas(copia), episodios_kit)
+                corrida["inyecciones"].append(rejilla.ficha_publica(ficha))
+            if progreso and (procesadas % 24 == 0 or procesadas == planeadas):
+                progreso(f"  {procesadas}/{planeadas} posiciones revisadas; "
+                         f"{len(corrida['inyecciones'])} ejecutadas, {len(corrida['omitidas'])} omitidas")
         manifiesto["corridas"].append(corrida)
     return (pd.DataFrame(por_inyeccion), pd.DataFrame(limpia),
             pd.concat(coincidencias, ignore_index=True), manifiesto)
@@ -346,7 +357,8 @@ def main() -> None:
 
     datos = _leer(a)
     semillas = tuple(int(s) for s in a.semillas_ruido.split(",") if s.strip())
-    por_inyeccion, limpia, coincidencias, manifiesto = correr(datos, semillas)
+    por_inyeccion, limpia, coincidencias, manifiesto = correr(
+        datos, semillas, progreso=lambda mensaje: print(mensaje, flush=True))
     resumen = resumir(por_inyeccion)
 
     a.salida.mkdir(parents=True, exist_ok=True)
@@ -384,4 +396,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nCorrida cancelada con Ctrl+C.", file=sys.stderr)
+        raise SystemExit(130) from None

@@ -15,7 +15,7 @@
 |---|---|
 | Sub-reto | **3 · Detección de anomalías con IA** en enfriamiento y gestión hídrica |
 | Métrica principal | **PUE** (Power Usage Effectiveness) |
-| Modelo | **Detector híbrido**: reglas explicables + Isolation Forest con variables por sitio (D12); balance neto por verificar |
+| Modelo | Línea base por sitio + umbrales de residuos + media móvil de 4 h + clasificación OT (D20); balance neto por verificar |
 | Demo | **Streamlit** (Python) |
 | Bono extra | Ir por el **Zero Freshwater Footprint** (+5% a +15%) con enfriamiento híbrido |
 | Flujo de Git | **Trunk-based**, con ramas cortas; `git worktree` es opcional |
@@ -53,7 +53,7 @@ Cada documento es independiente. Léanlo completo o pásenselo a su IA de confia
 |---|---|
 | **Leo** (líder) | Demo en Streamlit, guion y diapositivas del pitch |
 | **Misa** (co-líder) | Datos limpios y contrato v2, PUE inicial, balance neto final con Nico, comparación de refrigeración y bono, repositorio e integración |
-| **Gadiel** | Construye el detector híbrido, consumo esperado y medición con CodeCarbon |
+| **Gadiel** | Construye el detector, consumo esperado y medición con CodeCarbon |
 | **Nico** | Evaluación justa y Green AI del detector, ahorro y PUE final proyectados, balance neto final con Misa, consolida las cifras |
 | **Guille** | Ciberseguridad OT (eventos del kit y ATT&CK for ICS), análisis del acuífero y gobernanza |
 

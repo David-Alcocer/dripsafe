@@ -462,6 +462,16 @@ def evaluacion(d: Datos) -> None:
             ["Método", "Episodios detectados", "Falsas", "Omitidos"],
             [[f["metodo"], str(f["tp"]), str(f["fp"]), str(f["fn"])] for f in episodios],
             numericas=(1, 2, 3)), "Son 3 episodios que abarcan 21 horas; la tabla inferior cuenta horas."))
+    por_sitio = (d.numeros.get("comparacion_por_sitio") or {}).get("filas") or []
+    if por_sitio and not d.cifras_de_ejemplo:
+        st.html(c.panel("N2 por sitio · kit original", c.tabla(
+            ["Sitio", "Método", "Episodios TP/FP/FN", "Horas TP/FP/FN", "Latencia media"],
+            [[f["site_id"], "DripSafe" if f["metodo"] == "dripsafe" else "Reglas del kit",
+              f'{f["tp_episodios"]}/{f["fp_episodios"]}/{f["fn_episodios"]}',
+              f'{f["tp_horas"]}/{f["fp_horas"]}/{f["fn_horas"]}',
+              f'{c.numero(f["latencia_media_h"])} h' if f["latencia_media_h"] is not None else "—"]
+             for f in por_sitio if f["site_id"] != "TOTAL"], numericas=(2, 3, 4)),
+            "TP/FP/FN por episodio y por hora se cuentan por separado. Los resultados son simulados."))
 
     with fila("Curva de sensibilidad (rejilla fija de inyecciones)", "curva"):
         if curva:
@@ -492,13 +502,6 @@ def evaluacion(d: Datos) -> None:
             _fila_resumen("Reglas fijas del kit", rr, "PUE > 1.6, agua > 1.5, entrada > 29 °C o evento OT",
                           c.procedencia(telemetria_tipo(d))),
         ]
-        if_kit = d.benchmarks.get("isolation_forest")
-        if if_kit:
-            s = if_kit["scores"]
-            filas.append([
-                "Isolation Forest del kit", str(s["tp"]), str(s["fp"]), str(s["fn"]), f'{s["precision"]:.0%}',
-                f'{s["recall"]:.0%}', "—", f'<span class="tags">{c.procedencia(telemetria_tipo(d))}'
-                '<span>corrida de ejemplo del kit; 6 variables, sin OT</span></span>'])
         st.html(c.panel("Por hora, en las 96 h de evaluación", c.tabla(
             ["Método", "Aciertos", "Falsas", "Omitidas", "Precisión", "Recall", "Falsas por día", "Nota"],
             filas, numericas=(1, 2, 3, 4, 5, 6)),
@@ -512,10 +515,11 @@ def evaluacion(d: Datos) -> None:
                     return f'{c.numero(f["pct"])} %{rango}'
                 return f'{f["detectados"]} de {f["total"]}'
             st.html(c.panel("Robustez con más ruido", c.tabla(
-                ["Condición", "Método", "Detectadas", "Falsas por día"],
+                ["Condición", "Método", "Efectos físicos vistos", "Falsas por día y sitio"],
                 [[f["condicion"], f["metodo"], detectadas(f),
                   c.numero(f["falsas_por_dia"], 2) if f["falsas_por_dia"] is not None else "—"]
                  for f in robustez], numericas=(2, 3)),
+                "Media y rango en cinco semillas. Las falsas alarmas se miden en la base limpia, sin inyecciones. "
                 "El agua del kit no tiene ruido: la prueba agrega ruido para no detectar algo trivial."))
     mostrar_aviso_ejemplo(d)
 
