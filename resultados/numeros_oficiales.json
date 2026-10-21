@@ -7,20 +7,32 @@
       "inicio": "2026-10-12T00:00:00Z",
       "fin": "2026-10-18T23:00:00Z",
       "sitios": ["SIM-A", "SIM-B", "SIM-C"],
-      "horas": 504,
+      "filas": 504,
+      "horas_reloj": 168,
+      "nota": "filas = horas-sitio (horas de reloj × sitios).",
       "intervalo": "1h"
     },
     "fuente_datos": "cifox_kits/data/operaciones_simuladas.csv (kit CIFOX, no se sube)"
   },
 
   "pue": {
-    "antes": {
+    "referencia": {
       "valor": 1.2676,
       "unidad": "",
       "tipo": "medido",
-      "origen": "data/kit/reference_metrics.json (kit) + src/metricas/pue.py",
+      "origen": "src/metricas/pue.py · pue_inicial (referencia)",
       "responsable": "Misa (#2)",
-      "nota": "Sobre las 216 filas de referencia (72 h × 3 sitios). Cociente de sumas, no promedio de PUE horarios."
+      "particion": "referencia",
+      "nota": "Línea base normal: 72 h × 3 sitios = 216 filas. Cociente de sumas. No se compara directo con el PUE proyectado."
+    },
+    "antes": {
+      "valor": null,
+      "unidad": "",
+      "tipo": "medido",
+      "origen": "src/metricas/pue.py · pue_inicial (evaluación)",
+      "responsable": "Misa (#2)",
+      "particion": "evaluacion",
+      "nota": "Evaluación tal como viene (con anomalías): 96 h × 3 sitios = 288 filas. Cociente de sumas; mismas filas que el exceso estimado. Se llena con python -m src.pipeline."
     },
     "despues_proyectado": {
       "valor": null,
@@ -28,18 +40,28 @@
       "tipo": "proyectado",
       "origen": "src/metricas/pue_proyectado.py (pendiente, Nico)",
       "responsable": "Nico (#3)",
-      "nota": "PUE si se corta el exceso en cada alerta. NO es un ahorro observado."
+      "nota": "Pendiente (Nico, #3). Se calcula sobre EVALUACIÓN: (energía total de evaluación − exceso estimado) / la misma energía de TI que pue.antes. NO es un ahorro observado."
     }
   },
 
   "wue": {
-    "antes": {
+    "referencia": {
       "valor": 0.366,
       "unidad": "L/kWh",
       "tipo": "medido",
-      "origen": "data/kit/reference_metrics.json (kit)",
+      "origen": "src/metricas/pue.py · pue_inicial (referencia)",
       "responsable": "Misa",
-      "nota": "water_l del kit = captación in situ, NO huella hídrica total."
+      "particion": "referencia",
+      "nota": "Captación in situ / energía de TI, línea base normal."
+    },
+    "antes": {
+      "valor": null,
+      "unidad": "L/kWh",
+      "tipo": "medido",
+      "origen": "src/metricas/pue.py · pue_inicial (evaluación)",
+      "responsable": "Misa",
+      "particion": "evaluacion",
+      "nota": "water_l del kit = captación in situ, NO huella hídrica total. Evaluación: 288 filas. Se llena con python -m src.pipeline."
     },
     "despues_proyectado": {
       "valor": null,
@@ -57,6 +79,7 @@
       "tipo": "medido",
       "origen": "data/kit/reference_metrics.json",
       "responsable": "Misa",
+      "particion": "referencia",
       "nota": "Energía de TI acumulada en el periodo de referencia (216 h-sitio)."
     },
     "total_kwh": {
@@ -64,7 +87,8 @@
       "unidad": "kWh",
       "tipo": "medido",
       "origen": "data/kit/reference_metrics.json",
-      "responsable": "Misa"
+      "responsable": "Misa",
+      "particion": "referencia"
     },
     "no_ti_kwh": {
       "valor": 9501.1089,
@@ -72,6 +96,7 @@
       "tipo": "medido",
       "origen": "calculado: total - IT (ver D18, no decir 'enfriamiento')",
       "responsable": "Misa",
+      "particion": "referencia",
       "nota": "D18: energía no TI (overhead), no 'enfriamiento' — el kit no desglosa auxiliares/UPS/iluminación."
     },
     "agua_l": {
@@ -80,7 +105,15 @@
       "tipo": "medido",
       "origen": "data/kit/reference_metrics.json",
       "responsable": "Misa",
+      "particion": "referencia",
       "nota": "Captación in situ. No incluye huella hídrica de la electricidad."
+    },
+    "evaluacion": {
+      "it_kwh": {"valor": null, "unidad": "kWh", "tipo": "medido", "particion": "evaluacion",
+                 "nota": "Denominador de pue.antes y del PUE proyectado (96 h × 3 sitios = 288 filas)."},
+      "total_kwh": {"valor": null, "unidad": "kWh", "tipo": "medido", "particion": "evaluacion"},
+      "no_ti_kwh": {"valor": null, "unidad": "kWh", "tipo": "medido", "particion": "evaluacion"},
+      "agua_l": {"valor": null, "unidad": "L", "tipo": "medido", "particion": "evaluacion"}
     }
   },
 
@@ -91,7 +124,7 @@
       "tipo": "estimado",
       "origen": "src/metricas/exceso.py (pendiente, Nico)",
       "responsable": "Nico (N3)",
-      "nota": "Suma de residuos positivos sobre las 288 h de evaluación × 3 sitios."
+      "nota": "Suma de residuos positivos en evaluación (96 h × 3 sitios = 288 filas)."
     },
     "litros_sobre_evaluacion": {
       "valor": null,
@@ -152,8 +185,8 @@
       "responsable": "Misa + Nico"
     },
     "umbral_equilibrio": {
-      "descripcion": "Costo anual del detector comparado con el exceso de UNA sola hora de ineficiencia típica. Si el balance es positivo con una detección al año, no depende de que el ahorro proyectado sea exacto.",
-      "detecciones_necesarias_al_año": null,
+      "descripcion": "Costo anual del detector comparado con el exceso de UNA sola hora de ineficiencia típica. Si el balance es positivo con pocas horas de ineficiencia al año, no depende de que el ahorro proyectado sea exacto.",
+      "horas_ineficiencia_para_equilibrio_al_año": null,
       "responsable": "Misa + Nico"
     }
   },
