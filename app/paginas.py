@@ -16,7 +16,7 @@ import streamlit as st
 
 from app import calculos, graficas
 from app import componentes as c
-from app.cargar import Datos, cifra, mas_debil, tipo_cifra
+from app.cargar import Datos, cifra, tipo_cifra
 from app.textos import (
     BONO,
     CLASES,
