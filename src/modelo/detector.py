@@ -12,9 +12,9 @@ Pipeline por sitio, con las filas ordenadas por hora:
    anterior. Alerta si la EWMA y la hora actual lo superan.
 5. Clima no visto: si ``t_exterior`` sale del rango de entrenamiento, los
    umbrales se duplican y la alerta lleva «confianza baja». Nunca se apaga.
-6. Clases OT: escalón sin registro, intento de acceso, cambio no autorizado e
-   incidente OT con efecto (el exceso debe EMPEZAR dentro del evento o hasta
-   24 h después de su fin; uno que ya venía de antes se queda como escalón).
+6. Clases OT: las decide ``src/ot/clases.py`` (tabla de decisión D16, U1):
+   escalón sin registro, intento de acceso, cambio no autorizado e incidente
+   OT con efecto, con su prioridad, acción y causalidad.
 
 El detector únicamente usa columnas del contrato. En particular, jamás lee
 ``etiqueta_escenario`` ni ``etiqueta_tipo``: ``etiqueta_particion`` solo separa
@@ -39,12 +39,12 @@ import numpy as np
 import pandas as pd
 
 from src import contrato
+from src.ot import clases
 
 HORAS_AJUSTE = 48
 HORAS_CALIBRACION = 24
 MARGEN = 1.5
 MINIMOS = {"energia": 3.0, "agua": 3.0, "entrada": 0.5}
-VENTANA_EFECTO_H = 24
 SPAN_EWMA = 4
 
 COLUMNAS_ENTRADA = [
@@ -70,8 +70,16 @@ COLUMNAS_SALIDA = [
     "residuo_entrada_c",
     "alerta_umbral",
     "alerta_media_4h",
+    "exceso_energia",
+    "exceso_agua",
+    "exceso_entrada",
     "clima_no_visto",
     "clase",
+    "prioridad",
+    "accion",
+    "causalidad",
+    "evento_ot_inicio",
+    "forma",
     "motivo",
 ]
 
@@ -110,25 +118,6 @@ def _pct(real: np.ndarray, esperado: np.ndarray) -> np.ndarray:
     with np.errstate(divide="ignore", invalid="ignore"):
         residuo = (real - seguro) / seguro * 100.0
     return np.nan_to_num(residuo, nan=0.0, posinf=100.0, neginf=-100.0)
-
-
-def _paso_horas(horas: pd.Series) -> float:
-    """Intervalo mediano entre filas, en horas."""
-    diferencias = pd.to_datetime(horas).diff().dropna().dt.total_seconds() / 3600.0
-    if diferencias.empty:
-        return 1.0
-    return float(diferencias.median())
-
-
-def _tramos(mascara: pd.Series, horas: pd.Series, paso: float) -> list[tuple[pd.Timestamp, pd.Timestamp]]:
-    """Horas seguidas donde la máscara es verdadera: [(inicio, fin_exclusivo)]."""
-    seleccion = pd.Series(pd.to_datetime(horas))[mascara.to_numpy()].reset_index(drop=True)
-    if seleccion.empty:
-        return []
-    corte = pd.Timedelta(hours=1.5 * max(paso, 1e-9))
-    grupo = (seleccion.diff() > corte).cumsum()
-    fin = pd.Timedelta(hours=paso)
-    return [(g.iloc[0], g.iloc[-1] + fin) for _, g in seleccion.groupby(grupo)]
 
 
 def _preparar(tabla: pd.DataFrame) -> pd.DataFrame:
@@ -222,43 +211,10 @@ def _ajustar_sitio(s: pd.DataFrame) -> dict:
     }
 
 
-def _clasificar(o: pd.DataFrame, paso: float) -> pd.Series:
-    """Cruza los excesos con el registro OT para asignar una de las 4 clases."""
-    clase = pd.Series("normal", index=o.index, dtype=object)
-    exceso = (o["alerta_umbral"] | o["alerta_media_4h"]).astype(bool)
-    clase[exceso] = "escalon_sin_registro"
-
-    horas = o["timestamp"]
-    tramos_exceso = _tramos(exceso, horas, paso)
-    ot = o["_ot"].fillna("normal")
-    eventos = _tramos(ot != "normal", horas, paso)
-
-    for inicio, fin in eventos:
-        en_evento = (horas >= inicio) & (horas < fin)
-        login = en_evento & (ot == "login_fallido")
-        cambio = en_evento & (ot == "cambio_config_no_autorizado")
-
-        # Un login fallido solo es intento si no hay un exceso físico en esa hora.
-        clase[login & ~exceso] = "intento_acceso"
-        # Un cambio no autorizado se marca siempre, con o sin efecto.
-        clase[cambio] = "cambio_no_autorizado"
-
-        # Efecto: un tramo de exceso que EMPIEZA dentro del evento o hasta 24 h
-        # después de su fin. Uno que ya venía de antes no es causal.
-        limite = fin + pd.Timedelta(hours=VENTANA_EFECTO_H)
-        for e_ini, e_fin in tramos_exceso:
-            if inicio <= e_ini <= limite:
-                tramo = (horas >= e_ini) & (horas < e_fin)
-                clase[tramo | cambio] = "incidente_ot"
-
-    return clase
-
-
 def _aplicar_sitio(s: pd.DataFrame, params: dict) -> pd.DataFrame:
     """Calcula esperados, residuos, alertas y clase de un sitio."""
     # ``_preparar`` ya ordenó por (site_id, timestamp); solo alineamos posiciones.
     s = s.reset_index(drop=True)
-    paso = _paso_horas(s["timestamp"])
     x_energia, x_clima = _matrices(s)
     no_ti = (s["kw_total"] - s["kw_ti"]).to_numpy(dtype=float)
     agua = s["agua_reposicion_l"].to_numpy(dtype=float)
@@ -305,6 +261,7 @@ def _aplicar_sitio(s: pd.DataFrame, params: dict) -> pd.DataFrame:
 
         alerta_umbral |= por_hora
         alerta_media |= sostenido
+        out[f"exceso_{clave}"] = (por_hora | sostenido).to_numpy()
 
         for i in np.flatnonzero(por_hora.to_numpy()):
             motivos[i].append(
@@ -325,8 +282,12 @@ def _aplicar_sitio(s: pd.DataFrame, params: dict) -> pd.DataFrame:
     out["alerta_umbral"] = alerta_umbral.to_numpy()
     out["alerta_media_4h"] = alerta_media.to_numpy()
     out["clima_no_visto"] = clima_no_visto.to_numpy()
-    out["_ot"] = s["ot_event"].to_numpy()
-    out["clase"] = _clasificar(out, paso).to_numpy()
+    entrada_ot = out[["timestamp", "alerta_umbral", "alerta_media_4h", "exceso_agua"]].assign(
+        ot_event=s["ot_event"].to_numpy(),
+    )
+    clasificacion = clases.clasificar(entrada_ot)
+    for columna in clases.COLUMNAS_SALIDA:
+        out[columna] = clasificacion[columna].to_numpy()
 
     motivos_finales = []
     for i, clase in enumerate(out["clase"]):
@@ -340,12 +301,14 @@ def _aplicar_sitio(s: pd.DataFrame, params: dict) -> pd.DataFrame:
             partes.append("efecto físico en la ventana del evento OT")
         elif clase == "escalon_sin_registro" and not fisica:
             partes.append("exceso sin registro OT")
+        if out["nota_ot"].iloc[i]:
+            partes.append(out["nota_ot"].iloc[i])
         if bool(out["clima_no_visto"].iloc[i]) and clase != "normal":
             partes.append("confianza baja: clima fuera de lo aprendido")
         motivos_finales.append("; ".join(partes))
 
     out["motivo"] = motivos_finales
-    return out.drop(columns="_ot")
+    return out.drop(columns="nota_ot")
 
 
 def entrenar(tabla: pd.DataFrame) -> dict[str, dict]:
