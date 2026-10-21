@@ -1,8 +1,9 @@
 """Textos del dashboard en un solo lugar, para que cualquiera los corrija sin tocar la lógica.
 
-Guille: revisa CLASES, DEMO y TECNICAS (ciberseguridad) y HECHOS_ACUIFERO e IMPACTO_ACUIFERO (acuífero, D13).
+Guille: revisa CLASES, DEMO y TECNICAS (ciberseguridad; revisadas el 21 oct contra src/ot/clases.py).
 Misa: revisa BONO y EPOCAS (bono, D13).
-Nico: revisa LIMITES y TIPOS_CIFRA (qué es medido, estimado o proyectado).
+Nico: revisa LIMITES y TIPOS_CIFRA (qué es medido, estimado o proyectado), y HECHOS_ACUIFERO e
+IMPACTO_ACUIFERO (acuífero, N4 del plan de ejecución).
 """
 
 SITIOS = {"SIM-A": "SIM-A · aire", "SIM-B": "SIM-B · evaporativa", "SIM-C": "SIM-C · líquida"}
@@ -48,12 +49,12 @@ ESCENARIOS = {
 CLASES = {
     "incidente_ot": (
         "Incidente OT con efecto", "Crítica", "rojo",
-        "Evento OT y, desde su inicio hasta 24 h después de su fin, un exceso físico que empieza después del evento.",
+        "Evento OT y un exceso físico que empieza entre el inicio del evento y 24 h después de su fin.",
         "Restaurar la configuración aprobada y pasar a modo seguro manual. Confirmar en sitio.",
     ),
     "cambio_no_autorizado": (
         "Cambio no autorizado", "Alta", "rojo",
-        "Cambio de configuración no autorizado, con o sin efecto físico por ahora.",
+        "Cambio de configuración no autorizado. Si en las 24 h siguientes empieza un exceso físico, sube a incidente.",
         "Comparar contra la configuración aprobada y vigilar 24 h: puede notarse en el siguiente pico de calor.",
     ),
     "escalon_sin_registro": (
@@ -64,7 +65,7 @@ CLASES = {
     ),
     "intento_acceso": (
         "Intento de acceso", "Media", "amarillo",
-        "Logins fallidos sin cambio de configuración ni efecto físico.",
+        "Login fallido en una hora sin exceso físico. Si después llega un cambio, esas horas siguen siendo intento.",
         "Revisar accesos y cuentas. Un login fallido no prueba una intrusión.",
     ),
 }
@@ -129,7 +130,7 @@ TECNICAS = [
 ESTADO_TECNICA = {"kit": ("Observable en el kit", "ok"), "inyectada": ("Se inyecta", "est"),
                   "fuera": ("Fuera de alcance del kit", "sim")}
 
-# Fuente: docs/07-agua-y-acuifero.md (Guille cita las fuentes en #13; ver ~/hackathon/Papers).
+# Fuente: docs/07-agua-y-acuifero.md (Nico cita las fuentes en #13, N4; ver ~/hackathon/Papers).
 HECHOS_ACUIFERO = [
     ("Suelo kárstico", "Roca caliza porosa y fracturada: el agua se infiltra rápido y corre por conductos y cenotes conectados."),
     ("Nivel freático somero", "El agua subterránea está a pocos metros de la superficie, sobre todo en el norte del estado."),
