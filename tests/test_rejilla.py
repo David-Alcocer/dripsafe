@@ -219,3 +219,15 @@ def test_resumen_por_magnitud(corrida):
     fila = resumen[(resumen["nombre"] == "energia_+80") & (resumen["metodo"] == "dripsafe")].iloc[0]
     assert fila["pct_efectos_vistos"] == 100.0
     assert fila["unidad"] == "kWh"
+
+
+def test_bloque_para_numeros_oficiales(corrida):
+    por_inyeccion, limpia, coincidencias, _ = corrida
+    bloque = correr_rejilla.bloque_deteccion(por_inyeccion, limpia, coincidencias, "ejemplo")
+    d = bloque["deteccion"]
+    assert bloque["_meta"]["aviso"].startswith("DATOS SIMULADOS")
+    assert d["comparacion_contra_reglas_kit"]["episodios_originales_kit"]["dripsafe_tp"] == 3
+    assert d["comparacion_contra_reglas_kit"]["rejilla_inyecciones"]["datos_curva"]
+    assert set(d["clases_ot_conteo"]) >= {"incidente_ot", "cambio_no_autorizado", "escalon_sin_registro", "intento_acceso"}
+    assert [v["ventana_h"] for v in d["coincidencias_al_azar"]["ventanas"]] == [1, 4, 8, 12, 24]
+    json.dumps(bloque)  # se puede guardar tal cual

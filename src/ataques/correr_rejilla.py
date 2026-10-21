@@ -25,6 +25,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -159,8 +161,10 @@ def _base_limpia(telemetria: pd.DataFrame, banderas: dict, episodios_kit: pd.Dat
     filas = []
     for metodo in METODOS:
         alertas = banderas[metodo]["anomalia"].rename("anomalia").reset_index()
-        _, resumen = evaluar_episodios(telemetria, alertas, episodios_kit, horas_por_intervalo=horas_intervalo)
+        detalle, resumen = evaluar_episodios(telemetria, alertas, episodios_kit, horas_por_intervalo=horas_intervalo)
         filas.append({"condicion": condicion, "semilla": semilla, "metodo": metodo,
+                      "horas_limpias_sitio": resumen["horas_limpias_sitio"],
+                      "latencias_h": [None if pd.isna(x) else float(x) for x in detalle["horas_hasta_detectar"]],
                       "episodios_kit": resumen["tp"] + resumen["fn"], "detectados_kit": resumen["tp"],
                       "falsas_alarmas": resumen["fp"],
                       "falsas_alarmas_por_dia_sitio": resumen["falsas_alarmas_por_dia_sitio"],
@@ -168,6 +172,10 @@ def _base_limpia(telemetria: pd.DataFrame, banderas: dict, episodios_kit: pd.Dat
                       "ic95_superior": resumen["ic_falsas_alarmas_por_dia_sitio"][1]})
     evaluacion = _con_clave(telemetria)["etiqueta_particion"] == "evaluacion"
     d = banderas["dripsafe"][evaluacion.reindex(banderas["dripsafe"].index).fillna(False).to_numpy()]
+    conteo = d["clase"].value_counts()
+    for fila in filas:
+        if fila["metodo"] == "dripsafe":
+            fila["horas_por_clase"] = {c: int(conteo.get(c, 0)) for c in clases.CLASES}
     coincidencias = clases.coincidencias_al_azar(d.reset_index())
     coincidencias.insert(0, "semilla", semilla)
     coincidencias.insert(0, "condicion", condicion)
@@ -236,6 +244,75 @@ def resumir(por_inyeccion: pd.DataFrame) -> pd.DataFrame:
     return resumen
 
 
+def _num(x):
+    return None if x is None or pd.isna(x) else (round(float(x), 4) if isinstance(x, float) else x)
+
+
+def bloque_deteccion(por_inyeccion: pd.DataFrame, limpia: pd.DataFrame, coincidencias: pd.DataFrame,
+                     fuente: str) -> dict:
+    """Las cifras de la rejilla con la forma de `deteccion` en resultados/numeros_oficiales.json.
+
+    Es un insumo para N2 (Nico): él decide si lo integra tal cual o lo recalcula.
+    """
+    resumen = resumir(por_inyeccion)
+    base = limpia[limpia["condicion"] == "base"].set_index("metodo")
+    ds, rg = base.loc["dripsafe"], base.loc["reglas_kit"]
+    curva = [{k: _num(v) for k, v in fila.items()} for fila in resumen[resumen["condicion"] == "base"][
+        ["nombre", "variable", "magnitud_pct", "metodo", "inyecciones", "pct_efectos_vistos",
+         "mediana_horas_ver_efecto", "inyectado", "no_visto", "pct_no_visto", "unidad", "clase_correcta_pct"]
+    ].to_dict("records")]
+    ruido = por_inyeccion[por_inyeccion["condicion"] == "ruido"]
+    robustez = []
+    if not ruido.empty:
+        por_semilla = (ruido.groupby(["nombre", "metodo", "semilla"])["efecto_visto"].mean() * 100)
+        for (nombre, metodo), serie in por_semilla.groupby(level=["nombre", "metodo"], sort=False):
+            robustez.append({"nombre": nombre, "metodo": metodo, "semillas": int(serie.size),
+                             "pct_efectos_vistos_media": round(float(serie.mean()), 1),
+                             "pct_efectos_vistos_min": round(float(serie.min()), 1),
+                             "pct_efectos_vistos_max": round(float(serie.max()), 1)})
+    fa_ruido = limpia[(limpia["condicion"] == "ruido") & (limpia["metodo"] == "dripsafe")]
+    total = coincidencias[(coincidencias["condicion"] == "base") & (coincidencias["site_id"] == "TOTAL")]
+    try:
+        commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
+                                cwd=RAIZ, check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        commit = "desconocido"
+    return {
+        "_meta": {"aviso": "DATOS SIMULADOS · cifras de la rejilla de inyecciones (U2)",
+                  "generado_con_commit": commit,
+                  "generado_el": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                  "fuente_datos": fuente, "responsable": "Guille (U2, #32) → insumo de Nico (N2)"},
+        "deteccion": {
+            "comparacion_contra_reglas_kit": {
+                "episodios_originales_kit": {
+                    "dripsafe_tp": int(ds["detectados_kit"]), "dripsafe_fp": int(ds["falsas_alarmas"]),
+                    "dripsafe_fn": int(ds["episodios_kit"] - ds["detectados_kit"]),
+                    "reglas_tp": int(rg["detectados_kit"]), "reglas_fp": int(rg["falsas_alarmas"]),
+                    "reglas_fn": int(rg["episodios_kit"] - rg["detectados_kit"]),
+                    "nota": "Por episodio (D17): las 21 filas anómalas del kit son 3 episodios.",
+                },
+                "rejilla_inyecciones": {"datos_curva": curva,
+                                        "nota": "Una inyección por copia; ajuste y calibración intactos. "
+                                                "Efecto visto = alerta física en las horas del exceso."},
+                "robustez_ruido": {"resultado": robustez,
+                                   "falsas_alarmas_por_dia_sitio_media": _num(
+                                       fa_ruido["falsas_alarmas_por_dia_sitio"].mean()) if len(fa_ruido) else None},
+            },
+            "falsas_alarmas_por_dia": {"valor": _num(ds["falsas_alarmas_por_dia_sitio"]),
+                                       "intervalo_confianza_95": [_num(ds["ic95_inferior"]), _num(ds["ic95_superior"])],
+                                       "sobre_horas_limpias": _num(ds["horas_limpias_sitio"]),
+                                       "nota": "Por sitio y día, evaluación sin inyecciones."},
+            "clases_ot_conteo": {**{c: ds["horas_por_clase"].get(c) for c in clases.CLASES},
+                                 "nota": "Horas por clase en la evaluación del kit sin inyecciones."},
+            "latencia_horas_hasta_detectar_por_episodio": ds["latencias_h"],
+            "coincidencias_al_azar": {"ventanas": [{"ventana_h": int(f.ventana_h), "prob_pct": _num(f.prob_pct),
+                                                     "eventos_simulados": int(f.eventos_simulados)}
+                                                    for f in total.itertuples()],
+                                      "nota": "Probabilidad de atribuir a un evento OT un exceso que no causó."},
+        },
+    }
+
+
 def _leer(args) -> pd.DataFrame:
     if args.ejemplo:
         from app import kit
@@ -281,6 +358,9 @@ def main() -> None:
     resumen.to_csv(a.salida / "rejilla_resumen.csv", index=False)
     limpia.to_csv(a.salida / "rejilla_base_limpia.csv", index=False)
     coincidencias.to_csv(a.salida / "coincidencias_al_azar.csv", index=False)
+    bloque = bloque_deteccion(por_inyeccion, limpia, coincidencias, manifiesto["fuente"])
+    (a.salida / "deteccion_para_numeros_oficiales.json").write_text(
+        json.dumps(bloque, ensure_ascii=False, indent=2), encoding="utf-8")
 
     if a.ejemplo:
         print("DATOS INVENTADOS (app.kit.ejemplo): sirven para probar el flujo, no son cifras del pitch.\n")
@@ -296,7 +376,7 @@ def main() -> None:
         print("\nClase OT correcta (DripSafe, % de horas con efecto visto):")
         print(ds["clase_correcta_pct"].to_string())
     print("\nEvaluación sin inyecciones:")
-    print(limpia[limpia["condicion"] == "base"].to_string(index=False))
+    print(limpia[limpia["condicion"] == "base"].drop(columns=["latencias_h", "horas_por_clase"]).to_string(index=False))
     total = coincidencias[(coincidencias["condicion"] == "base") & (coincidencias["site_id"] == "TOTAL")]
     print("\nCoincidencias al azar (DripSafe, todos los sitios):")
     print(total[["ventana_h", "eventos_simulados", "atribuciones_al_azar", "prob_pct"]].to_string(index=False))
