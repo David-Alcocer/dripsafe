@@ -62,7 +62,9 @@ def _detector_oficial(avisos: list) -> pd.DataFrame | None:
     if "motivo" not in al.columns:
         al["motivo"] = ""
     al["motivo"] = al["motivo"].fillna("")
-    return al[linea_base.COLUMNAS]
+    # La acción sugerida la decide src/ot/clases.py (Guille); es opcional para no romper salidas viejas.
+    al["accion"] = al["accion"].fillna("") if "accion" in al.columns else ""
+    return al[linea_base.COLUMNAS + ["accion"]]
 
 
 def unir(datos: pd.DataFrame, detector: pd.DataFrame) -> pd.DataFrame:
@@ -71,6 +73,7 @@ def unir(datos: pd.DataFrame, detector: pd.DataFrame) -> pd.DataFrame:
     t = t.drop(columns="tipo_sugerido").merge(detector, on=["timestamp", "site_id"], how="left")
     t["clase"] = t["clase"].fillna("normal")
     t["motivo"] = t["motivo"].fillna("")
+    t["accion"] = t["accion"].fillna("") if "accion" in t.columns else ""
     t["alerta"] = t["clase"] != "normal"
     t["energia_no_ti_kwh"] = t["energy_total_kwh"] - t["energy_it_kwh"]
     fisica = t["alerta_umbral"].fillna(False).astype(bool) | t["alerta_media_4h"].fillna(False).astype(bool)
@@ -87,15 +90,17 @@ def cargar() -> Datos:
     else:
         datos, fuentes["telemetria"] = kit.ejemplo(), "ejemplo"
 
+    # Las salidas del equipo se calculan con el kit: con datos de ejemplo no se mezclan (no cuadrarían).
+    del_kit = fuentes["telemetria"] == "kit"
     avisos = []
     detector = _detector_oficial(avisos)
-    if detector is not None:
+    if detector is not None and del_kit:
         fuentes["detector"] = "modelo"
     else:
         detector, fuentes["detector"] = linea_base.detectar(datos), "vista_previa"
     tabla = unir(datos, detector)
 
-    if RUTAS["numeros"].exists():
+    if RUTAS["numeros"].exists() and del_kit:
         numeros = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
         meta = numeros.get("_meta", {})
         es_borrador = (meta.get("generado_con_commit") == "ejemplo-sin-commit"
@@ -109,7 +114,7 @@ def cargar() -> Datos:
     evaluacion = {"dripsafe": calculos.evaluacion(tabla, "alerta"),
                   "reglas": calculos.evaluacion(tabla, "alerta_reglas")}
     consumo = {}
-    if RUTAS["consumo"].exists():
+    if RUTAS["consumo"].exists() and del_kit:
         consumo = json.loads(RUTAS["consumo"].read_text(encoding="utf-8"))
     return Datos(tabla, calculos.eventos(tabla), evaluacion, numeros, kit.benchmarks(), fuentes, consumo, avisos)
 
