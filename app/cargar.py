@@ -107,6 +107,8 @@ def cargar() -> Datos:
                       or "VALORES DE EJEMPLO" in meta.get("aviso", "").upper())
         if es_borrador:
             numeros = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8"))
+        else:
+            numeros = adaptar_oficial(numeros)
         fuentes["numeros"] = "ejemplo" if es_borrador else "oficial"
     else:
         numeros, fuentes["numeros"] = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8")), "ejemplo"
@@ -117,6 +119,67 @@ def cargar() -> Datos:
     if RUTAS["consumo"].exists() and del_kit:
         consumo = json.loads(RUTAS["consumo"].read_text(encoding="utf-8"))
     return Datos(tabla, calculos.eventos(tabla), evaluacion, numeros, kit.benchmarks(), fuentes, consumo, avisos)
+
+
+METODOS = {"dripsafe": "DripSafe", "reglas_kit": "Reglas del kit"}
+
+
+def _ruta(dato, *claves):
+    """dato[c1][c2]…, o None si falta algún nivel."""
+    for clave in claves:
+        dato = dato.get(clave) if isinstance(dato, dict) else None
+    return dato
+
+
+def _nombre_inyeccion(nombre: str) -> str:
+    """'energia_+20' → 'Energía +20 %'; 'cambio_sin_registro' → 'Cambio sin registro'."""
+    if "_+" in nombre:
+        variable, magnitud = nombre.split("_+")
+        return f'{"Energía" if variable == "energia" else "Agua"} +{magnitud} %'
+    return nombre.replace("_", " ").capitalize()
+
+
+def adaptar_oficial(o: dict) -> dict:
+    """Pasa numeros_oficiales.json (secciones anidadas, ver resultados/README.md) a las claves del dashboard.
+
+    Las claves de primer nivel con «valor» pasan tal cual. De las secciones solo se toma lo que ya
+    tiene datos: lo que sigue en null se queda «pendiente» en pantalla, nunca se inventa.
+    """
+    n = dict(o)
+    rejilla = _ruta(o, "deteccion", "comparacion_contra_reglas_kit", "rejilla_inyecciones") or {}
+
+    # Curva de sensibilidad: solo las inyecciones de energía de 4 h (energia_+10 … +80).
+    curva = [f for f in rejilla.get("datos_curva") or [] if str(f.get("nombre", "")).startswith("energia_+")]
+    if curva and "curva_sensibilidad" not in o:
+        n["curva_sensibilidad"] = {"tipo": "observado", "nota": rejilla.get("nota", ""), "filas": [{
+            "magnitud_pct": f["magnitud_pct"],
+            "metodo": METODOS.get(f["metodo"], f["metodo"]),
+            "detectados": round(f["pct_efectos_vistos"] * f["inyecciones"] / 100),
+            "total": f["inyecciones"],
+            "horas_hasta_detectar": f["mediana_horas_ver_efecto"],
+            "kwh_no_vistos": f["no_visto"],
+        } for f in curva]}
+
+    # Robustez: la misma rejilla con más ruido, en % de efectos vistos (media y rango entre semillas).
+    ruido = _ruta(o, "deteccion", "comparacion_contra_reglas_kit", "robustez_ruido") or {}
+    if ruido.get("resultado") and "robustez" not in o:
+        falsas = ruido.get("falsas_alarmas_por_dia_sitio_media")
+        n["robustez"] = {"tipo": "observado", "filas": [{
+            "condicion": f'Doble de ruido · {_nombre_inyeccion(f["nombre"])}',
+            "metodo": METODOS.get(f["metodo"], f["metodo"]),
+            "pct": f["pct_efectos_vistos_media"],
+            "pct_min": f["pct_efectos_vistos_min"],
+            "pct_max": f["pct_efectos_vistos_max"],
+            "falsas_por_dia": falsas if f["metodo"] == "dripsafe" else None,
+        } for f in ruido["resultado"]]}
+
+    # Horas de respaldo del bono: {"umbral_27c": 2400, …} → filas por umbral.
+    horas = _ruta(o, "bono_zero_freshwater", "horas_respaldo_mérida_al_año") or {}
+    filas = [{"umbral_c": int(k.removeprefix("umbral_").removesuffix("c")), "horas_anio": v}
+             for k, v in horas.items() if k.startswith("umbral_") and v is not None]
+    if filas and "bono_horas_respaldo" not in o:
+        n["bono_horas_respaldo"] = {"tipo": horas.get("tipo", "estimado"), "filas": filas}
+    return n
 
 
 def cifra(numeros: dict, clave: str, defecto=None):
