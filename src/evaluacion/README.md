@@ -107,6 +107,44 @@ manifiesto de U2 y los resultados por método permanecen bajo `data/`, fuera de
 Git. Los porcentajes de detección usan solo inyecciones ejecutadas como
 denominador; nunca convierten una omisión en fallo del detector.
 
+### Paso 3 · Comparación del kit original
+
+Desde la raíz del repositorio, con el CSV local del kit disponible:
+
+```bash
+.venv/bin/python -m src.evaluacion.comparar_originales --kit "$KIT_CSV"
+```
+
+Si `.venv` está en otro checkout, se puede usar su Python con la ruta completa.
+El comando comprueba el hash del CSV y su `MANIFEST.json`, los archivos del
+detector y las ventanas de evaluación contra `resultados/n2_congelamiento.json`.
+Usa la misma telemetría y el mismo registro OT para DripSafe y las cuatro
+reglas. Las etiquetas solo se consultan para puntuar, nunca para predecir.
+
+`data/resultados/n2_originales_comparacion.csv` contiene una fila por método y
+sitio, además de `TOTAL`. `data/resultados/n2_originales_episodios.csv` registra
+la detección y latencia de cada episodio por método. Ambos quedan fuera
+de Git. Las 96 horas de evaluación de cada sitio son **horas-sitio**; el total
+son 288 horas-sitio, no 96 horas de reloj. Hay 267 horas-sitio limpias.
+
+| Método | Sitio | Episodios TP/FP/FN | Horas TP/FP/FN | Precisión/recall (episodios y horas) | Latencia media |
+|---|---|---:|---:|---:|---:|
+| DripSafe | SIM-A | 1/0/0 | 8/0/0 | 100 % / 100 % | 0 h |
+| DripSafe | SIM-B | 1/0/0 | 8/0/0 | 100 % / 100 % | 0 h |
+| DripSafe | SIM-C | 1/0/0 | 5/0/0 | 100 % / 100 % | 0 h |
+| DripSafe | TOTAL | 3/0/0 | 21/0/0 | 100 % / 100 % | 0 h |
+| Reglas del kit | SIM-A | 1/0/0 | 8/0/0 | 100 % / 100 % | 0 h |
+| Reglas del kit | SIM-B | 1/0/0 | 8/0/0 | 100 % / 100 % | 0 h |
+| Reglas del kit | SIM-C | 1/0/0 | 5/0/0 | 100 % / 100 % | 0 h |
+| Reglas del kit | TOTAL | 3/0/0 | 21/0/0 | 100 % / 100 % | 0 h |
+
+Por episodio, TP significa al menos una alerta dentro de la ventana y FP es
+un tramo continuo alertado fuera de ella. Por hora, cada hora verdadera o
+falsa se cuenta individualmente. La latencia va del inicio del episodio a su
+primera alerta. Ambos métodos empatan en estos tres episodios simulados del
+kit; el kit fue diseñado para las reglas y este empate no demuestra rendimiento
+fuera de él. Esta comparación no incluye la medición de costo de Gadiel.
+
 ## Métricas de impacto
 
 `src/metricas/impacto.py` calcula PUE y WUE como cocientes de sumas por sitio
