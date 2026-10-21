@@ -1,7 +1,9 @@
 {
   "_meta": {
     "aviso": "DATOS SIMULADOS · fijación técnica de N2",
-    "estado": "fijado localmente; pendiente de confirmación de Gadiel",
+    "estado": "confirmado por Gadiel el 2026-10-21",
+    "confirmado_por": "Gadiel",
+    "fecha_confirmacion": "2026-10-21",
     "sin_medicion_codecarbon": true
   },
   "kit": {
