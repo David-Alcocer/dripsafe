@@ -12,7 +12,8 @@ de esta vista previa (app/cargar.py). Sigue la propuesta (§3.1–§3.3) en su f
    móvil de 4 h con su propio umbral, para excesos pequeños y sostenidos.
 4. Fuera del rango de temperatura aprendido, el umbral se duplica y la alerta sale con
    «confianza baja» (nunca se apaga).
-5. Clases: cruza los excesos con el registro OT (incidente, cambio, escalón, intento).
+5. Clases: las decide src/ot/clases.py, la misma tabla de decisión del detector oficial
+   (docs/06 §4). Así la demo muestra las mismas clases aunque caiga en esta vista previa.
 
 Las etiquetas del kit (scenario, simulated_anomaly) nunca entran aquí: solo `split`, para
 separar ajuste y calibración.
@@ -21,11 +22,12 @@ separar ajuste y calibración.
 import numpy as np
 import pandas as pd
 
+from src.ot import clases
+
 HORAS_AJUSTE = 48
 MARGEN = 1.5             # umbral = mayor residuo de calibración × 1.5
 MINIMOS = {"energia": 3.0, "agua": 3.0, "entrada": 0.5}         # % · % · °C
 MINIMOS_MEDIA = {"energia": 2.0, "agua": 2.0, "entrada": 0.3}
-VENTANA_EFECTO_H = 24    # un exceso hasta 24 h después del evento OT cuenta como su efecto
 
 COLUMNAS = [
     "timestamp", "site_id", "esperado_energia_no_ti_kwh", "esperado_agua_l", "esperado_entrada_c",
@@ -107,39 +109,11 @@ def _sitio(s: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def _tramos(mascara: pd.Series, horas: pd.Series) -> list[tuple[pd.Timestamp, pd.Timestamp]]:
-    """Horas seguidas donde la máscara es verdadera: [(inicio, fin_exclusivo)]."""
-    sel = horas[mascara.to_numpy()]
-    if sel.empty:
-        return []
-    grupo = (sel.diff() > pd.Timedelta(hours=1)).cumsum()
-    return [(g.iloc[0], g.iloc[-1] + pd.Timedelta(hours=1)) for _, g in sel.groupby(grupo)]
-
-
 def _clasificar(o: pd.DataFrame) -> pd.Series:
-    """Clase de cada hora de un sitio según la tabla de decisión de la propuesta (§3.3)."""
-    clase = pd.Series("normal", index=o.index, dtype=object)
-    horas = o["timestamp"]
-    exceso = o["alerta_umbral"] | o["alerta_media_4h"]
-    tramos_exceso = _tramos(exceso, horas)
-
-    # Primero lo que no tiene registro: todo exceso es «escalón sin registro» hasta que un evento lo explique.
-    clase[exceso] = "escalon_sin_registro"
-
-    ot = o["_ot"] != "normal"
-    for inicio, fin in _tramos(ot, horas):
-        en_evento = (horas >= inicio) & (horas < fin)
-        cambio = (o.loc[en_evento, "_ot"] == "cambio_config_no_autorizado").any()
-        clase[en_evento & (o["_ot"] == "login_fallido")] = "intento_acceso"
-        clase[en_evento & (o["_ot"] == "cambio_config_no_autorizado")] = "cambio_no_autorizado"
-        # Efecto: un tramo de exceso que EMPIEZA dentro de [inicio, fin + 24 h]. Uno que ya venía de
-        # antes es «coincidente, no causal» y se queda como escalón.
-        limite = fin + pd.Timedelta(hours=VENTANA_EFECTO_H)
-        for e_ini, e_fin in tramos_exceso:
-            if inicio <= e_ini <= limite:
-                tramo = (horas >= e_ini) & (horas < e_fin)
-                clase[tramo | (en_evento & cambio)] = "incidente_ot"
-    return clase
+    """Clase de cada hora de un sitio con la tabla de decisión oficial (src/ot/clases.py)."""
+    entrada = pd.DataFrame({"timestamp": o["timestamp"], "alerta_umbral": o["alerta_umbral"],
+                            "alerta_media_4h": o["alerta_media_4h"], "ot_event": o["_ot"]}, index=o.index)
+    return clases.clasificar(entrada)["clase"]
 
 
 def detectar(tabla: pd.DataFrame) -> pd.DataFrame:
