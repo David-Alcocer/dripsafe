@@ -1,10 +1,15 @@
-"""Catálogo de ataques y fallas simulados sobre la telemetría.
+"""Catálogo de ataques y fallas simulados sobre telemetría con sensores por equipo.
+
+Solo aplica a los datos sintéticos de src/sinteticos.py (un sitio, con chiller,
+bombas, caudal y temperaturas del agua). El kit de CIFOX no trae esas columnas:
+para el kit se usa la rejilla de src/ataques/rejilla.py. Ver docs/06, apéndice A.
 
 Cada escenario modifica las filas de UNA ventana de tiempo para dejar la huella
 que dejaría el ataque o la falla real. Nada de esto toca sistemas reales: solo
 cambia números en un DataFrame (regla 18 de la convocatoria).
 
-Las técnicas vienen de MITRE ATT&CK for ICS: https://attack.mitre.org/matrices/ics/
+Las técnicas vienen de MITRE ATT&CK for ICS v20: https://attack.mitre.org/matrices/ics/
+(T0855 y T0856 se revocaron en abril de 2026: ahora son T1692.001 y T1692.002).
 
 Para agregar un escenario: escribe una función `_mi_escenario(df, idx, ctx)` y
 agrégala a CATALOGO con su ficha. `idx` son las etiquetas de fila de la ventana;
@@ -141,7 +146,7 @@ CATALOGO = [
         "El setpoint cambia y el chiller gasta más con la misma carga de TI.",
         ["setpoint_suministro", "kw_chiller"], horas=18, aplicar=_setpoint_alterado),
     Escenario(
-        "sensor_falsificado", "ataque", "T0856", "Spoof Reporting Message",
+        "sensor_falsificado", "ataque", "T1692.002", "Unauthorized Message: Reporting Message",
         "El sensor de temperatura de retorno reporta valores inventados, pero creíbles.",
         "El balance de calor no cuadra: caudal × ΔT queda por debajo del calor de los servidores.",
         ["t_retorno"], horas=12, aplicar=_sensor_falsificado),
@@ -151,7 +156,7 @@ CATALOGO = [
         "La bomba gasta ~70 % menos pero el caudal reportado es normal (ley de afinidad rota).",
         ["flujo_m3h", "kw_bombas"], horas=6, aplicar=_vista_repetida),
     Escenario(
-        "comandos_no_autorizados", "ataque", "T0855", "Unauthorized Command Message",
+        "comandos_no_autorizados", "ataque", "T1692.001", "Unauthorized Message: Command Message",
         "Llegan órdenes de apagar y prender la bomba de madrugada.",
         "Arranques y paros que no corresponden con la carga ni el horario.",
         ["kw_bombas"], horas=1, aplicar=_comandos_no_autorizados, hora_inicio=3),

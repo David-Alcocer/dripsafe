@@ -63,7 +63,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 
 - [ ] **Innovación:** línea base física por sitio aplicada a detectar + fusión evento–efecto + prioridad por litros (diapositivas 3 y 4).
 - [ ] **Viabilidad técnica:** demo funcionando sobre el kit real, en una laptop, sin internet.
-- [ ] **Impacto en ciberseguridad:** cuatro clases, T0859 y T0836 observables, T0831 y T0855 inyectadas; solo lectura (diapositiva 4).
+- [ ] **Impacto en ciberseguridad:** cuatro clases, T0859 y T0836 observables, T0831 inyectada y el cambio sin registro (T0836 sin log o T1692.001, antes T0855); solo lectura (diapositiva 4). Cifras y frases en `docs/06` §6 y §10.
 - [ ] **Eficiencia Green AI:** PUE con sumas, exceso medido sobre la línea base y curva de sensibilidad (diapositiva 6).
 - [ ] **Balance neto y gobernanza:** umbral de equilibrio, acuífero y reporte para CONAGUA (diapositivas 7 y 8).
 - [ ] **Escalabilidad y negocio:** seis medidores, autocalibración y precio por kW (diapositiva 9).

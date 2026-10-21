@@ -71,7 +71,7 @@ Cada alerta se explica en una frase: *"SIM-A gasta 31 % más energía de enfriam
 ### 3.3 Fusión evento–efecto
 
 **Dos reglas de oro:**
-1. **Ningún exceso sin explicar va directo a mantenimiento.** Un ataque que cambia un setpoint sin dejar registro (T0855, o T0836 sin log) se ve igual que una falla brusca, así que todo escalón sin registro se trata como posible cambio no autorizado hasta comprobar la configuración.
+1. **Ningún exceso sin explicar va directo a mantenimiento.** Un ataque que cambia un setpoint sin dejar registro (T1692.001, antes T0855, o T0836 sin log) se ve igual que una falla brusca, así que todo escalón sin registro se trata como posible cambio no autorizado hasta comprobar la configuración.
 2. **Ningún cambio de configuración no autorizado es "sin urgencia"**, aunque todavía no tenga efecto físico. Puede notarse hasta el siguiente pico de calor, o ser un cambio de límites de alarma que nunca mueve la física y aun así es grave.
 
 | Clase (MVP) | Condición | Acción sugerida | ¿Está en el kit? |
@@ -207,7 +207,7 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
 ## 10. Límites (declarados)
 
 - **Los datos son simulados**, de 3 sitios y 7 días, y el generador es casi lineal. La validación demuestra el método, no su eficacia en plantas reales; la siguiente validación necesaria es con datos de una instalación real.
-- **Sin balance de calor:** sin caudal ni temperaturas de agua no se detectan sensores falsificados por balance de calor (T0856, T0832).
+- **Sin balance de calor:** sin caudal ni temperaturas de agua no se detectan sensores falsificados por balance de calor (T1692.002, antes T0856, y T0832).
 - **Estacionalidad:** 72 h de referencia no la cubren.
 - **Ineficiencia crónica:** si la referencia ya es ineficiente, la línea base la aprende como normal. Se mitiga con la auditoría al instalar (§9). En el kit no se puede probar, porque hay un solo sitio por tipo de enfriamiento.
 - **Cambio sin registro contra falla brusca:** con datos de proceso no se distinguen. DripSafe no los separa; los manda a verificar la configuración antes de mantenimiento.
