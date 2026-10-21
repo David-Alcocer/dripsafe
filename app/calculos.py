@@ -87,13 +87,20 @@ def eventos(df: pd.DataFrame) -> pd.DataFrame:
         # Un evento nuevo empieza cuando hay más de una hora desde la alerta anterior.
         grupo = (g["timestamp"].diff() > pd.Timedelta(hours=1)).cumsum()
         for _, v in g.groupby(grupo):
+            clase = _clase_principal(v["clase"])
             # El motivo del evento es el de su peor hora (la de mayor exceso), no la lista de todas.
+            # Sin exceso físico, el de la primera hora de la clase más grave: así un cambio no autorizado
+            # no se explica con el login fallido que lo precedió.
             con_motivo = v[v["motivo"] != ""]
-            pico = con_motivo.loc[(con_motivo["exceso_kwh"] + con_motivo["exceso_l"]).idxmax()] if len(con_motivo) else None
+            exceso = con_motivo["exceso_kwh"] + con_motivo["exceso_l"]
+            if exceso.gt(0).any():
+                motivo = f'pico: {con_motivo.loc[exceso.idxmax(), "motivo"]}'
+            else:
+                de_la_clase = con_motivo.loc[con_motivo["clase"] == clase, "motivo"]
+                motivo = (de_la_clase if len(de_la_clase) else con_motivo["motivo"]).iloc[0] if len(con_motivo) else ""
             # Los eventos OT en el orden en que ocurrieron: «Login fallido → Cambio de configuración…».
             ot = list(dict.fromkeys(EVENTOS_OT_TEXTO[x] for x in v["ot_event"] if x in EVENTOS_OT_TEXTO))
             # La acción del detector es la de la primera hora con la clase más grave del evento.
-            clase = _clase_principal(v["clase"])
             acciones = v.loc[v["clase"] == clase, "accion"] if "accion" in v.columns else pd.Series(dtype=str)
             acciones = acciones[acciones != ""]
             filas.append({
@@ -103,7 +110,7 @@ def eventos(df: pd.DataFrame) -> pd.DataFrame:
                 "horas": len(v),
                 "clase": clase,
                 "clases": sorted(set(v["clase"]) - {"normal"}),
-                "motivo": (f'pico: {pico["motivo"]}' if pico is not None else " → ".join(ot)),
+                "motivo": motivo or " → ".join(ot),
                 "accion": acciones.iloc[0] if len(acciones) else "",
                 "escenario": v["scenario"].mode().iloc[0],
                 "ot_event": " → ".join(ot),

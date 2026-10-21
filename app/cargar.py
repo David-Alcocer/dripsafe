@@ -188,7 +188,7 @@ def cifra(numeros: dict, clave: str, defecto=None):
 
 
 # De la cifra más firme a la más débil. Una cifra calculada con otras hereda la más débil.
-FIRMEZA = ["observado", "medido", "estimado", "proyectado", "vista_previa", "ejemplo"]
+FIRMEZA = ["observado", "medido", "estimado", "proyectado", "vista_previa", "ejemplo", "pendiente"]
 
 
 def mas_debil(*tipos: str) -> str:
@@ -201,4 +201,7 @@ def tipo_cifra(numeros: dict, clave: str, ejemplo: bool) -> str:
     if ejemplo:
         return "ejemplo"
     dato = numeros.get(clave)
-    return dato.get("tipo", "estimado") if isinstance(dato, dict) else "vista_previa"
+    # Una cifra que el JSON oficial aún no trae (o trae en null) está pendiente, no es una vista previa.
+    if not isinstance(dato, dict) or ("valor" in dato and dato["valor"] is None):
+        return "pendiente"
+    return dato.get("tipo", "estimado")

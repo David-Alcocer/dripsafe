@@ -8,17 +8,27 @@ El video muestra los datos del kit: se guarda FUERA del repo y nunca se sube a G
 Sigue el recorrido de docs/08-pitch.md en modo presentación, a 1920×1080, con pausas para
 narrar encima.
 
-No graba si todavía no existe resultados/numeros_oficiales.json: un video de respaldo con cifras de
-ejemplo podría pasar por resultados. Para un borrador de prueba, usar --borrador (el archivo
+No graba mientras resultados/numeros_oficiales.json no exista o siga siendo el borrador con valores de
+ejemplo: un video de respaldo con cifras de ejemplo podría pasar por resultados. Para un borrador de prueba, usar --borrador (el archivo
 queda marcado como BORRADOR). El video final se graba después del congelamiento del 21 a las 20:00.
 """
 
 import argparse
+import json
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
 NUMEROS_OFICIALES = Path(__file__).resolve().parent.parent / "resultados" / "numeros_oficiales.json"
+
+
+def hay_cifras_oficiales(ruta: Path = NUMEROS_OFICIALES) -> bool:
+    """El JSON existe y no es el borrador con valores de ejemplo (misma regla que app/cargar.py)."""
+    if not ruta.exists():
+        return False
+    meta = json.loads(ruta.read_text(encoding="utf-8")).get("_meta", {})
+    return not (meta.get("generado_con_commit") == "ejemplo-sin-commit"
+                or "VALORES DE EJEMPLO" in meta.get("aviso", "").upper())
 
 # (qué hacer, segundos de pausa para narrar)
 RECORRIDO = [
@@ -86,8 +96,9 @@ if __name__ == "__main__":
     p.add_argument("--salida", type=Path, default=Path.home() / "hackathon" / "video-respaldo")
     p.add_argument("--borrador", action="store_true", help="grabar aunque las cifras sean de ejemplo (queda marcado)")
     a = p.parse_args()
-    if not NUMEROS_OFICIALES.exists() and not a.borrador:
-        raise SystemExit("Todavía no existe resultados/numeros_oficiales.json: el video mostraría cifras de ejemplo. "
-                         "Usa --borrador para una prueba.")
-    nombre = "dripsafe-demo.webm" if NUMEROS_OFICIALES.exists() else "dripsafe-demo-BORRADOR-cifras-ejemplo.webm"
+    oficiales = hay_cifras_oficiales()
+    if not oficiales and not a.borrador:
+        raise SystemExit("resultados/numeros_oficiales.json todavía es el borrador con valores de ejemplo: el video "
+                         "mostraría cifras de ejemplo. Usa --borrador para una prueba.")
+    nombre = "dripsafe-demo.webm" if oficiales else "dripsafe-demo-BORRADOR-cifras-ejemplo.webm"
     print(f"Video: {grabar(a.url, a.salida.expanduser(), nombre)}")
