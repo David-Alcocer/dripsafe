@@ -106,7 +106,11 @@ def cargar() -> Datos:
         canonico = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
         from src.metricas.generar_numeros import plano
         if numeros.get("_ejemplo") is not False or numeros != plano(canonico):
-            raise ValueError("La vista JSON de Leo no coincide con el Contrato 4 canónico")
+            # El canónico manda. Si alguien regeneró solo uno de los dos, la demo no se cae: se usa la vista
+            # calculada del canónico y se avisa en pantalla para correr `python -m src.pipeline` otra vez.
+            numeros = plano(canonico)
+            avisos.append("app/ejemplos/numeros_ejemplo.json no coincide con resultados/numeros_oficiales.json: "
+                          "se muestran las cifras del canónico. Corre python -m src.pipeline para regenerar los dos.")
         fuentes["numeros"] = "oficial"
     else:
         numeros, fuentes["numeros"] = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8")), "ejemplo"

@@ -280,3 +280,19 @@ def test_cifra_oficial_que_falta_se_marca_pendiente():
     assert cargar.tipo_cifra(n, "punto_ciego_pct", ejemplo=False) == "pendiente"   # no existe
     assert cargar.tipo_cifra(n, "equilibrio_horas", ejemplo=False) == "pendiente"  # existe, pero en null
     assert cargar.mas_debil("medido", "pendiente") == "pendiente"
+
+
+def test_vista_plana_desfasada_avisa_y_no_tumba_la_app(monkeypatch, tmp_path):
+    """Si alguien regeneró solo uno de los dos JSON, la app usa el canónico y avisa; no se cae en la demo."""
+    from src.metricas.generar_numeros import plano
+    monkeypatch.setattr(cargar.kit, "disponible", lambda: True)
+    monkeypatch.setattr(cargar.kit, "leer", kit.ejemplo)
+    vieja = tmp_path / "numeros_ejemplo.json"
+    vieja.write_text(json.dumps({"_ejemplo": False, "desfasado": True}), encoding="utf-8")
+    monkeypatch.setitem(cargar.RUTAS, "leo", vieja)
+    monkeypatch.setitem(cargar.RUTAS, "alertas", tmp_path / "no-existe.csv")
+    monkeypatch.setitem(cargar.RUTAS, "consumo", tmp_path / "no-existe.json")
+    d = cargar.cargar()
+    assert d.fuentes["numeros"] == "oficial"
+    assert d.numeros == plano(json.loads(cargar.RUTAS["numeros"].read_text(encoding="utf-8")))
+    assert any("no coincide" in a for a in d.avisos)
