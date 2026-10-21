@@ -536,7 +536,7 @@ def ciberseguridad(d: Datos, v: Vista) -> None:
         st.html(c.panel("Tabla de decisión", c.tabla(
             ["Clase", "Severidad", "Cuándo", "Acción sugerida"],
             [[c.chip(k), sev, cuando, accion] for k, (_, sev, _, cuando, accion) in CLASES.items()]),
-            "Propuesta del equipo (Guille, U1). Ningún exceso sin explicar va directo a mantenimiento, "
+            "La aplica src/ot/clases.py (Guille, U1). Ningún exceso sin explicar va directo a mantenimiento, "
             "y ningún cambio no autorizado es «sin urgencia»."))
 
     with fila("Registro de eventos OT", "ot"):
