@@ -33,7 +33,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 ### 1 · El problema (40 s)
 > "En Yucatán no hay ríos. Casi toda el agua sale de un solo acuífero, con el agua a pocos metros de la superficie y conectado por cenotes. Cada centro de datos que enfría con torres evaporativas saca agua de ahí.
 > Y el enfriamiento lo controlan PLCs: si alguien cambia un setpoint, el consumo se dispara sin que nadie lo note.
-> Hoy se vigila con umbrales fijos: alertar si el PUE pasa de 1.6. Pero un sitio eficiente, con PUE de 1.2, puede subir su energía de enfriamiento **[punto_ciego_pct]** sin cruzar esa línea. El umbral fijo deja ciegos justo a los sitios eficientes."
+> Hoy se vigila con umbrales fijos: alertar si el PUE pasa de 1.6. Pero un sitio eficiente, con PUE de 1.2, puede subir su energía no TI hasta **158 %** sin cruzar esa línea. El umbral fijo deja ciegos justo a los sitios eficientes."
 
 ### 2 · La solución (50 s)
 > "DripSafe aprende, con 72 horas limpias de referencia (48 para ajustar y 24 para calibrar), cuánto **debería** gastar cada sitio según su carga y la temperatura exterior. Cada hora compara lo real contra lo esperado. Es la misma línea base que se usa para verificar ahorros de energía (ASHRAE Guideline 14), pero aplicada a detectar en tiempo real.
@@ -43,19 +43,19 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 ### 3 · Demo (90 s) · dashboard en modo presentación
 1. **Resumen** (15 s): "Esto es el kit oficial, datos simulados. La línea punteada es lo esperado; el área naranja es el exceso."
 2. **Demo de ataque · Evento OT · SIM-C** (45 s), los 4 pasos: "El operador ve todo normal. La energía también va en lo esperado. Pero el registro OT muestra tres logins fallidos de madrugada y luego un cambio de configuración. DripSafe lo marca como **cambio no autorizado**: no hay efecto físico todavía, pero se compara contra la configuración aprobada y se vigila 24 horas."
-3. **Demo · Ineficiencia · SIM-A** (30 s): "Aquí no hay evento OT, pero la energía no TI sube [pico del exceso, del dashboard] sobre lo esperado. Es un **escalón sin registro**: puede ser una falla o un cambio que no dejó huella. Primero se revisa la configuración, después mantenimiento. DripSafe solo avisa; decide una persona."
+3. **Demo · Ineficiencia · SIM-A** (30 s): "Aquí no hay evento OT, pero la energía no TI sube hasta **107 %** sobre lo esperado. Es un **escalón sin registro**: puede ser una falla o un cambio que no dejó huella. Primero se revisa la configuración, después mantenimiento. DripSafe solo avisa; decide una persona."
 
 > Si la demo falla: pasar al video de respaldo sin comentarlo (#20).
 
 ### 4 · Los números (60 s)
 > "En los 3 episodios anómalos del kit, 21 horas en total, DripSafe y las reglas empatan: el kit los diseñó para que las reglas los vean, y lo decimos así.
-> El aporte está en las fallas más pequeñas. Inyectamos excesos de 10 a 80 % con una rejilla fija, escrita antes de medir. DripSafe detecta desde [+X %]; las reglas fijas, desde [+Y %]. Esto es lo que dejan de ver: [kWh no vistos].
+> El aporte está en las fallas más pequeñas. Inyectamos excesos de 10 a 80 % con una rejilla fija, escrita antes de medir. DripSafe detecta las 18 fallas de cada tamaño desde **+10 %**, en la misma hora; las reglas fijas no ven ninguna hasta **+80 %**, y ahí solo 6 de 18. Solo en las fallas de +20 %, las reglas dejan pasar **625 kWh**.
 > ¿Y lo que gasta DripSafe? Medimos [detector_cpu_ms] ms por corrida en una laptop. Eso es [detector_kwh_anual] kWh al año, estimado. Basta con detectar a tiempo **[equilibrio] de exceso al año** para pagar su propia energía. Ese es el balance neto: no depende de prometer ahorros."
 
 ### 5 · Impacto y escala (60 s)
 > "En agua, el ahorro depende del tipo de enfriamiento: es grande en el evaporativo y casi nulo en el de aire. Lo decimos en lugar de prometer agua en todos lados.
 > Para el bono proponemos llegar a **cero agua potable** en obra nueva: enfriamiento líquido en circuito cerrado con enfriadores secos, y un chiller de respaldo en las [horas] más calientes del año. Cuesta un poco de PUE y lo reportamos. Microsoft anunció en 2024 un diseño así, sin evaporación; Google ya enfría un centro de datos con agua residual tratada, nuestro respaldo opcional.
-> DripSafe corre en local, sin nube y sin GPU, con seis medidores que casi cualquier centro de datos ya tiene. Cuesta por kW, y con nuestro precio supuesto la cuota se paga sola con menos del [0.5 %] del consumo auxiliar de un sitio de 1 MW.
+> DripSafe corre en local, sin nube y sin GPU, con seis medidores que casi cualquier centro de datos ya tiene. Cuesta por kW, y con nuestro precio supuesto la cuota se paga sola con menos del 0.5 % del consumo auxiliar de un sitio de 1 MW.
 > Nuestros límites: datos simulados, una sola semana de clima y sin sensores de agua helada. La siguiente validación es con datos reales de una sala de cómputo en Yucatán.
 > DripSafe: que cada litro y cada kWh que sobra se note a tiempo."
 
