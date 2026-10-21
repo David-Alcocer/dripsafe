@@ -95,7 +95,7 @@ def test_curva_y_falsas_alarmas_de_leo_usen_los_agregados_n2(cifras):
 
 def test_g3_versionado_y_pendientes_del_balance(cifras):
     c, leo = cifras
-    for clave, responsable in (("pue_con_bono", "Misa"), ("acuifero_3105", "Guille")):
+    for clave, responsable in (("pue_con_bono", "Misa"), ("acuifero_3105", "Nico")):
         x = leo[clave]
         assert x["valor"] is None and x["estado"] == "pendiente"
         assert responsable in x.get("motivo_pendiente", "")
