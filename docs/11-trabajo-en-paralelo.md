@@ -100,20 +100,15 @@ Además se genera un `.manifiesto.json` con las ventanas exactas de cada escenar
 
 `resultados/numeros_oficiales.json` es **la única fuente** de las cifras que aparecen en el dashboard, las diapositivas y el pitch. Cada número dice de dónde salió:
 
-**Nico es responsable de consolidarlo.** Misa aporta `pue_antes` y las energías y periodo que lo sustentan; Nico calcula `pue_despues` (PUE final proyectado), el ahorro y el impacto en agua y emisiones cuando los datos sean suficientes. Usa las alertas y el consumo esperado de Gadiel. **Misa + Nico calculan y validan juntos el balance neto final**, usando las mediciones de CodeCarbon de Gadiel. Misa conserva la integración del flujo y Leo consume las cifras.
+**Nico consolida** el JSON canónico y genera `app/ejemplos/numeros_ejemplo.json`, la vista plana que consume Leo. Misa aporta y revisa el PUE; Gadiel entrega tiempo y energía medidos del detector; Guille confirma el dato del acuífero. Misa y Nico validan el balance neto cuando Gadiel entregue CodeCarbon.
 
-Ejemplo ilustrativo de la entrada de Misa; no es un resultado medido del proyecto:
+Cada cifra lleva `valor`, `unidad`, `tipo`, `origen`, `responsable`, `estado` y, si queda en `null`, `motivo_pendiente`. `tipo` distingue `observado` (kit simulado), `medido` (hardware con repeticiones), `estimado` (modelo) y `proyectado` (escenario). `_meta.periodos` fija referencia (216 horas-sitio) y evaluación (288 horas-sitio), con fechas inclusivas, sitios e intervalo de una hora. Las energías de entrada son kWh por intervalo, el agua es captación in situ en L; PUE es ratio y WUE L/kWh IT.
 
-```json
-{
-  "pue_antes": {"valor": 1.33, "unidad": "", "origen": "src/metricas/pue.py", "responsable": "Misa"},
-  "generado_con_commit": "abc1234"
-}
-```
+`pue.referencia` conserva la línea base histórica. `pue.antes` es el PUE observado de **evaluación** y `pue.despues_proyectado` resta de esa misma evaluación solo el exceso estimado que coincide con alertas físicas. Es un contrafactual, no ahorro observado. Se hace lo mismo con WUE. `periodos_y_sitios` deja auditables los totales de referencia y evaluación, el exceso por sitio y las unidades. La comparación original de detección cuenta **3 episodios**; las 21 horas anómalas se reportan aparte. Los nombres de clases coinciden con `src/ot/clases.py`.
 
 Este archivo **sí** se sube al repo, porque solo contiene totales que de todos modos se van a mostrar en el pitch, nunca filas del kit. Así Git guarda el historial de cada cifra. Si un número aparece en una diapositiva y no está aquí, es un error.
 
-Los cálculos están **pendientes de implementación**. En su documentación y presentación, Nico identifica periodo, unidades, fuentes y supuestos. `pue_despues` y los ahorros se muestran como proyecciones hasta contar con evidencia medida; las métricas sin datos suficientes quedan pendientes. Se conserva el formato existente: este cambio redistribuye el trabajo, sin modificar `src/contrato.py`.
+El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit usa `app/ejemplos/numeros_demo.json`, rotulada **Ejemplo**. El costo del detector, el balance que depende de él, el PUE con bono y el acuífero siguen pendientes hasta recibir evidencia.
 
 ### Cambiar un contrato
 

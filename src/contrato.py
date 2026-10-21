@@ -13,6 +13,8 @@ Reglas:
 """
 
 import pandas as pd
+import math
+import re
 
 # Sin estas columnas no se puede calcular el PUE.
 OBLIGATORIAS = ["timestamp", "kw_ti", "kw_total"]
@@ -88,3 +90,57 @@ def intervalo_horas(df: pd.DataFrame) -> float:
 def leer(ruta) -> pd.DataFrame:
     """Lee un CSV del contrato con 'timestamp' como fecha."""
     return pd.read_csv(ruta, parse_dates=["timestamp"])
+
+
+TIPOS_CIFRA = {"observado", "medido", "estimado", "proyectado"}
+
+
+def validar_numeros_oficiales(numeros: dict) -> list[str]:
+    """Contrato 4: periodos comparables, procedencia y pendientes explícitos.
+
+    Solo se versionan agregados. La vista plana de Leo se deriva de este objeto.
+    """
+    problemas = []
+    meta = numeros.get("_meta", {})
+    if "DATOS SIMULADOS" not in meta.get("aviso", ""):
+        problemas.append("_meta.aviso debe identificar DATOS SIMULADOS")
+    if meta.get("estado") != "parcial":
+        problemas.append("_meta.estado debe declarar parcial mientras haya pendientes")
+    periodos = meta.get("periodos", {})
+    for clave in ("referencia", "evaluacion"):
+        p = periodos.get(clave, {})
+        if not all(p.get(c) for c in ("inicio", "fin", "horas_sitio", "sitios", "intervalo_h")):
+            problemas.append(f"periodo {clave} incompleto")
+    if numeros.get("pue", {}).get("antes", {}).get("periodo") != "evaluacion" or \
+            numeros.get("pue", {}).get("despues_proyectado", {}).get("periodo") != "evaluacion":
+        problemas.append("PUE antes/después debe usar la misma evaluación")
+    if numeros.get("pue", {}).get("referencia", {}).get("periodo") != "referencia":
+        problemas.append("PUE de referencia debe identificarse por separado")
+
+    def recorrer(obj, ruta=""):
+        if isinstance(obj, dict):
+            if "valor" in obj:
+                for campo in ("unidad", "tipo", "origen", "responsable", "estado"):
+                    if campo not in obj or not isinstance(obj[campo], str) or not obj[campo]:
+                        problemas.append(f"{ruta}: falta {campo}")
+                if obj.get("tipo") not in TIPOS_CIFRA:
+                    problemas.append(f"{ruta}: tipo inválido")
+                valor = obj["valor"]
+                if valor is None:
+                    if obj.get("estado") != "pendiente" or not obj.get("motivo_pendiente"):
+                        problemas.append(f"{ruta}: null sin pendiente y motivo")
+                elif isinstance(valor, bool) or not isinstance(valor, (int, float)) or not math.isfinite(valor):
+                    problemas.append(f"{ruta}: valor no numérico o no finito")
+                elif obj.get("estado") != "disponible":
+                    problemas.append(f"{ruta}: cifra disponible sin estado")
+            for k, v in obj.items():
+                recorrer(v, f"{ruta}.{k}" if ruta else k)
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                recorrer(v, f"{ruta}[{i}]")
+
+    recorrer(numeros)
+    bruto = str(numeros)
+    if re.search(r"['\"]/(?:home|Users|tmp)/", bruto):
+        problemas.append("El JSON contiene una ruta absoluta local")
+    return problemas

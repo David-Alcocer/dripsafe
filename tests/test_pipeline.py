@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from app import kit
-from src import pipeline
+from src import contrato, pipeline
 from src.datos.cargar import cargar
 from src.metricas import balance_neto
 from src.metricas.pue import pue_inicial
@@ -93,7 +93,7 @@ def test_commit_limpio_no_lleva_marca(monkeypatch):
     assert pipeline._commit() == "abc1234"
 
 
-# ---------- pipeline de punta a punta ----------
+# ---------- pipeline de punta a punta (contrato 4 de Nico) ----------
 
 @pytest.fixture(scope="module")
 def salida(tmp_path_factory):
@@ -102,90 +102,95 @@ def salida(tmp_path_factory):
     pipeline.main([
         "--ejemplo", "--sin-medir", "--semillas-ruido", "",
         "--resultados", str(carpeta / "resultados"),
+        "--clima", str(carpeta / "sin_clima.json"),
         "--salida", str(destino),
     ])
     return carpeta, json.loads(destino.read_text(encoding="utf-8"))
 
 
-def test_pipeline_escribe_json_con_meta_y_aviso_de_ejemplo(salida):
+def test_pipeline_cumple_el_contrato_4(salida):
+    _, numeros = salida
+    assert contrato.validar_numeros_oficiales(numeros) == []
+
+
+def test_pipeline_escribe_meta_con_commit_y_aviso_de_ejemplo(salida):
     _, numeros = salida
     meta = numeros["_meta"]
-    assert "INVENTADOS" in meta["aviso"]
-    assert meta["generado_con_commit"] not in ("", "ejemplo-sin-commit")
-    assert meta["periodo"]["sitios"] == ["SIM-A", "SIM-B", "SIM-C"]
-    assert meta["periodo"]["filas"] == 504          # horas-sitio
-    assert meta["periodo"]["horas_reloj"] == 168
-    assert "horas" not in meta["periodo"]
+    assert "DATOS SIMULADOS" in meta["aviso"] and "INVENTADOS" in meta["aviso"]
+    assert meta["generado_con_commit"] == meta["base_main"]
+    assert meta["generado_con_commit"] not in ("", "f2e5c4b")
+    assert meta["periodos"]["referencia"]["horas_sitio"] == 216
+    assert meta["periodos"]["evaluacion"]["horas_sitio"] == 288
 
 
 def test_pipeline_separa_pue_de_referencia_y_de_evaluacion(salida, crudo):
     _, numeros = salida
     pue = numeros["pue"]
-    assert pue["referencia"]["particion"] == "referencia"
-    assert pue["antes"]["particion"] == "evaluacion"
-    assert pue["referencia"]["tipo"] == pue["antes"]["tipo"] == "medido"
-    assert pue["referencia"]["origen"].startswith("src/metricas/pue.py")
-    assert pue["antes"]["origen"].startswith("src/metricas/pue.py")
+    assert pue["referencia"]["periodo"] == "referencia"
+    assert pue["antes"]["periodo"] == pue["despues_proyectado"]["periodo"] == "evaluacion"
     eva = crudo[crudo["split"] == "evaluacion"]
     assert pue["antes"]["valor"] == pytest.approx(
         eva["energy_total_kwh"].sum() / eva["energy_it_kwh"].sum(), abs=1e-4)
-    assert "wue" in numeros and numeros["wue"]["referencia"]["particion"] == "referencia"
-    energia = numeros["energia"]
-    assert energia["it_kwh"]["particion"] == "referencia"
-    assert energia["evaluacion"]["it_kwh"]["particion"] == "evaluacion"
-    assert energia["no_ti_kwh"]["valor"] == pytest.approx(
-        energia["total_kwh"]["valor"] - energia["it_kwh"]["valor"], rel=1e-6)
 
 
-def test_pue_antes_y_exceso_usan_la_misma_particion(salida):
+def test_pue_antes_y_exceso_usan_el_mismo_periodo(salida):
     _, numeros = salida
     antes = numeros["pue"]["antes"]
     kwh = numeros["exceso_estimado"]["kwh_sobre_evaluacion"]
     litros = numeros["exceso_estimado"]["litros_sobre_evaluacion"]
-    assert antes["particion"] == kwh["particion"] == litros["particion"] == "evaluacion"
-    assert kwh["filas"] == litros["filas"] == 288
-    assert "96 h × 3 sitios = 288 filas" in kwh["nota"]
-    assert "EVALUACIÓN" in numeros["pue"]["despues_proyectado"]["nota"]
+    assert antes["periodo"] == kwh["periodo"] == litros["periodo"] == "evaluacion"
 
 
-def test_pipeline_llena_exceso_y_deteccion(salida):
+def test_pipeline_llena_deteccion_con_la_rejilla(salida):
     _, numeros = salida
-    assert numeros["exceso_estimado"]["kwh_sobre_evaluacion"]["valor"] >= 0
-    assert numeros["exceso_estimado"]["litros_sobre_evaluacion"]["valor"] >= 0
     deteccion = numeros["deteccion"]
     assert deteccion["comparacion_contra_reglas_kit"]["episodios_originales_kit"]["dripsafe_tp"] is not None
     assert deteccion["comparacion_contra_reglas_kit"]["rejilla_inyecciones"]["datos_curva"]
     assert deteccion["falsas_alarmas_por_dia"]["valor"] is not None
 
 
-def test_pipeline_no_inventa_lo_que_falta(salida):
+def test_pipeline_sin_medicion_deja_el_costo_pendiente(salida):
     _, numeros = salida
-    # Sin medir con CodeCarbon no hay costo; sin supuestos de Nico no hay ahorro proyectado.
-    assert numeros["balance_neto"]["costo_detector_kwh_anual"]["valor"] is None
-    assert numeros["balance_neto"]["ahorro_proyectado_kwh_anual"]["valor"] is None
-    assert numeros["pue"]["despues_proyectado"]["valor"] is None
+    balance = numeros["balance_neto"]
+    for clave in ("costo_detector_kwh_anual", "umbral_equilibrio", "razon_ahorro_costo"):
+        assert balance[clave]["valor"] is None
+        assert balance[clave]["estado"] == "pendiente" and balance[clave]["motivo_pendiente"]
 
 
 def test_pipeline_deja_las_tablas_intermedias_fuera_del_json(salida):
     carpeta, _ = salida
     assert (carpeta / "resultados" / "alertas.csv").is_file()
     assert (carpeta / "resultados" / "rejilla_resumen.csv").is_file()
+    assert (carpeta / "resultados" / "deteccion_para_numeros_oficiales.json").is_file()
 
 
-def test_pipeline_usa_consumo_ya_medido(tmp_path):
+def test_pipeline_usa_consumo_ya_medido(salida, tmp_path):
+    carpeta, _ = salida
     consumo = tmp_path / "consumo_modelo.json"
     consumo.write_text(json.dumps({"kwh_entrenamiento": 1e-6, "kwh_inferencia_anual": 0.02,
-                                   "repeticiones": 10, "fecha": "2026-10-20"}), encoding="utf-8")
+                                   "ms_mediana": 12.5, "repeticiones": 10,
+                                   "fecha": "2026-10-20"}), encoding="utf-8")
     destino = tmp_path / "numeros.json"
     pipeline.main([
         "--ejemplo", "--sin-medir", "--sin-rejilla", "--consumo", str(consumo),
-        "--resultados", str(tmp_path / "resultados"), "--salida", str(destino),
+        "--resultados", str(carpeta / "resultados"), "--clima", str(tmp_path / "sin_clima.json"),
+        "--salida", str(destino),
     ])
     numeros = json.loads(destino.read_text(encoding="utf-8"))
+    assert contrato.validar_numeros_oficiales(numeros) == []
     balance = numeros["balance_neto"]
     assert balance["costo_detector_kwh_anual"]["valor"] == pytest.approx(0.02)
-    assert balance["umbral_equilibrio"]["horas_ineficiencia_para_equilibrio_al_año"] is not None
-    assert "detecciones_necesarias_al_año" not in balance["umbral_equilibrio"]
+    assert balance["tiempo_detector_ms"]["valor"] == pytest.approx(12.5)
+    assert balance["umbral_equilibrio"]["unidad"] == "h/año"
+    assert balance["umbral_equilibrio"]["valor"] > 0
+    ahorro = balance["ahorro_proyectado_kwh_anual"]["valor"]
+    assert balance["razon_ahorro_costo"]["valor"] == pytest.approx(ahorro / 0.02, rel=1e-3)
+
+
+def test_sin_rejilla_exige_una_corrida_previa(tmp_path):
+    with pytest.raises(SystemExit):
+        pipeline.main(["--ejemplo", "--sin-medir", "--sin-rejilla",
+                       "--resultados", str(tmp_path / "vacia"), "--salida", str(tmp_path / "n.json")])
 
 
 def test_ejemplo_no_sobrescribe_el_json_oficial():
