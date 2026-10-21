@@ -30,7 +30,7 @@ También debe conservarse el detalle por sitio. En evaluación, el WUE aproximad
 
 ### Comparación del PUE proyectado
 
-[`resultados/numeros_oficiales.json`](../resultados/numeros_oficiales.json) usa como `pue.antes` el PUE de las 216 filas de referencia. Si `pue.despues_proyectado` se calcula sobre las 288 filas de evaluación, compararlos directamente mezclaría periodos. Para proyectar el efecto sobre evaluación, el punto de partida debe ser su PUE **observado** y el denominador debe seguir siendo su energía TI del mismo periodo:
+**Corregido (#4 y contrato 4):** [`resultados/numeros_oficiales.json`](../resultados/numeros_oficiales.json) separa `pue.referencia` (216 filas de referencia, línea base normal) de `pue.antes` (288 filas de evaluación, tal como vienen). `src/metricas/pue.py` calcula el PUE inicial para el diagnóstico y `src/metricas/generar_numeros.py` genera las cifras canónicas y la vista de Leo. Antes se usaba como `pue.antes` el PUE de referencia. El punto de partida para proyectar el efecto sobre evaluación es su PUE **observado** y el denominador sigue siendo la energía TI del mismo periodo:
 
 ```text
 PUE observado, evaluación = 60 245.050 kWh / 47 146.578 kWh
@@ -63,6 +63,8 @@ Para atribuir impacto conviene separar alertas físicas de eventos OT y, dentro 
 ## 4. Agua y procedencia de las cifras
 
 El borrador de `impacto.py` aún no calcula litros de exceso. La vista previa sí entrega agua esperada, pero antes de publicar una cifra se necesita su equivalente en la salida oficial del modelo y una definición de qué alerta permite atribuir el exceso. El resultado se llama **exceso estimado de captación in situ**, nunca agua potable ahorrada.
+
+**Corregido (#4 y contrato 4):** `src/metricas/pue.py` ya existe; el diagnóstico de `src.pipeline --ejemplo` reporta `filas` (horas-sitio) y `horas_reloj`. El contrato 4 guarda ambos periodos en `_meta.periodos` y el exceso estimado se refiere a las 288 horas-sitio de evaluación. Texto original de la revisión:
 
 El JSON actual es un **ejemplo con resultados pendientes**. Su `pue.antes` cita `src/metricas/pue.py`, archivo que todavía no existe en el repositorio; el valor proviene del `reference_metrics.json` del kit. En `_meta.periodo`, `horas: 504` significa **504 horas-sitio**, equivalentes a 168 horas de reloj en tres sitios. La nota de `exceso_estimado` debe expresar **96 horas de evaluación × 3 sitios = 288 filas**, para evitar una extrapolación triple.
 

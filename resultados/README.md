@@ -7,6 +7,12 @@ Las entradas por fila permanecen bajo `data/`, ignorado por Git: `data/procesado
 Para regenerar, desde la raíz del repo, con el kit disponible:
 
 ```bash
+.venv/bin/python -m src.pipeline --kit "$KIT_CSV" --sin-medir
+```
+
+Ese comando corre el detector y la rejilla, deja sus tablas bajo `data/`, y genera **ambos** JSON mediante `src.metricas.generar_numeros`. Para reproducirlo por etapas:
+
+```bash
 .venv/bin/python -m src.datos.cargar --kit "$KIT_CSV" --salida data/procesado/telemetria.csv
 .venv/bin/python -m src.modelo.detector --entrada data/procesado/telemetria.csv --salida data/resultados/alertas.csv --sin-medir
 .venv/bin/python -m src.ataques.correr_rejilla --entrada data/procesado/telemetria.csv
@@ -14,6 +20,7 @@ Para regenerar, desde la raíz del repo, con el kit disponible:
 ```
 
 `--sin-medir` evita atribuir una medición de esta laptop a Gadiel. Sin la salida verificada de CodeCarbon de Gadiel, el costo del detector y el balance neto son `null` con `estado: pendiente`, responsable y motivo. Lo mismo ocurre con el PUE del bono sin rendimiento de chiller de Misa y el acuífero sin fuente confirmada por Guille.
+Una ejecución con `--ejemplo` usa cifras inventadas y escribe únicamente un diagnóstico bajo `data/`; nunca lee el JSON canónico como plantilla ni reemplaza los archivos versionados.
 `--descargar-clima` guarda las 8760 horas de ERA5 2025 bajo `data/` para reproducir los agregados climáticos; sin red también puede pasarse un archivo ya descargado con `--clima`.
 
 Cada métrica tiene `valor`, `unidad`, `tipo` (`observado`, `medido`, `estimado`, `proyectado`), `origen`, `responsable` y `estado`. Las métricas pendientes llevan `motivo_pendiente`. `_meta.periodos` separa 216 horas-sitio de referencia de 288 de evaluación. `pue.antes` y `pue.despues_proyectado` se refieren a **la misma evaluación**; `pue.referencia` se conserva aparte. El exceso es residuo estimado en horas con alerta física, no ahorro observado. `periodos_y_sitios` incluye PUE/WUE y exceso por sitio y unidad.
