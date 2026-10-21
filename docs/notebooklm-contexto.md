@@ -58,11 +58,11 @@ Somos 5 estudiantes de segundo año de Ingeniería de Software. Todos venimos de
 Reparto vigente (D13, 19 oct):
 - **Leo** (líder): demo en Streamlit, guion y diapositivas del pitch.
 - **Misa** (co-líder): datos, PUE inicial, GitHub e integración; comparación de refrigeración y bono; balance neto con Nico.
-- **Gadiel**: construye el detector híbrido (reglas + Isolation Forest) y mide su consumo con CodeCarbon.
+- **Gadiel**: construye el detector por sitio y mide su consumo con CodeCarbon.
 - **Nico**: evalúa el detector (calidad frente a costo, Green AI), ahorro y PUE final proyectados, balance neto con Misa. Participó en IRAP (programa de investigación de Texas A&M en Yucatán).
 - **Guille**: ciberseguridad OT, análisis del acuífero y gobernanza. Maneja Linux y seguridad básica.
 
-Sobre el kit (19 oct): datos totalmente simulados, 3 sitios ficticios (enfriamiento por aire, evaporativo y líquido) × 168 h, con energía, agua, carga, temperaturas y eventos OT resumidos. Las reglas simples del kit detectan sus anomalías de ejemplo; el Isolation Forest de ejemplo no, pero la comparación no es justa. Por eso usamos un detector híbrido con comparación justa.
+Sobre el kit (19 oct): datos totalmente simulados, 3 sitios ficticios (enfriamiento por aire, evaporativo y líquido) × 168 h, con energía, agua, carga, temperaturas y eventos OT resumidos. Las reglas simples del kit detectan sus anomalías de ejemplo; comparamos nuestro detector con ellas por episodio y con inyecciones adicionales.
 
 ---
 
@@ -74,7 +74,7 @@ Sobre el kit (19 oct): datos totalmente simulados, 3 sitios ficticios (enfriamie
 
 **Cómo funciona:**
 - Entrada: datos de sensores del enfriamiento (torres, bombas, chillers, flujo, temperatura y energía), que viajan por protocolos como Modbus o BACnet.
-- Modelo: **Isolation Forest** (scikit-learn), que aprende el comportamiento normal y marca lo que se sale de él.
+- Modelo: **línea base física por sitio** que predice energía no TI, agua y temperatura; umbrales y media móvil detectan residuos anómalos, y reglas OT clasifican las alertas.
 - Clasificación: ineficiencia (consumo coherente pero excesivo) o posible ataque (lecturas incoherentes entre sensores, cambios bruscos o actividad fuera de horario).
 - Salida: dashboard en Streamlit con alertas, PUE antes y después, y balance neto.
 
@@ -115,7 +115,7 @@ Hay que respaldar cada dato con una fuente.
 
 ### B. Detección de anomalías y Green AI
 6. ¿Qué estudios usan detección de anomalías para mejorar la eficiencia energética de sistemas HVAC o de enfriamiento? ¿Cuánto ahorro reportan?
-7. ¿Qué tan efectivo es Isolation Forest frente a otros métodos en datos de sensores industriales?
+7. ¿Qué tan efectivos son los modelos de línea base y los umbrales de residuos en datos de sensores industriales?
 8. ¿Cuánta energía consume entrenar un modelo clásico de machine learning frente a un LLM?
 9. ¿Existen casos documentados donde la IA redujo el PUE de un centro de datos?
 
@@ -140,7 +140,7 @@ Hay que respaldar cada dato con una fuente.
 
 ## 6. Palabras clave para buscar
 
-**Inglés:** data center water footprint · water usage effectiveness WUE · power usage effectiveness PUE · cooling tower blowdown evaporation · closed-loop liquid cooling data center · reclaimed water data center cooling · anomaly detection HVAC energy efficiency · isolation forest industrial sensor data · process-based anomaly detection ICS · false data injection attack ICS · MITRE ATT&CK for ICS · IEC 62443 · Modbus security · Green AI carbon footprint machine learning · CodeCarbon · SWaT dataset · WADI dataset.
+**Inglés:** data center water footprint · water usage effectiveness WUE · power usage effectiveness PUE · cooling tower blowdown evaporation · closed-loop liquid cooling data center · reclaimed water data center cooling · anomaly detection HVAC energy efficiency · baseline residual threshold industrial sensor data · process-based anomaly detection ICS · false data injection attack ICS · MITRE ATT&CK for ICS · IEC 62443 · Modbus security · Green AI carbon footprint machine learning · CodeCarbon · SWaT dataset · WADI dataset.
 
 **Español:** huella hídrica centros de datos · consumo de agua inteligencia artificial · eficiencia energética PUE · enfriamiento líquido circuito cerrado · agua residual tratada enfriamiento · ciberseguridad sistemas de control industrial · seguridad Modbus · acuífero Península de Yucatán · contaminación cenotes Yucatán · Anillo de Cenotes reserva geohidrológica · disponibilidad acuífero CONAGUA Yucatán · factor de emisión sistema eléctrico nacional México.
 
@@ -165,8 +165,6 @@ Hay que respaldar cada dato con una fuente.
 - INCIBE, análisis de riesgos en SCI: https://www.incibe.es/incibe-cert/blog/analisis-de-riesgos-en-sci
 
 **IA:**
-- scikit-learn IsolationForest: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
-- CodeCarbon con scikit-learn: https://docs.codecarbon.io/latest/how-to/scikit-learn/
 
 **Yucatán:**
 - Greenpeace, informe sobre cenotes (PDF): https://www.greenpeace.org/static/planet4-mexico-stateless/2018/11/b73d5a1c-b73d5a1c-informe-cenotes-gp_final.pdf

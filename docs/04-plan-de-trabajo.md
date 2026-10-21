@@ -13,7 +13,7 @@ Este plan reemplaza el día-por-día anterior. Está organizado por **dependenci
 5. **PUE/WUE, exceso estimado** (kWh y L), costo del detector, balance neto y análisis del acuífero, todo con procedencia y supuestos.
 6. **Dashboard y pitch** alimentados por el JSON oficial, con ruta de demo que funcione sin kit.
 
-**Ampliaciones (no bloquean el MVP):** Isolation Forest con ablación, CUSUM, incoherencia física, deriva, cola por litros, pantallas extra.
+**Ampliaciones (no bloquean el MVP):** CUSUM, incoherencia física, deriva, cola por litros, pantallas extra. El detector vigente sigue D20.
 
 ## Flujo de dependencias
 
@@ -98,7 +98,7 @@ Conservar en este orden:
 6. Acuífero
 7. Demo sencilla
 
-Dejar fuera: cuantificación detallada del bono, Isolation Forest, CUSUM, pantallas adicionales.
+Dejar fuera: cuantificación detallada del bono, CUSUM, pantallas adicionales.
 
 ---
 

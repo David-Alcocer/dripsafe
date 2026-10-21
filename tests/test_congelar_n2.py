@@ -40,7 +40,6 @@ def test_fija_ventanas_parametros_y_exclusion_de_etiquetas():
     assert len(sitio["parametros"]["coef_energia"]) == 3
     assert primero["protocolo"]["etiquetas_no_alteran_predicciones"] is True
     assert primero["protocolo"]["evaluacion_no_altera_parametros"] is True
-    assert primero["protocolo"]["incluye_isolation_forest"] is False
     assert primero["codigo"]["commit_corte"] == _revision()
     assert "/home/" not in json.dumps(primero)
 

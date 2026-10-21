@@ -12,7 +12,7 @@
 ### Nombres de rama
 
 ```text
-feat/modelo-isolation-forest
+feat/modelo-linea-base
 feat/dashboard-alertas
 data/limpieza-kit
 docs/analisis-acuifero

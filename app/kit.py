@@ -13,7 +13,6 @@ Las reglas de `reglas()` son las mismas reglas didácticas de common/cifox.py de
 (licencia MIT): PUE > 1.6, agua > 1.5 L/kWh IT, entrada > 29 °C o evento OT.
 """
 
-import json
 import os
 from pathlib import Path
 
@@ -55,16 +54,6 @@ def leer(ruta: Path | None = None) -> pd.DataFrame:
     if df.duplicated(["timestamp", "site_id"]).any():
         raise ValueError("Hay un sitio con dos filas en la misma hora")
     return df[COLUMNAS].sort_values(["site_id", "timestamp"]).reset_index(drop=True)
-
-
-def benchmarks() -> dict:
-    """Corridas de ejemplo del kit (reglas e Isolation Forest): tiempo, memoria y aciertos."""
-    salida = {}
-    for metodo, archivo in [("reglas", "benchmark_rules_example.json"), ("isolation_forest", "benchmark_if_example.json")]:
-        ruta = carpeta() / "docs" / archivo
-        if ruta.exists():
-            salida[metodo] = json.loads(ruta.read_text(encoding="utf-8"))
-    return salida
 
 
 def reglas(df: pd.DataFrame) -> pd.DataFrame:

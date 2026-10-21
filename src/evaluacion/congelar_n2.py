@@ -165,7 +165,6 @@ def construir(telemetria: pd.DataFrame, identidad_kit: dict, revision: str) -> d
         "codigo": _revision_codigo(revision),
         "protocolo": {
             "detector_actual": "mínimos cuadrados por sitio + umbrales de residuo + EWMA + clasificación OT",
-            "incluye_isolation_forest": False,
             "intervalo_h": 1,
             "horas_ajuste_por_sitio": detector.HORAS_AJUSTE,
             "horas_calibracion_por_sitio": detector.HORAS_CALIBRACION,

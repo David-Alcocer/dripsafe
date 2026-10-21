@@ -192,7 +192,7 @@ KIT_VS_EQUIPO = {
         "CSV simulado de 3 sitios × 168 horas y su diccionario de datos",
         "Fórmulas de PUE y WUE con sumas",
         "Reglas didácticas fijas (PUE, agua, temperatura, evento OT)",
-        "Corrida de ejemplo de reglas contra Isolation Forest",
+        "Reglas didácticas como referencia de comparación",
     ],
     "Aporte de DripSafe": [
         "Línea base física por sitio: lo que cada sitio debería gastar según su carga y su clima",

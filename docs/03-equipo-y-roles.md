@@ -1,6 +1,6 @@
 # 03 · Equipo y roles
 
-> Somos 5 estudiantes de segundo año de Ingeniería de Software. Todos venimos de **C++**, así que la primera tarea común es **instalar Python 3.12 y aprender lo básico de pandas y scikit-learn**. A programadores competitivos esto les toma una tarde.
+> Somos 5 estudiantes de segundo año de Ingeniería de Software. Todos venimos de **C++**, así que la primera tarea común es **instalar Python 3.12 y aprender lo básico de pandas y numpy**. A programadores competitivos esto les toma una tarde.
 >
 > **Reparto vigente: D13 (19 oct).** Ver [02-decisiones.md](02-decisiones.md).
 
@@ -33,7 +33,7 @@
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md), [07-agua-y-acuifero.md](07-agua-y-acuifero.md) (sección del bono) y [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
 
 ### Gadiel · Construye el detector
-- **Detector híbrido** (#6): reglas explicables más Isolation Forest con variables derivadas por sitio, ajustado **solo con la partición de referencia**.
+- **Detector por sitio** (#6): línea base, umbrales de residuos y media móvil, ajustado **solo con la partición de referencia**; el registro OT clasifica las alertas.
 - **Consumo esperado** de energía auxiliar y agua por sitio, según carga, temperatura y tipo de enfriamiento (#5). Con eso se mide el exceso.
 - Explicar cada alerta con un motivo legible (#8).
 - Medir su consumo con **CodeCarbon** (#7).
@@ -41,7 +41,7 @@
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md).
 
 ### Nico · Pone a prueba el detector y calcula el impacto
-- **Evaluación justa y Green AI** (issue nuevo): comparar reglas, Isolation Forest e híbrido con **las mismas entradas**, ajuste y evaluación separados y **varias corridas** con dispersión. Reportar calidad (precisión y recall) junto al costo (tiempo, memoria y energía estimada). `tools/compare_detectors.py` del kit es el punto de partida.
+- **Evaluación justa y Green AI** (issue nuevo): comparar el detector con las reglas del kit usando **las mismas entradas**, ajuste y evaluación separados y **varias corridas** con dispersión. Reportar calidad (precisión y recall) junto al costo (tiempo, memoria y energía estimada).
 - **Ahorro y PUE final proyectado** (#3), con el PUE inicial de Misa y el consumo esperado de Gadiel.
 - **Balance neto final junto con Misa** (#14), con análisis de sensibilidad a los supuestos (watts y gCO₂e/kWh).
 - Consolidar `resultados/numeros_oficiales.json`.
@@ -62,7 +62,7 @@
 |---|---|
 | **Todos** | Instalar Python 3.12 y correr el **Stack A** siguiendo la guía del kit |
 | **Misa** | Proponer el contrato v2 (D14) y cargar el CSV; calcular el PUE inicial por sitio |
-| **Gadiel** | Correr `tools/compare_detectors.py` con los dos métodos y diseñar las variables por sitio |
+| **Gadiel** | Fijar el detector por sitio y sus parámetros sobre referencia; medir su consumo |
 | **Nico** | Leer `docs/METRICS.md` del kit y diseñar el protocolo de comparación justa |
 | **Guille** | Revisar cómo vienen los eventos OT y empezar a buscar fuentes del acuífero |
 | **Leo** | Revisar la app del Stack A y qué debe mostrar la demo de 3 minutos que sugiere el kit |

@@ -35,7 +35,6 @@ class Datos:
     eventos: pd.DataFrame    # alertas de DripSafe agrupadas en eventos por sitio
     evaluacion: dict         # {"dripsafe": (por escenario, resumen), "reglas": (…)}
     numeros: dict            # contrato 4 (oficial) o el ejemplo ficticio
-    benchmarks: dict         # corridas de ejemplo del kit: reglas e Isolation Forest
     fuentes: dict = field(default_factory=dict)
     consumo: dict = field(default_factory=dict)   # contrato 3: consumo_modelo.json (CodeCarbon), si existe
     avisos: list = field(default_factory=list)    # problemas de formato que el dashboard debe mostrar
@@ -116,7 +115,7 @@ def cargar() -> Datos:
     consumo = {}
     if RUTAS["consumo"].exists() and del_kit:
         consumo = json.loads(RUTAS["consumo"].read_text(encoding="utf-8"))
-    return Datos(tabla, calculos.eventos(tabla), evaluacion, numeros, kit.benchmarks(), fuentes, consumo, avisos)
+    return Datos(tabla, calculos.eventos(tabla), evaluacion, numeros, fuentes, consumo, avisos)
 
 
 METODOS = {"dripsafe": "DripSafe", "reglas_kit": "Reglas del kit"}

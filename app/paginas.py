@@ -492,13 +492,6 @@ def evaluacion(d: Datos) -> None:
             _fila_resumen("Reglas fijas del kit", rr, "PUE > 1.6, agua > 1.5, entrada > 29 °C o evento OT",
                           c.procedencia(telemetria_tipo(d))),
         ]
-        if_kit = d.benchmarks.get("isolation_forest")
-        if if_kit:
-            s = if_kit["scores"]
-            filas.append([
-                "Isolation Forest del kit", str(s["tp"]), str(s["fp"]), str(s["fn"]), f'{s["precision"]:.0%}',
-                f'{s["recall"]:.0%}', "—", f'<span class="tags">{c.procedencia(telemetria_tipo(d))}'
-                '<span>corrida de ejemplo del kit; 6 variables, sin OT</span></span>'])
         st.html(c.panel("Por hora, en las 96 h de evaluación", c.tabla(
             ["Método", "Aciertos", "Falsas", "Omitidas", "Precisión", "Recall", "Falsas por día", "Nota"],
             filas, numericas=(1, 2, 3, 4, 5, 6)),

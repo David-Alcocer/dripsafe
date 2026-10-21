@@ -38,11 +38,6 @@
 
 ## 🧠 IA y detección de anomalías
 
-- 🇬🇧 [IsolationForest: documentación de scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html)
-- 🇪🇸 [Detección de anomalías con Isolation Forest (LabEx)](https://labex.io/es/tutorials/anomaly-detection-with-isolation-forest-49171). Tutorial práctico en español.
-- 🇬🇧 [Anomaly detection using Isolation Forest: A Complete Guide (Analytics Vidhya)](https://analyticsvidhya.com/blog/2021/07/anomaly-detection-using-isolation-forest-a-complete-guide)
-- 🇬🇧 [Anomaly Detection with Isolation Forest (DigitalOcean)](https://www.digitalocean.com/community/tutorials/anomaly-detection-isolation-forest)
-- 🇬🇧 [Track Carbon Emissions with scikit-learn (CodeCarbon)](https://docs.codecarbon.io/latest/how-to/scikit-learn/). Para medir el consumo del modelo y armar el **balance neto**.
 - 🇬🇧 [SWaT: Secure Water Treatment dataset (iTrust, SUTD)](https://www.sutd.edu.sg/itrust/itrust-labs/datasets/dataset-characteristics/) y [WaDi: Water Distribution dataset](https://www.sutd.edu.sg/itrust/itrust-labs/datasets/dataset-characteristics/wadi/). Datos reales de plantas de agua con ataques simulados, para practicar. Hay que solicitar acceso.
 
 ## 🐍 Python para quienes vienen de C++

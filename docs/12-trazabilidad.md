@@ -23,7 +23,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 
 | Criterio | Responsable | Issues | Evidencia que lo demuestra | Estado |
 |---|---|---|---|---|
-| Innovación | Gadiel + Nico | #6, #8, #22 | Detector híbrido con coherencia física por sitio y comparación justa frente a las reglas del kit | ⬜ |
+| Innovación | Gadiel + Nico | #6, #8, #22 | Detector con línea base física por sitio y comparación por episodio frente a las reglas del kit | ⬜ |
 | Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números (`python -m src.pipeline`) | 🟨 faltan los supuestos de Nico para completar el JSON oficial |
 | Impacto en ciberseguridad | Guille | #9–#12, #30, #32 | Tabla de decisión de las 4 clases (`src/ot/clases.py`), rejilla corrida sobre el kit (`src/ataques/correr_rejilla.py`) y modelo de amenazas con tabla ATT&CK v20 (`docs/06`) | 🟨 PR #38, #39 y #40 |
 | Eficiencia Green AI | Nico: impacto y costo del detector; Misa: PUE inicial; Gadiel: consumo esperado | #2, #3, #5, #22 | PUE inicial y final proyectado + tabla calidad frente a costo | ⬜ |
@@ -42,7 +42,7 @@ Creados en GitHub el 19 de octubre, cada uno con su etiqueta `rol:*` y sus etiqu
 | #3 | Nico | Ahorro energético, PUE final proyectado y consolidación de `numeros_oficiales.json` | Contrato 4 + ejemplo reproducible |
 | #4 | Misa | Un solo comando que corre todo el flujo | `python -m src.pipeline` |
 | #5 | Gadiel | Modelo de consumo esperado del enfriamiento | `kw_esperado_enfriamiento` |
-| #6 | Gadiel | Isolation Forest v1 | Contrato 3 (`alertas.csv`) |
+| #6 | Gadiel | Detector por sitio: línea base, umbrales y media móvil (alcance D20) | Contrato 3 (`alertas.csv`) |
 | #7 | Gadiel | Medición con CodeCarbon | `consumo_modelo.json` |
 | #8 | Gadiel | Explicar cada alerta | `variable_principal` |
 | #9 | Guille | Escenarios simulados de ataque y falla | Contrato 2 |
@@ -65,7 +65,7 @@ Creados en GitHub el 19 de octubre, cada uno con su etiqueta `rol:*` y sus etiqu
 
 | # | Dueño | Issue | Produce |
 |---|---|---|---|
-| #22 | Nico | Evaluación justa y Green AI: reglas, Isolation Forest e híbrido con mismas entradas y varias corridas | Tabla calidad frente a costo + `numeros_oficiales.json` |
+| #22 | Nico | Evaluación justa y Green AI: detector vigente frente a reglas del kit, por episodio y con varias corridas | Tabla calidad frente a costo + `numeros_oficiales.json` |
 | #23 | Misa | Contrato v2 adaptado al kit (D14) | PR que cambia doc 11, `src/contrato.py` y `config/columnas.json` |
 | — | Guille | Mapear las etiquetas del kit a `etiqueta_*` y separar escenarios del kit de los nuestros | Cubierto: `src/datos/cargar.py` (#1) mapea las etiquetas y la rejilla (#30) marca cada episodio como `origen=kit` u `origen=inyeccion` |
 

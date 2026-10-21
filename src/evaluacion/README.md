@@ -39,8 +39,8 @@ coincidencia perfecta en él no demuestra eficacia externa.
 
 `evaluar_episodios()` recibe cualquier tabla de alertas que tenga
 `site_id`, `timestamp` y `anomalia`. Por eso se puede evaluar con el mismo
-código el umbral fijo, la línea base de Gadiel y, si llega a tiempo,
-Isolation Forest. Se congelan sus parámetros antes de abrir la evaluación.
+código las reglas fijas del kit y el detector de Gadiel. Se congelan sus
+parámetros antes de abrir la evaluación.
 Las múltiples corridas corresponden a semillas o inyecciones diferentes; no
 se vuelven a ajustar umbrales usando los resultados de evaluación.
 
@@ -66,9 +66,9 @@ y las 24 h de calibración por sitio; las 96 h posteriores son evaluación.
 `ot_event` es una entrada legítima para clasificar, pero no ajusta la línea
 base numérica. El estado del manifiesto es **fijación local pendiente de
 confirmación de Gadiel**; no contiene ni sustituye su medición de CodeCarbon.
-El detector fijado en este commit usa mínimos cuadrados, umbrales y EWMA; no
-incluye Isolation Forest. Si Gadiel incorpora otro modelo, N2 necesita un
-nuevo commit de corte y debe repetir la evaluación con esa versión.
+El detector fijado en este commit usa mínimos cuadrados, umbrales y EWMA.
+Según D20, esa es la arquitectura acordada para N2. Cualquier cambio posterior
+requiere un nuevo commit de corte y repetir la evaluación con esa versión.
 
 ## Métricas de impacto
 

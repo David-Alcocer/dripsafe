@@ -22,7 +22,7 @@
       "src/contrato.py": "a566e9de372f88ff2f19f8572a3ade731b7ab731260014707330f03edd6b9692",
       "config/columnas.json": "88970896af064cb0650b498d19543f87d85a25890b6fd722afb243eb3fe746d4"
     },
-    "generador_sha256": "c325f7c2c2d234917758ce9059ae0f2f5721f8be4137f33e059b7b3228027f31",
+    "generador_sha256": "2d282774999c24fcda84b3a726880b4bde1d1b56422f0707ab66d81e56a10c9f",
     "entorno": {
       "python": "3.12.3",
       "numpy": "2.5.4",
@@ -31,7 +31,6 @@
   },
   "protocolo": {
     "detector_actual": "mínimos cuadrados por sitio + umbrales de residuo + EWMA + clasificación OT",
-    "incluye_isolation_forest": false,
     "intervalo_h": 1,
     "horas_ajuste_por_sitio": 48,
     "horas_calibracion_por_sitio": 24,
