@@ -70,6 +70,38 @@ El detector fijado en este commit usa mínimos cuadrados, umbrales y EWMA.
 Según D20, esa es la arquitectura acordada para N2. Cualquier cambio posterior
 requiere un nuevo commit de corte y repetir la evaluación con esa versión.
 
+### Paso 2 · Auditoría de la rejilla
+
+Después de correr U2 con el mismo CSV del kit, la auditoría comprueba que la
+fuente coincide con el hash fijado en el paso 1 y que el código del detector
+conserva sus hashes. Verifica todas las combinaciones de sitio, inyección e
+inicio, que cada inyección ejecutada tenga exactamente un resultado por método,
+que cada omisión tenga motivo y que las posiciones y omisiones sean las mismas
+en la base y en las cinco semillas de ruido. U2 verifica además que cada copia
+conserve los parámetros aprendidos de su condición.
+
+```bash
+KIT_CSV=/ruta/local/al/kit/data/operaciones_simuladas.csv
+python -m src.ataques.correr_rejilla --kit "$KIT_CSV"
+python -m src.evaluacion.auditar_rejilla
+```
+
+En el kit fijado hubo **144 posiciones planeadas por condición** (3 sitios ×
+8 inyecciones × 6 inicios), **141 ejecutadas y 3 omitidas**. SIM-C no tuvo
+ventana limpia para `cambio_sin_registro` a las 66 h ni para
+`cambio_con_efecto` a las 54 y 66 h. Por tanto, los denominadores por
+inyección son 18, excepto esos cambios: 17 y 16, respectivamente. Los mismos
+lugares y omisiones se conservaron en las cinco semillas; entre seis corridas
+hay 846 inyecciones y 1692 filas de resultados para dos métodos.
+
+`data/resultados/n2_auditoria_rejilla.csv` incluye **las 864 posiciones
+planeadas**, ejecutadas u omitidas, con el motivo y desplazamiento.
+`data/resultados/n2_auditoria_denominadores.csv` separa planeadas, ejecutadas
+y omitidas por condición, semilla, sitio e inyección. Ambas tablas, el
+manifiesto de U2 y los resultados por método permanecen bajo `data/`, fuera de
+Git. Los porcentajes de detección usan solo inyecciones ejecutadas como
+denominador; nunca convierten una omisión en fallo del detector.
+
 ## Métricas de impacto
 
 `src/metricas/impacto.py` calcula PUE y WUE como cocientes de sumas por sitio
