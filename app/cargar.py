@@ -106,7 +106,11 @@ def cargar() -> Datos:
         canonico = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
         from src.metricas.generar_numeros import plano
         if numeros.get("_ejemplo") is not False or numeros != plano(canonico):
-            raise ValueError("La vista JSON de Leo no coincide con el Contrato 4 canónico")
+            # El canónico manda. Si alguien regeneró solo uno de los dos, la demo no se cae: se usa la vista
+            # calculada del canónico y se avisa en pantalla para correr `python -m src.pipeline` otra vez.
+            numeros = plano(canonico)
+            avisos.append("app/ejemplos/numeros_ejemplo.json no coincide con resultados/numeros_oficiales.json: "
+                          "se muestran las cifras del canónico. Corre python -m src.pipeline para regenerar los dos.")
         fuentes["numeros"] = "oficial"
     else:
         numeros, fuentes["numeros"] = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8")), "ejemplo"
@@ -188,7 +192,7 @@ def cifra(numeros: dict, clave: str, defecto=None):
 
 
 # De la cifra más firme a la más débil. Una cifra calculada con otras hereda la más débil.
-FIRMEZA = ["observado", "medido", "estimado", "proyectado", "vista_previa", "ejemplo"]
+FIRMEZA = ["observado", "medido", "estimado", "proyectado", "vista_previa", "ejemplo", "pendiente"]
 
 
 def mas_debil(*tipos: str) -> str:
@@ -201,4 +205,7 @@ def tipo_cifra(numeros: dict, clave: str, ejemplo: bool) -> str:
     if ejemplo:
         return "ejemplo"
     dato = numeros.get(clave)
-    return dato.get("tipo", "estimado") if isinstance(dato, dict) else "vista_previa"
+    # Una cifra que el JSON oficial aún no trae (o trae en null) está pendiente, no es una vista previa.
+    if not isinstance(dato, dict) or ("valor" in dato and dato["valor"] is None):
+        return "pendiente"
+    return dato.get("tipo", "estimado")

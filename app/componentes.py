@@ -23,7 +23,7 @@ COLORES = {
 }
 # Clase CSS de la etiqueta de procedencia de cada tipo de cifra.
 _TAG_TIPO = {"observado": "ok", "medido": "ok", "estimado": "est", "proyectado": "proy", "ejemplo": "sim",
-             "vista_previa": "sim"}
+             "vista_previa": "sim", "pendiente": "sim"}
 
 # ------------------------------------------------------------ íconos (estilo Lucide, sin emojis)
 _SVG = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' "
