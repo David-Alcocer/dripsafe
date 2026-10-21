@@ -222,15 +222,64 @@ print(pue_wue_por_sitio(datos, particion="evaluacion",
 # A: PUE = 370 / 300 = 1.2333; WUE = 50 / 300 = 0.1667 L/kWh TI
 ```
 
-### Formato preparado para N2
+### Paso 4 · Sensibilidad, ruido y cierre de N2
 
-La futura tabla de comparación tendrá una fila por `metodo × sitio × escenario
-× magnitud × ruido × semilla`, con `tp`, `fp`, `fn`, `precision`, `recall`,
-`falsas_alarmas_por_dia_sitio`, límites de su IC, latencia en horas y exceso
-físico no detectado en kWh/L cuando exista manifiesto de inyección. La curva
-usará la misma tabla, con magnitud de la inyección en el eje horizontal y
-recall por episodio en el vertical. N1 define el formato; N2 producirá los
-puntos reales al recibir G2 y U2. No se inventan resultados oficiales.
+Después de los pasos 2 y 3, ejecutar:
+
+```bash
+.venv/bin/python -m src.evaluacion.cerrar_n2 --kit "$KIT_CSV"
+.venv/bin/python -m src.metricas.generar_numeros
+```
+
+El primer comando verifica otra vez el kit y el detector fijados, las 144
+posiciones planeadas por condición (864 entre las seis), la rejilla y los
+parámetros de ruido. Recalcula las bases sin inyecciones de las cinco semillas
+y exige que sus TP, FP, exposición limpia y latencias coincidan con U2. También
+comprueba las unidades, atributos, banderas y latencias de cada inyección.
+Deja `data/resultados/n2_tabla_final.csv` con una fila por condición, semilla,
+sitio, inyección y método; y `data/resultados/n2_cierre.json` con agregados.
+Ambos permanecen fuera de Git. El generador copia **solo agregados** del cierre
+al Contrato 4 y a la vista plana de Leo, tras comparar los originales, la
+curva y el ruido con el bloque de U2. El pipeline oficial hace esta auditoría
+automáticamente; con `--ejemplo` conserva el flujo de datos ficticios.
+
+| Condición | Método | Episodios detectados | Efectos físicos vistos |
+|---|---|---:|---:|
+| Base, 141 inyecciones ejecutadas | DripSafe | 141/141 | 141/141 |
+| Base, 141 inyecciones ejecutadas | Reglas | 22/141 | 6/141 |
+| Ruido, cinco semillas × 141 | DripSafe | 625/705 | 623/705 |
+| Ruido, cinco semillas × 141 | Reglas | 110/705 | 30/705 |
+
+En la curva de energía de 4 h y sin ruido, DripSafe detectó 18/18 episodios
+en cada magnitud (+10, +20, +40 y +80 % de energía no TI). Las reglas
+detectaron 0/18, 0/18, 0/18 y 6/18. Con ruido extra, el caso de +10 % bajó
+a 30/90 episodios en DripSafe; +20 % alcanzó 72/90. Esos fallos se conservan
+en el JSON. El ruido añade una desviación normal de 1.5 % de la energía TI a
+la energía total y un factor uniforme de ±4 % al agua en ajuste, calibración
+y evaluación. Las semillas fijadas son 1–5.
+
+`cambio_con_efecto` ilustra por qué hay dos métricas: las reglas detectaron el
+evento OT en 16/16 episodios de la base, pero no marcaron el exceso físico
+posterior en ninguna de esas 16 copias. Con ruido, DripSafe detectó ese
+episodio en 80/80 copias y vio el efecto en 78/80. La exactitud de clase OT
+se calcula **solo donde hubo efecto físico visto**; no convierte los casos
+sin detección en clasificaciones correctas. El exceso no visto se informa en
+kWh o L de inyección, según la variable.
+
+Las falsas alarmas se miden en las **267 horas-sitio limpias de cada condición
+sin inyecciones**, no se asignan a una copia inyectada. Por eso la tabla de
+inyecciones informa TP, FN y recall por episodio, mientras que precisión y FP
+se informan en las bases limpias. En la base original hubo
+0 para ambos métodos; con ruido, DripSafe tuvo 2 tramos falsos en la semilla
+1 y 2 en la 4, y 0 en las demás. Las reglas tuvieron 0 en las cinco. La
+media de DripSafe fue 0.0719 falsas alarmas por día y sitio. Son cinco
+perturbaciones del mismo kit, no cinco instalaciones independientes.
+
+El JSON permanece **parcial**: Gadiel no ha entregado su medición repetida
+de tiempo, energía y CodeCarbon. El costo, el equilibrio y el balance que
+dependen de ella siguen en `null`. La evaluación de calidad y robustez de N2
+sí queda cerrada con la versión local del detector, sujeta a la confirmación
+de Gadiel de que corresponde a su versión final.
 
 Para ejecutar las pruebas sintéticas después de implementar: `.venv/bin/python
 -m pytest tests/test_n1.py -q`. Para la suite completa:

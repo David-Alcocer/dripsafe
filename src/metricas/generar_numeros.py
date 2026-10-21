@@ -19,6 +19,8 @@ import pandas as pd
 
 from app.cargar import adaptar_oficial
 from src import contrato
+from src.evaluacion import cerrar_n2
+from src.evaluacion.episodios import episodios_desde_etiquetas
 from src.metricas.impacto import exceso_no_ti, pue_wue_por_sitio
 
 RAIZ = Path(__file__).resolve().parents[2]
@@ -92,7 +94,7 @@ def _clima(ruta: Path | None) -> dict:
 
 
 def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
-             clima: Path | None = None) -> dict:
+             clima: Path | None = None, cierre_n2: dict | None = None) -> dict:
     problemas = contrato.validar(tabla)
     if problemas:
         raise ValueError(f"Telemetría inválida: {problemas}")
@@ -151,10 +153,15 @@ def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
     horas_ev = sup["fallas_por_sitio_al_anio"] * (sup["horas_sin_alerta"] - sup["horas_con_alerta_hasta_correccion"])
     anual_kwh = horas_ev * sup["exceso_pct_no_ti"] / 100 * base_h
     anual_agua = horas_ev * sup["exceso_pct_no_ti"] / 100 * agua_evap
-    bloque = deteccion["deteccion"]
-    bloque["comparacion_contra_reglas_kit"]["episodios_originales_kit"]["horas_anomalas"] = 21
-    bloque["comparacion_contra_reglas_kit"]["episodios_originales_kit"]["episodios"] = 3
-    bloque["comparacion_contra_reglas_kit"]["episodios_originales_kit"]["unidad_conteo"] = "episodios"
+    episodios = episodios_desde_etiquetas(tabla, horas_por_intervalo=1)
+    horas_anomalas = int(tabla.loc[(tabla["etiqueta_particion"] == "evaluacion") &
+                                     tabla["etiqueta_escenario"].fillna("").ne(""), "timestamp"].size)
+    if cierre_n2 is not None:
+        bloque = cerrar_n2.integrar(deteccion["deteccion"], cierre_n2, len(episodios), horas_anomalas)
+    else:
+        bloque = json.loads(json.dumps(deteccion["deteccion"]))
+        bloque["comparacion_contra_reglas_kit"]["episodios_originales_kit"].update(
+            horas_anomalas=horas_anomalas, episodios=len(episodios), unidad_conteo="episodios")
     bloque["comparacion_contra_reglas_kit"]["rejilla_inyecciones"]["unidad_conteo"] = "inyecciones"
     bloque["falsas_alarmas_por_dia"]["unidad"] = "alarmas/día/sitio"
     bloque["falsas_alarmas_por_dia"]["periodo"] = "evaluacion"
@@ -297,6 +304,17 @@ def plano(o: dict) -> dict:
                                             "horas_sin": sup["horas_sin_alerta"],
                                             "horas_con": sup["horas_con_alerta_hasta_correccion"]}}
     n["periodos_y_sitios"] = o["periodos_y_sitios"]
+    cierre = o["deteccion"]["comparacion_contra_reglas_kit"].get("cierre_n2")
+    if cierre:
+        for clave, campo, unidad in (
+            ("comparacion_por_sitio", "originales_por_metodo_sitio", "episodios y horas-sitio"),
+            ("rejilla_por_sitio", "rejilla_base_por_sitio_escenario", "inyecciones"),
+            ("ruido_por_escenario", "ruido_por_escenario", "inyecciones"),
+            ("falsas_alarmas_ruido", "falsas_alarmas_base_y_ruido", "alarmas/día/sitio"),
+        ):
+            n[clave] = {"tipo": "observado", "estado": "disponible", "periodo": "evaluacion",
+                        "unidad_conteo": unidad, "origen": "src/evaluacion/cerrar_n2.py",
+                        "responsable": "Nico", "filas": cierre[campo]}
     n["deteccion_detalle"] = {k: o["deteccion"][k] for k in
                              ("falsas_alarmas_por_dia", "clases_ot_conteo", "latencia_horas_hasta_detectar_por_episodio")}
     return n
@@ -317,6 +335,8 @@ def main() -> None:
     ap.add_argument("--entrada", type=Path, default=Path("data/procesado/telemetria.csv"))
     ap.add_argument("--alertas", type=Path, default=Path("data/resultados/alertas.csv"))
     ap.add_argument("--deteccion", type=Path, default=Path("data/resultados/deteccion_para_numeros_oficiales.json"))
+    ap.add_argument("--n2", type=Path, default=Path("data/resultados/n2_cierre.json"),
+                    help="agregados auditados de N2; ejecutar src.evaluacion.cerrar_n2 primero")
     ap.add_argument("--clima", type=Path, default=Path("data/clima/merida_era5_2025.json"))
     ap.add_argument("--descargar-clima", action="store_true",
                     help="Descarga de Open-Meteo ERA5 el año horario 2025 a data/ antes de generar")
@@ -326,8 +346,16 @@ def main() -> None:
         with urlopen(URL_CLIMA, timeout=30) as respuesta:
             contenido = json.load(respuesta)
         a.clima.write_text(json.dumps(contenido, ensure_ascii=False), encoding="utf-8")
+    if not a.n2.is_file():
+        ap.error(f"falta {a.n2}; ejecutar python -m src.evaluacion.cerrar_n2")
+    cierre = json.loads(a.n2.read_text(encoding="utf-8"))
+    fijacion = json.loads((RAIZ / "resultados/n2_congelamiento.json").read_text(encoding="utf-8"))
+    if cierre.get("_meta", {}).get("kit_csv_sha256") != fijacion["kit"]["csv_sha256"] or \
+            cierre.get("_meta", {}).get("codigo_commit_corte") != fijacion["codigo"]["commit_corte"]:
+        ap.error("El cierre N2 no corresponde al kit y detector fijados")
     o = construir(pd.read_csv(a.entrada), pd.read_csv(a.alertas),
-                  json.loads(a.deteccion.read_text(encoding="utf-8")), a.clima)
+                  json.loads(a.deteccion.read_text(encoding="utf-8")), a.clima,
+                  cierre)
     escribir(o)
     print("Contrato 4 y vista de Leo generados desde agregados del kit.")
 

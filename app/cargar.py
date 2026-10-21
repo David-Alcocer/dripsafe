@@ -151,23 +151,24 @@ def adaptar_oficial(o: dict) -> dict:
         n["curva_sensibilidad"] = {"tipo": "observado", "nota": rejilla.get("nota", ""), "filas": [{
             "magnitud_pct": f["magnitud_pct"],
             "metodo": METODOS.get(f["metodo"], f["metodo"]),
-            "detectados": round(f["pct_efectos_vistos"] * f["inyecciones"] / 100),
+            "detectados": f.get("tp_episodios", round(f["pct_efectos_vistos"] * f["inyecciones"] / 100)),
             "total": f["inyecciones"],
-            "horas_hasta_detectar": f["mediana_horas_ver_efecto"],
+            "horas_hasta_detectar": f.get("latencia_episodio_mediana_h", f["mediana_horas_ver_efecto"]),
             "kwh_no_vistos": f["no_visto"],
         } for f in curva]}
 
     # Robustez: la misma rejilla con más ruido, en % de efectos vistos (media y rango entre semillas).
     ruido = _ruta(o, "deteccion", "comparacion_contra_reglas_kit", "robustez_ruido") or {}
     if ruido.get("resultado") and "robustez" not in o:
-        falsas = ruido.get("falsas_alarmas_por_dia_sitio_media")
+        falsas = ruido.get("falsas_alarmas_por_dia_sitio_media_por_metodo") or {
+            "dripsafe": ruido.get("falsas_alarmas_por_dia_sitio_media")}
         n["robustez"] = {"tipo": "observado", "filas": [{
             "condicion": f'Doble de ruido · {_nombre_inyeccion(f["nombre"])}',
             "metodo": METODOS.get(f["metodo"], f["metodo"]),
             "pct": f["pct_efectos_vistos_media"],
             "pct_min": f["pct_efectos_vistos_min"],
             "pct_max": f["pct_efectos_vistos_max"],
-            "falsas_por_dia": falsas if f["metodo"] == "dripsafe" else None,
+            "falsas_por_dia": falsas.get(f["metodo"]),
         } for f in ruido["resultado"]]}
 
     # Horas de respaldo del bono: {"umbral_27c": 2400, …} → filas por umbral.

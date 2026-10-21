@@ -51,6 +51,48 @@ def test_episodios_separados_de_horas_y_clases(cifras):
         "incidente_ot", "cambio_no_autorizado", "escalon_sin_registro", "intento_acceso"}
 
 
+def test_n2_cerrado_con_denominadores_y_unidades_separadas(cifras):
+    c, leo = cifras
+    n2 = c["deteccion"]["comparacion_contra_reglas_kit"]["cierre_n2"]
+    assert n2["_meta"]["kit_csv_sha256"] == json.loads(
+        (RAIZ / "resultados/n2_congelamiento.json").read_text(encoding="utf-8"))["kit"]["csv_sha256"]
+    assert len(n2["originales_por_metodo_sitio"]) == 8
+    assert len(n2["rejilla_base_por_sitio_escenario"]) == 48
+    assert len(n2["curva_base"]) == len(n2["ruido_por_escenario"]) == 16
+    assert len(n2["falsas_alarmas_base_y_ruido"]) == 48
+    assert leo["comparacion_por_sitio"]["filas"] == n2["originales_por_metodo_sitio"]
+    assert leo["rejilla_por_sitio"]["filas"] == n2["rejilla_base_por_sitio_escenario"]
+    for fila in n2["rejilla_base_por_sitio_escenario"]:
+        assert fila["planeadas"] == fila["ejecutadas"] + fila["omitidas"]
+        assert fila["ejecutadas"] == fila["tp_episodios"] + fila["fn_episodios"]
+        assert fila["clases_evaluadas"] <= fila["efectos_vistos"]
+    totales = {f["metodo"]: f for f in n2["rejilla_base_total"]}
+    assert totales["dripsafe"]["tp_episodios"] == totales["dripsafe"]["inyecciones"] == 141
+    assert totales["reglas_kit"]["tp_episodios"] == 22
+    assert totales["reglas_kit"]["efectos_vistos"] == 6
+    ruidosos = {f["metodo"]: f for f in n2["ruido_total"]}
+    assert ruidosos["dripsafe"]["inyecciones"] == 705
+    assert ruidosos["dripsafe"]["tp_episodios"] == 625
+    assert ruidosos["dripsafe"]["efectos_vistos"] == 623
+    cambio = next(f for f in n2["curva_base"] if f["nombre"] == "cambio_con_efecto"
+                  and f["metodo"] == "reglas_kit")
+    assert cambio["tp_episodios"] == 16 and cambio["efectos_vistos"] == 0
+
+
+def test_curva_y_falsas_alarmas_de_leo_usen_los_agregados_n2(cifras):
+    c, leo = cifras
+    curva = c["deteccion"]["comparacion_contra_reglas_kit"]["rejilla_inyecciones"]["datos_curva"]
+    for f in leo["curva_sensibilidad"]["filas"]:
+        origen = next(x for x in curva if x["magnitud_pct"] == f["magnitud_pct"]
+                      and x["metodo"] == ("dripsafe" if f["metodo"] == "DripSafe" else "reglas_kit"))
+        assert f["detectados"] == origen["tp_episodios"]
+        assert f["horas_hasta_detectar"] == origen["latencia_episodio_mediana_h"]
+    falsas = c["deteccion"]["comparacion_contra_reglas_kit"]["robustez_ruido"][
+        "falsas_alarmas_por_dia_sitio_media_por_metodo"]
+    assert falsas["dripsafe"] > 0 and falsas["reglas_kit"] == 0
+    assert leo["falsas_alarmas_ruido"]["unidad_conteo"] == "alarmas/día/sitio"
+
+
 def test_pendientes_no_se_convierten_en_balance(cifras):
     c, leo = cifras
     for clave, responsable in (("detector_cpu_ms", "Gadiel"), ("detector_kwh_anual", "Gadiel"),

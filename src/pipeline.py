@@ -31,6 +31,9 @@ import pandas as pd
 
 from src import contrato
 from src.ataques import correr_rejilla
+from src.evaluacion import auditar_rejilla, cerrar_n2
+from src.evaluacion.__main__ import _ruta_kit
+from src.evaluacion.comparar_originales import _validar_fijacion
 from src.datos.cargar import cargar
 from src.metricas import balance_neto, generar_numeros
 from src.metricas.generar_numeros import metrica
@@ -93,7 +96,7 @@ def _deteccion(args, telemetria: pd.DataFrame, fuente: str) -> dict:
         return json.loads(previa.read_text(encoding="utf-8"))
     semillas = tuple(int(s) for s in args.semillas_ruido.split(",") if s.strip())
     por_inyeccion, limpia, coincidencias, manifiesto = correr_rejilla.correr(telemetria, semillas)
-    manifiesto["fuente"] = fuente
+    manifiesto["fuente"] = fuente if args.ejemplo else str(_ruta_kit(args.kit))
     (args.resultados / "rejilla.manifiesto.json").write_text(
         json.dumps(manifiesto, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     por_inyeccion.to_csv(args.resultados / "rejilla_por_inyeccion.csv", index=False)
@@ -103,6 +106,37 @@ def _deteccion(args, telemetria: pd.DataFrame, fuente: str) -> dict:
     bloque = correr_rejilla.bloque_deteccion(por_inyeccion, limpia, coincidencias, fuente)
     previa.write_text(json.dumps(bloque, ensure_ascii=False, indent=2), encoding="utf-8")
     return bloque
+
+
+def _cierre_n2(args, telemetria: pd.DataFrame) -> dict | None:
+    """Audita U2 y agrega N2 en la ruta oficial; el ejemplo sigue siendo ficticio."""
+    if args.ejemplo:
+        return None
+    ruta = _ruta_kit(args.kit)
+    fijacion = json.loads((RAIZ / "resultados/n2_congelamiento.json").read_text(encoding="utf-8"))
+    mapeo = json.loads((RAIZ / "config/columnas.json").read_text(encoding="utf-8"))
+    crudo = cargar(ruta, mapeo)
+    _validar_fijacion(ruta, crudo, fijacion)
+    procesada = telemetria.copy()
+    for columna in ("etiqueta_escenario", "etiqueta_tecnica"):
+        if columna in procesada and columna in crudo:
+            procesada[columna] = procesada[columna].fillna("")
+    try:
+        pd.testing.assert_frame_equal(procesada.reset_index(drop=True), crudo.reset_index(drop=True),
+                                      check_dtype=False, rtol=1e-12)
+    except AssertionError as error:
+        raise ValueError("La telemetría procesada difiere del kit fijado en N2") from error
+    manifest_local = args.resultados / "rejilla.manifiesto.json"
+    manifest_u2 = RAIZ / "data/escenarios/rejilla.manifiesto.json"
+    manifiesto = json.loads((manifest_local if manifest_local.is_file() else manifest_u2).read_text(encoding="utf-8"))
+    inyecciones = pd.read_csv(args.resultados / "rejilla_por_inyeccion.csv")
+    limpia = pd.read_csv(args.resultados / "rejilla_base_limpia.csv")
+    _, denominadores = auditar_rejilla.auditar(manifiesto, inyecciones, fijacion)
+    cierre, tabla = cerrar_n2.construir(crudo, manifiesto, inyecciones, limpia, denominadores, fijacion)
+    tabla.to_csv(args.resultados / "n2_tabla_final.csv", index=False)
+    (args.resultados / "n2_cierre.json").write_text(
+        json.dumps(cierre, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    return cierre
 
 
 def _exceso_por_hora_alertada(telemetria: pd.DataFrame, alertas: pd.DataFrame) -> pd.Series:
@@ -224,7 +258,8 @@ def main(argv: list[str] | None = None) -> None:
     deteccion = _deteccion(args, telemetria, fuente)
     print("4/5 Rejilla: " + ("reutilizada" if args.sin_rejilla else f"tablas en {args.resultados}"))
 
-    base = generar_numeros.construir(telemetria, alertas, deteccion, args.clima)
+    cierre = _cierre_n2(args, telemetria)
+    base = generar_numeros.construir(telemetria, alertas, deteccion, args.clima, cierre)
     numeros = {**base, "_meta": _meta(base, args, fuente),
                "balance_neto": _balance(base, consumo, _exceso_por_hora_alertada(telemetria, alertas))}
     _escribir(numeros, args.salida)
