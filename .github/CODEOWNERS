@@ -1,18 +1,5 @@
-# Dueños de cada carpeta (ver docs/11-trabajo-en-paralelo.md).
-# GitHub pide la revisión del dueño automáticamente si el plan de la cuenta lo permite.
+# Revisores de código: Misa y Leo revisan cualquier PR.
+# Los dueños de cada carpeta siguen en docs/11-trabajo-en-paralelo.md.
+# GitHub pide la revisión automáticamente si el plan de la cuenta lo permite.
 
-*                               @David-Alcocer
-/src/metricas/                  @Nicomoguel
-# La regla específica va después de la carpeta: Misa conserva el PUE inicial.
-/src/metricas/pue.py            @David-Alcocer
-/src/metricas/balance_neto.py   @David-Alcocer @Nicomoguel
-/resultados/numeros_oficiales.json @Nicomoguel
-/src/ataques/                   @Ghosflot
-/src/ot/                        @Ghosflot
-/docs/06-ciberseguridad-ot.md   @Ghosflot
-/app/                           @Leosanlo30
-/docs/07-agua-y-acuifero.md     @Ghosflot @David-Alcocer
-/docs/08-pitch.md               @Leosanlo30 @Nicomoguel
-# D13: Nico evalúa el detector que construye Gadiel.
-/src/modelo/                    @uicabg1 @Nicomoguel
-/src/evaluacion/                @Nicomoguel
+*  @David-Alcocer @Leosanlo30
