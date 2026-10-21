@@ -25,7 +25,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 |---|---|---|---|---|
 | Innovación | Gadiel + Nico | #6, #8, #22 | Detector híbrido con coherencia física por sitio y comparación justa frente a las reglas del kit | ⬜ |
 | Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números | ⬜ |
-| Impacto en ciberseguridad | Guille | #9, #10, #11, #12 | `deteccion_por_escenario.csv` + tabla ATT&CK final en `docs/06` | ⬜ |
+| Impacto en ciberseguridad | Guille | #9–#12, #30, #32 | Tabla de decisión de las 4 clases (`src/ot/clases.py`), rejilla corrida sobre el kit (`src/ataques/correr_rejilla.py`) y modelo de amenazas con tabla ATT&CK v20 (`docs/06`) | 🟨 PR #38, #39 y #40 |
 | Eficiencia Green AI | Nico: impacto y costo del detector; Misa: PUE inicial; Gadiel: consumo esperado | #2, #3, #5, #22 | PUE inicial y final proyectado + tabla calidad frente a costo | ⬜ |
 | Balance neto y gobernanza hídrica | Misa + Nico: balance; Guille: acuífero | #13, #14 | Balance en kWh y litros + análisis del acuífero | ⬜ |
 | Escalabilidad y negocio | Leo + Nico | #16 | Diapositiva de modelo de negocio | ⬜ |
@@ -46,8 +46,8 @@ Creados en GitHub el 19 de octubre, cada uno con su etiqueta `rol:*` y sus etiqu
 | #7 | Gadiel | Medición con CodeCarbon | `consumo_modelo.json` |
 | #8 | Gadiel | Explicar cada alerta | `variable_principal` |
 | #9 | Guille | Escenarios simulados de ataque y falla | Contrato 2 |
-| #10 | Guille | Evaluación de detección por escenario | `deteccion_por_escenario.csv` |
-| #11 | Guille | Modelo de amenazas y tabla ATT&CK final | `docs/06` |
+| #10 | Guille | Evaluación de detección por escenario | `rejilla_por_inyeccion.csv` + bloque `deteccion` (lo cubren #30 y #32) |
+| #11 | Guille | Modelo de amenazas y tabla ATT&CK final | `docs/06` §2–§3 + `docs/img/modelo-amenazas-purdue.svg` |
 | #12 | Guille | Cómo se instala el detector sin abrir una puerta nueva | `docs/06` |
 | #13 | Guille | Análisis del acuífero | `docs/07` |
 | #14 | Misa + Nico | Balance neto final energético y, con datos suficientes, hídrico y de emisiones | `balance_neto_*` + fuentes, periodo y supuestos |
@@ -58,6 +58,8 @@ Creados en GitHub el 19 de octubre, cada uno con su etiqueta `rol:*` y sus etiqu
 | #19 | Leo | Diapositivas | PDF |
 | #20 | Leo | Video de respaldo | Video sin conexión |
 | #21 | Todos | Congelamiento y ensayo del miércoles | Etiqueta `congelado-21` |
+| #30 | Guille | U1 · Tabla de decisión de las 4 clases OT + inyector de la rejilla | `src/ot/clases.py`, `src/ataques/rejilla.py`, `docs/06` §4–§5 |
+| #32 | Guille | U2 · Correr la rejilla contra el detector congelado | `src/ataques/correr_rejilla.py` → `deteccion_para_numeros_oficiales.json` (insumo de N2) |
 
 ### Issues nuevos propuestos tras el kit (crear en GitHub)
 
@@ -65,6 +67,6 @@ Creados en GitHub el 19 de octubre, cada uno con su etiqueta `rol:*` y sus etiqu
 |---|---|---|---|
 | #22 | Nico | Evaluación justa y Green AI: reglas, Isolation Forest e híbrido con mismas entradas y varias corridas | Tabla calidad frente a costo + `numeros_oficiales.json` |
 | #23 | Misa | Contrato v2 adaptado al kit (D14) | PR que cambia doc 11, `src/contrato.py` y `config/columnas.json` |
-| #24 | Guille | Mapear las etiquetas del kit a `etiqueta_*` y separar escenarios del kit de los nuestros | Contrato 2 sobre el kit |
+| — | Guille | Mapear las etiquetas del kit a `etiqueta_*` y separar escenarios del kit de los nuestros | Cubierto: `src/datos/cargar.py` (#1) mapea las etiquetas y la rejilla (#30) marca cada episodio como `origen=kit` u `origen=inyeccion` |
 
 Los números #22–#24 son tentativos: usar los que asigne GitHub y actualizar esta tabla.

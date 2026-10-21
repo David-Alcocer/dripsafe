@@ -1,122 +1,75 @@
-# 06 · Ciberseguridad OT: guía rápida
+# 06 · Ciberseguridad OT
 
-> Documento para **Guille**. No tienes que ser experto: solo saber explicar con claridad **qué amenazas existen, cuáles detecta nuestro modelo y qué recomendaríamos**. El 22 hay mentores de ciberseguridad para validar.
+> **Dueño:** Guille. Cubre el criterio «Impacto en ciberseguridad» (§13 de la convocatoria), la regla 18 (nada de ataques a sistemas reales) y el reto 2 del kit («documentad qué no puede inferirse de un evento sintético»). Las técnicas son de **MITRE ATT&CK for ICS v20** (13 oct 2026), verificadas contra el catálogo oficial de MITRE.
 
-## 1. ¿Qué es OT/ICS?
+**En un minuto:**
+- DripSafe **no** mira la red. Mira la **física**: cuánta energía y agua debería gastar cada sitio según su carga y su clima. Un cambio de configuración puede pasar un filtro de red con comandos válidos, pero el gasto de energía o agua lo delata.
+- Cruza esos excesos con el registro OT y los clasifica en **4 clases**, con prioridad y acción, sin afirmar nunca que un exceso prueba un ataque (§4).
+- En el kit, con su ruido, **DripSafe ve el 100 % de los excesos inyectados desde +10 %**. Las reglas fijas del kit no ven ninguno por debajo de +80 % ni ningún exceso de agua (§6).
+- En los cambios de configuración con efecto 8 h después, las reglas ven el evento, pero **dejan pasar 1 710 kWh** de exceso; DripSafe deja pasar 5 kWh y lo clasifica como incidente (§6).
+- Lo decimos también cuando no nos favorece: con el doble de ruido, a +10 % DripSafe solo ve un tercio; y con la ventana de 24 h, **1 de cada 5 eventos OT al azar** encontraría un exceso que no causó (§6, §7).
 
-- **IT** (tecnología de la información): computadoras, servidores, correo, datos.
-- **OT** (tecnología operacional): sistemas que controlan **equipos físicos** como bombas, válvulas, chillers y torres de enfriamiento.
-- **ICS** (Industrial Control Systems): los sistemas de control industrial. Incluyen:
-  - **Sensores:** miden temperatura, flujo, presión y energía.
-  - **PLCs** (controladores lógicos programables): reciben lecturas y mandan órdenes a los equipos.
-  - **SCADA / HMI:** las pantallas desde donde el operador ve y controla todo.
+## 1. OT en un centro de datos, en una página
 
-En un centro de datos, el sistema de enfriamiento es OT: si falla o lo atacan, los servidores se sobrecalientan o se desperdicia agua y energía.
+- **IT** son las computadoras, los servidores y los datos. **OT** son los sistemas que controlan equipos físicos: chillers, bombas, torres de enfriamiento, manejadoras de aire y válvulas.
+- El enfriamiento de un centro de datos es OT. Lo controlan **controladores (PLC)** y un **BMS** (sistema de gestión del edificio) con sus pantallas. La energía la mide, muchas veces, **otro sistema (EPMS)**.
+- **Por qué es vulnerable:**
+  - **Protocolos sin seguridad.** Modbus (de 1979) y muchas instalaciones de BACnet no autentican ni cifran: quien llega a la red puede leer valores o escribir setpoints.
+  - **Equipos de 15 a 20 años** que casi nunca se actualizan.
+  - **Redes de oficina y de planta mal separadas.**
+  - **Accesos remotos** de proveedores mal protegidos.
+- **Modelo Purdue:** divide la red en niveles, desde los sensores y actuadores (nivel 0) hasta la red corporativa e internet (niveles 4–5). La regla de oro es que los niveles bajos no queden expuestos a internet.
 
-### Modelo Purdue (en una línea)
-Es la forma clásica de dividir una red industrial en niveles: sensores y actuadores (0), PLCs (1), SCADA/HMI (2), operaciones (3) y red corporativa (4–5). **La regla de oro es que los niveles bajos no deberían estar expuestos a internet.**
+## 2. Modelo de amenazas (niveles Purdue)
 
-## 2. ¿Por qué son vulnerables?
+![Modelo de amenazas por niveles Purdue](img/modelo-amenazas-purdue.svg)
 
-- **Protocolos antiguos sin seguridad.** **Modbus** (de 1979) y muchas configuraciones de **BACnet** **no autentican ni cifran**: cualquiera que llegue a la red puede leer valores o mandar órdenes.
-- **Equipos que duran 15 a 20 años** y casi nunca se actualizan.
-- **Redes IT y OT mal separadas.**
-- **Accesos remotos** de mantenimiento mal protegidos.
+El diagrama ([`img/modelo-amenazas-purdue.svg`](img/modelo-amenazas-purdue.svg)) está en formato de diapositiva, listo para usarse.
 
-## 3. Técnicas de ataque que detectaría nuestro modelo
+**Supuesto declarado:** el kit no trae red, equipos ni protocolos. El diagrama es la arquitectura típica del enfriamiento de un centro de datos, no la de un sitio real. Sirve para ubicar dónde entraría un atacante y qué parte de su rastro le llega a DripSafe.
 
-Del catálogo **MITRE ATT&CK for ICS** (<https://attack.mitre.org/matrices/ics/>). Verifica los IDs y descripciones en la matriz antes del pitch.
-
-| Técnica | ID | Qué es | Cómo la detecta DripSafe |
+| # | Punto de ataque | Técnicas (ATT&CK for ICS v20) | ¿Lo ve DripSafe? |
 |---|---|---|---|
-| Manipulation of View | T0832 | El operador ve datos falsos en su pantalla | Las lecturas no cuadran con la física (por ejemplo, la temperatura "baja" sin que el chiller consuma más) |
-| Spoof Reporting Message | T0856 | Un sensor reporta valores inventados | Un sensor se separa del comportamiento correlacionado de los demás |
-| Modify Parameter | T0836 | Alguien cambia valores de configuración (setpoints) | Cambio brusco de un parámetro fuera del patrón normal u horario |
-| Unauthorized Command Message | T0855 | Llegan órdenes no autorizadas a bombas o válvulas | Arranques y paros que no corresponden con la carga ni el horario |
-| Manipulation of Control | T0831 | El atacante altera el control físico del proceso | Consumo de energía o agua anómalo sin causa operativa |
-| Denial of View | T0815 | El operador deja de recibir la telemetría | Huecos en los sensores mientras los medidores de energía siguen reportando. **Se atrapa con una regla, no con el modelo** (ver 3b) |
+| 1 | BMS o pantallas expuestos a internet | T0883 Internet Accessible Device | No: DripSafe no mira la red. Se cierra con zonas de red (M0930) |
+| 2 | Acceso remoto del proveedor de mantenimiento | T0822 External Remote Services → T0886 Remote Services | No. Se cierra con MFA (M0932) y un equipo de salto con permisos mínimos |
+| 3 | Contraseñas válidas robadas o de fábrica | T0859 Valid Accounts · T1694.001 Default Credentials | Solo los intentos fallidos que quedan en el registro: `login_fallido` → **intento de acceso** |
+| 4 | Cambio de setpoint o de configuración | T0836 Modify Parameter. Si la orden llega directo al controlador sin pasar por el BMS: T1692.001 Unauthorized Message: Command Message | Con registro → **cambio no autorizado**. Sin registro → el exceso aparece como **escalón sin registro** |
+| 5 | Efecto físico | T0831 Manipulation of Control → T0828 Loss of Productivity and Revenue (kWh y litros de más). Si llega a sobrecalentar: T0879 Damage to Property | Sí: es lo que mide la línea base. Evento + exceso en 24 h → **incidente OT con efecto** |
 
-Por dónde entraría un atacante (para el modelo de amenazas): **Internet Accessible Device** (T0883), un BMS o HMI expuesto a internet, y **Remote Services** (T0886), el acceso remoto de un proveedor de mantenimiento.
+**Un caso real que se parece: FrostyGoop (MITRE C0041, enero de 2024).** Atacaron la calefacción urbana de una ciudad de Ucrania. El malware (S1165) escribió por **Modbus TCP** valores en controladores ENCO usando **comandos legítimos** (T0836), y dejó sin calefacción a la población; MITRE registra que la reparación tomó dos días. Es climatización como la nuestra, y la lección es la misma: los comandos eran válidos, así que un filtro de red no los distinguía, pero la física cambió.
 
-## 3b. Escenarios simulados (`src/ataques/`)
+**MITRE describe nuestra idea como estrategia de detección.** Para T0836, la analítica AN1908 propone alertar ante un cambio de parámetro sin control de cambios «**correlacionado con la deriva posterior del historiador**» y, cuando la telemetría lo permite, exigir un efecto en el proceso. Es la fusión evento–efecto de §4. Para los reportes falsos (T1692.002), AN2215 propone contrastar la telemetría contra **una medición independiente** del mismo fenómeno, que es lo que haría DripSafe con los medidores de energía si el sitio midiera caudal y temperaturas del agua (§3C).
 
-Para demostrar con números qué detecta DripSafe, metemos ataques y fallas **simulados** en la telemetría: solo cambian números en un CSV. Cada escenario vive en su propia ventana de tiempo y la respuesta correcta queda en las columnas `etiqueta_*`, que el modelo nunca ve.
+## 3. Tabla ATT&CK final, aplicada al kit
 
-```bash
-python -m src.ataques.inyectar --entrada data/procesado/telemetria.csv    # o data/sinteticos/...
-python -m src.ataques.evaluar                                              # cuando existan las alertas de Gadiel
-```
+**Aviso de versión:** MITRE **revocó T0855 y T0856** en abril de 2026. Ahora son subtécnicas de T1692 Unauthorized Message: T0855 Unauthorized Command Message pasó a **T1692.001 Command Message** y T0856 Spoof Reporting Message pasó a **T1692.002 Reporting Message**. Si el jurado o el mentor consultan la matriz, ya no van a encontrar los IDs viejos.
 
-| Escenario | Tipo | Técnica | Qué se simula | Huella física que lo delata |
+### A. Lo que se ve en el kit tal cual
+
+| Técnica | Táctica | Rastro en el kit | Clase en DripSafe | Evidencia |
 |---|---|---|---|---|
-| `setpoint_alterado` | Ataque | T0836 | Bajan 3 °C la temperatura objetivo, poco a poco | El chiller gasta ~9 % más con la misma carga de TI |
-| `sensor_falsificado` | Ataque | T0856 | El sensor de retorno reporta 0.8 °C menos | Caudal × ΔT ya no alcanza para el calor de los servidores |
-| `vista_repetida` | Ataque | T0832 + T0831 | Bajan la bomba al 65 % y repiten en pantalla las lecturas de ayer | La bomba gasta ~70 % menos pero el caudal «es normal»: rompe la ley de afinidad (potencia ∝ caudal³) |
-| `comandos_no_autorizados` | Ataque | T0855 | Apagan y prenden la bomba cada 10 min a las 3 a. m. | Arranques y paros sin relación con la carga ni el horario |
-| `denegacion_de_vista` | Ataque | T0815 | Se corta la telemetría de temperatura y caudal | Sensores vacíos mientras la energía sigue llegando |
-| `ensuciamiento` | Falla | — | El intercambiador se ensucia en 2 días | Consumo que sube gradual y coherente |
-| `sensor_atorado` | Falla | — | El sensor repite siempre el mismo valor | Varianza cero |
-| `fuga_reposicion` | Falla | — | Entra 35 % más agua a la torre | Más agua sin más calor (sube el WUE) |
+| T0859 Valid Accounts · T1694.001 Default Credentials (intentos) | Persistencia, movimiento lateral | `login_fallido`, 3 h en SIM-C | Intento de acceso (media) | Kit sin inyecciones: 3 h en esa clase |
+| T0836 Modify Parameter | Afectar el control del proceso | `cambio_config_no_autorizado`, 2 h en SIM-C, sin efecto físico | Cambio no autorizado (alta) | Kit sin inyecciones: 2 h en esa clase |
 
-**Falla contra ataque, en una frase:** una falla cambia la física de forma gradual y coherente; un ataque deja lecturas que **no cuadran con la física** o cambios bruscos sin causa operativa. Un sensor congelado es falla; un sensor que se mueve «normal» pero rompe el balance de calor es ataque.
+### B. Lo que se inyecta (rejilla, §5)
 
-### Primer experimento (datos sintéticos, 19 oct)
+| Técnica | Qué se simula | Clase esperada | Resultado en el kit |
+|---|---|---|---|
+| T0836 + T0831 | Cambio registrado y, 8 h después, energía no TI +20 % durante 12 h | Incidente OT con efecto | 16 de 16 vistas y bien clasificadas |
+| T0836 sin registro (o T1692.001) | Energía no TI +20 % durante 12 h, sin evento | Escalón sin registro | 17 de 17 |
+| T0831 → T0828 | Excesos de energía (+10 a +80 %) y de agua (+25 y +50 %) durante 4 h | Escalón sin registro | 108 de 108 |
 
-Un Isolation Forest rápido, entrenado con los 7 días limpios y evaluado en los 7 días con escenarios:
+### C. Lo que DripSafe **no** puede ver con el kit, y qué haría falta
 
-| Variables del modelo | Escenarios detectados | Falsas alarmas |
+| Técnica | Por qué no se ve | Qué haría falta medir |
 |---|---|---|
-| Solo las columnas crudas | 6 de 8 | 0.5 por día |
-| Crudas + variables físicas (balance de calor, afinidad de la bomba, chiller por kW de TI, agua por calor, varianza del sensor) | **7 de 8** | 1 por día |
+| T1692.002 Reporting Message (antes T0856) | Un sensor falso con valores creíbles necesita otro sensor con el que contrastarse | Caudal y temperaturas de suministro y retorno del agua: el balance de calor (caudal × ΔT) contra el medidor de energía, como propone AN2215 |
+| T0832 Manipulation of View | Igual: sin balance de calor no hay contra qué comparar lo que ve el operador | Lo mismo, más la energía por equipo (chiller, bombas, torre) |
+| T0815 Denial of View | En el kit no faltan datos | Una regla directa: sensores vacíos mientras los medidores de energía siguen reportando |
+| T0838 Modify Alarm Settings | Cambiar un límite de alarma no mueve la física | Que el BMS registre esos cambios. Si los registra, DripSafe los trata como cambio no autorizado (alta) |
+| T0883, T0822, T0886 | DripSafe no mira el tráfico de red | Un monitor OT de red (Nozomi, Claroty, Dragos). DripSafe lo complementa, no lo sustituye |
 
-Lo que aprendimos (insumo para Gadiel):
-- **Las variables físicas son las que atrapan los ataques disfrazados.** `vista_repetida` solo se detecta con ellas, y `sensor_falsificado` pasa de 1 % a 11 % de la ventana marcada.
-- **La telemetría cortada (T0815) no la ve el modelo**, porque nunca vio huecos al entrenar. Se resuelve con una regla directa: «si faltan lecturas de sensores y la energía sigue llegando → alerta».
-- Un Isolation Forest diluye una anomalía que aparece en una sola variable cuando hay muchas. Conviene combinarlo con reglas simples sobre las variables físicas (z-score), la línea base que ya propone [05-solucion-tecnica.md](05-solucion-tecnica.md).
-
-Son datos sintéticos: los números finales salen del kit.
-
-**Mensaje clave para el pitch:**
-> "DripSafe funciona como **primera capa de detección**: no reemplaza un firewall ni un SOC, pero detecta cuando los datos físicos del enfriamiento no tienen sentido, que es justo lo que pasa cuando alguien manipula sensores o controladores."
-
-## 3c. Rejilla de inyecciones sobre el kit (U1 · U2)
-
-Las 21 anomalías del kit están hechas para que las reglas fijas las vean, así que ahí lo esperado es un empate. Para medir **desde qué tamaño** ve cada método un problema, metemos excesos controlados en copias de la evaluación. La rejilla quedó fijada aquí y en [`src/ataques/rejilla.py`](../src/ataques/rejilla.py) **antes de correrla sobre el kit**, y una prueba (`test_la_rejilla_es_la_que_fijo_la_propuesta`) impide cambiarla sin que se note.
-
-| Inyección | Qué se cambia | Duración | Evento OT | Clase esperada |
-|---|---|---|---|---|
-| `energia_+10` … `energia_+80` | Energía no TI +10, +20, +40 y +80 % | 4 h | No | Escalón sin registro |
-| `agua_+25`, `agua_+50` | Agua +25 y +50 % | 4 h | No | Escalón sin registro |
-| `cambio_sin_registro` | Energía no TI +20 % (setpoint cambiado sin dejar registro, T0836) | 12 h | No | Escalón sin registro, **nunca** mantenimiento directo |
-| `cambio_con_efecto` | `cambio_config_no_autorizado` y, **8 h después**, energía no TI +20 % | 12 h | Sí | Incidente OT con efecto |
-
-**Dónde se pone cada una:**
-- Una inyección por copia, en cada sitio, a 6, 18, 30, 42, 54 y 66 h del inicio de la evaluación (noche, mañana y tarde).
-- Si ahí estorba una anomalía original del kit (con 2 h de margen) o hay un evento OT del kit en las 24 h previas, se recorre hora por hora hasta un lugar limpio. Se anota cuánto se recorrió y no se repite un lugar.
-- Solo se toca la evaluación. Ajuste y calibración quedan idénticos, así que el detector aprende exactamente lo mismo en todas las copias: la corrida lo verifica en cada copia y se detiene si no es así.
-- Las respuestas correctas van en `etiqueta_*`, que el detector nunca lee (prueba `test_el_detector_no_ve_las_etiquetas_de_la_inyeccion`).
-
-**Robustez (prueba c):** se repite toda la rejilla con sensores peores en **todas** las horas: el ruido de la energía se duplica (gaussiano de 1.5 % de la energía TI encima del ±1.5 % uniforme del kit) y el agua lleva ±4 %. Se corre con 5 semillas para ver la dispersión.
-
-**Qué mide la corrida** ([`src/ataques/correr_rejilla.py`](../src/ataques/correr_rejilla.py)), para DripSafe y para las reglas del kit en la misma tabla:
-
-| Columna | Qué responde |
-|---|---|
-| `detectado`, `horas_hasta_detectar` | ¿Hubo alguna alerta en el episodio? Se cuenta por episodio (D17) con la función de Nico |
-| `efecto_visto`, `horas_hasta_ver_efecto` | ¿Se vio el exceso físico, no solo el evento OT? |
-| `inyectado_kwh`, `no_visto_kwh` (o `_l`) | Exceso exacto que metimos y la parte que pasó antes de verlo |
-| `clase_obtenida`, `clase_correcta_pct` | ¿La clase OT fue la esperada? (solo DripSafe) |
-
-La corrida también da las falsas alarmas por día de la evaluación **sin** inyecciones y las coincidencias al azar de la §4b.
-
-```bash
-python -m src.ataques.correr_rejilla --kit RUTA/operaciones_simuladas.csv   # o --entrada data/procesado/telemetria.csv
-python -m src.ataques.correr_rejilla --ejemplo                              # sin el kit: datos inventados
-```
-
-Salidas, todas fuera de Git: `data/escenarios/rejilla.manifiesto.json` (cada inyección con su ventana y sus etiquetas) y `data/resultados/rejilla_por_inyeccion.csv`, `rejilla_resumen.csv` (la curva por magnitud), `rejilla_base_limpia.csv` y `coincidencias_al_azar.csv`. Nico (N2) toma de ahí la tabla y la curva oficiales; solo los agregados van a `numeros_oficiales.json`.
-
-**Lo que ya se ve con datos inventados** (`--ejemplo`, solo para probar el flujo): las reglas no ven ningún exceso de energía de +10 o +20 % y solo un tercio de los de +80 %, mientras que DripSafe ve todos desde +40 %. En los 15 cambios con efecto, las reglas disparan por el evento OT pero no ven ninguno de los excesos que llegan 8 h después; DripSafe los ve todos y los clasifica como incidente. Las cifras del pitch salen del kit.
+Los escenarios del apéndice A demuestran T1692.002, T0832 y T0815 con datos sintéticos que sí traen esos sensores. **No son evidencia del kit**: muestran por qué vale la pena instalar esa instrumentación (propuesta §9).
 
 ## 4. Las 4 clases de alerta: tabla de decisión (D16 · U1)
 
@@ -167,48 +120,180 @@ DripSafe no adivina si algo es «falla» o «ataque»: con datos de proceso esas
 
 La propuesta (§3.3) pide reportar cuántas coincidencias al azar habría. `clases.coincidencias_al_azar()` lo calcula así: sobre la evaluación **sin inyecciones**, pone un evento OT ficticio de 1 h en cada hora posible y revisa si algún tramo de exceso empieza dentro de su ventana. El porcentaje de aciertos es la probabilidad de llamar «incidente OT con efecto» a algo que el evento no causó.
 
-Se reporta para ventanas de 1, 4, 8, 12 y 24 h, porque es un intercambio: una ventana corta casi no se equivoca por casualidad, pero se pierde el caso del cambio que se nota 8 h después. Las cifras salen de la corrida de la rejilla sobre el kit (U2, #32) y van al JSON oficial.
+Se reporta para ventanas de 1, 4, 8, 12 y 24 h, porque es un intercambio: una ventana corta casi no se equivoca por casualidad, pero se pierde el caso del cambio que se nota 8 h después. Los resultados sobre el kit están en la §6.
 
 ### Mensaje honesto para el pitch
 
 > *"DripSafe no afirma que un residuo pruebe un ciberataque. Distingue un intento (login fallido), un cambio (sin efecto confirmado), un escalón sin registro (falla o cambio no registrado: primero se revisa la configuración) y un incidente con efecto (evento OT seguido de un exceso físico medible). Y dice qué tan seguido esa atribución podría ser casualidad."*
 
-## 5. Recomendaciones de defensa (para la propuesta)
+## 5. Rejilla de inyecciones sobre el kit (U1 · U2)
 
-Basadas en **ISA/IEC 62443**, el estándar de seguridad industrial:
-- **Zonas y conductos:** separar la red OT del enfriamiento de la red IT y controlar qué tráfico pasa entre ellas.
-- **Lista blanca de comandos:** solo ciertos equipos pueden mandar órdenes a los PLCs.
-- **Monitoreo continuo:** aquí entra DripSafe.
-- **Acceso remoto seguro:** VPN, llaves SSH y autenticación multifactor. Lo que ya sabes del server aplica.
-- **Respaldo manual:** si se detecta un ataque, el sistema pasa a un modo seguro.
+Las 21 anomalías del kit están hechas para que las reglas fijas las vean, así que ahí lo esperado es un empate. Para medir **desde qué tamaño** ve cada método un problema, metemos excesos controlados en copias de la evaluación. La rejilla quedó fijada aquí y en [`src/ataques/rejilla.py`](../src/ataques/rejilla.py) **antes de correrla sobre el kit**, y una prueba (`test_la_rejilla_es_la_que_fijo_la_propuesta`) impide cambiarla sin que se note.
 
-### Cómo se instala DripSafe sin abrir una puerta nueva
+| Inyección | Qué se cambia | Duración | Evento OT | Clase esperada |
+|---|---|---|---|---|
+| `energia_+10` … `energia_+80` | Energía no TI +10, +20, +40 y +80 % | 4 h | No | Escalón sin registro |
+| `agua_+25`, `agua_+50` | Agua +25 y +50 % | 4 h | No | Escalón sin registro |
+| `cambio_sin_registro` | Energía no TI +20 % (setpoint cambiado sin dejar registro, T0836) | 12 h | No | Escalón sin registro, **nunca** mantenimiento directo |
+| `cambio_con_efecto` | `cambio_config_no_autorizado` y, **8 h después**, energía no TI +20 % | 12 h | Sí | Incidente OT con efecto |
+
+**Dónde se pone cada una:**
+- Una inyección por copia, en cada sitio, a 6, 18, 30, 42, 54 y 66 h del inicio de la evaluación (noche, mañana y tarde).
+- Si ahí estorba una anomalía original del kit (con 2 h de margen) o hay un evento OT del kit en las 24 h previas, se recorre hora por hora hasta un lugar limpio. Se anota cuánto se recorrió y no se repite un lugar.
+- Solo se toca la evaluación. Ajuste y calibración quedan idénticos, así que el detector aprende exactamente lo mismo en todas las copias: la corrida lo verifica en cada copia y se detiene si no es así.
+- Las respuestas correctas van en `etiqueta_*`, que el detector nunca lee (prueba `test_el_detector_no_ve_las_etiquetas_de_la_inyeccion`).
+
+**Robustez (prueba c):** se repite toda la rejilla con sensores peores en **todas** las horas: el ruido de la energía se duplica (gaussiano de 1.5 % de la energía TI encima del ±1.5 % uniforme del kit) y el agua lleva ±4 %. Se corre con 5 semillas para ver la dispersión.
+
+**Qué mide la corrida** ([`src/ataques/correr_rejilla.py`](../src/ataques/correr_rejilla.py)), para DripSafe y para las reglas del kit en la misma tabla:
+
+| Columna | Qué responde |
+|---|---|
+| `detectado`, `horas_hasta_detectar` | ¿Hubo alguna alerta en el episodio? Se cuenta por episodio (D17) con la función de Nico |
+| `efecto_visto`, `horas_hasta_ver_efecto` | ¿Se vio el exceso físico, no solo el evento OT? |
+| `inyectado_kwh`, `no_visto_kwh` (o `_l`) | Exceso exacto que metimos y la parte que pasó antes de verlo |
+| `clase_obtenida`, `clase_correcta_pct` | ¿La clase OT fue la esperada? (solo DripSafe) |
+
+La corrida también da las falsas alarmas por día de la evaluación **sin** inyecciones y las coincidencias al azar de la §4b.
+
+```bash
+python -m src.ataques.correr_rejilla --kit RUTA/operaciones_simuladas.csv   # o --entrada data/procesado/telemetria.csv
+python -m src.ataques.correr_rejilla --ejemplo                              # sin el kit: datos inventados
+```
+
+Salidas, todas fuera de Git: `data/escenarios/rejilla.manifiesto.json` (cada inyección con su ventana y sus etiquetas) y `data/resultados/rejilla_por_inyeccion.csv`, `rejilla_resumen.csv` (la curva por magnitud), `rejilla_base_limpia.csv` y `coincidencias_al_azar.csv`. Nico (N2) toma de ahí la tabla y la curva oficiales; solo los agregados van a `numeros_oficiales.json`.
+
+Los resultados sobre el kit están en la §6.
+
+## 6. Resultados sobre el kit (corrida del 21 de octubre)
+
+Corrida de `python -m src.ataques.correr_rejilla --kit …` con el código del commit `cf46ead`: 141 inyecciones por condición (18 por tipo; SIM-C tiene menos lugares limpios por su evento OT). Son **agregados**; las filas del kit no salen de la laptop. Las cifras oficiales del pitch las consolida Nico en `numeros_oficiales.json` (N2) a partir de `data/resultados/deteccion_para_numeros_oficiales.json`, que la corrida deja con esa misma forma.
+
+**Las anomalías originales del kit: empate, como se esperaba.** Los dos métodos detectan los 3 episodios (21 filas), en la primera hora y sin falsas alarmas (0 por día y sitio; IC 95 %: 0 a 0.33, sobre 267 horas limpias sumando los 3 sitios). DripSafe los clasifica así: la ineficiencia de SIM-A y la fuga de SIM-B como **escalón sin registro** (la fuga, con inspección física), los logins de SIM-C como **intento de acceso** y su cambio como **cambio no autorizado**.
+
+**La rejilla: dónde se separan.**
+
+| Inyección (4 h salvo los cambios, 12 h) | DripSafe ve el efecto | Con el doble de ruido (5 semillas) | Reglas del kit ven el efecto | Lo que las reglas no vieron |
+|---|---|---|---|---|
+| Energía no TI +10 % | 100 % | 33 % (22–50) | 0 % | 312 kWh |
+| Energía no TI +20 % | 100 % | 80 % (72–89) | 0 % | 625 kWh |
+| Energía no TI +40 % | 100 % | 100 % | 0 % | 1 249 kWh |
+| Energía no TI +80 % | 100 % | 100 % | 33 % (solo SIM-A) | 1 382 kWh |
+| Agua +25 % | 100 % | 100 % | 0 % | 1 116 L |
+| Agua +50 % | 100 % | 100 % | 0 % | 2 231 L |
+| Cambio sin registro (+20 %) | 100 % | 98 % (94–100) | 0 % | 1 887 kWh |
+| Cambio con efecto 8 h después (+20 %) | 100 % | 98 % (94–100) | 0 % del efecto; sí ven el evento | 1 710 kWh |
+
+- **Clase OT:** en el 100 % de las horas con efecto visto, DripSafe puso la clase esperada, con y sin ruido. Todos los cambios sin registro quedaron como escalón sin registro, que manda a revisar la configuración antes que a mantenimiento.
+- **Rapidez:** DripSafe ve el efecto en la misma hora en que empieza, salvo a +10 %, que tarda en promedio 0.4 h. Lo que deja pasar: 28 kWh en los de +10 % y 5 kWh en los cambios con efecto.
+- **Por qué las reglas no ven:** el sitio líquido trabaja con un PUE cercano a 1.2 y el evaporativo con un WUE cercano a 0.9 L/kWh. Les cabe mucho exceso antes de llegar a 1.6 o a 1.5 L/kWh.
+- **Falsas alarmas con el doble de ruido:** suben de 0 a 0.07 por día y sitio.
+
+**Coincidencias al azar (§4b).** Si un evento OT cayera en una hora al azar de la evaluación, ¿cuántas veces encontraría un exceso que no causó?
+
+| Ventana | 1 h | 4 h | 8 h | 12 h | 24 h |
+|---|---|---|---|---|---|
+| Kit | 1.4 % | 3.6 % | 6.8 % | 10.3 % | **20.4 %** |
+| Con el doble de ruido (media) | 2.0 % | 5.0 % | 9.5 % | 14.0 % | 27.0 % |
+
+Con 24 h, uno de cada cinco «incidentes OT con efecto» podría ser casualidad. Por eso el incidente pide **confirmar en sitio** antes de actuar, y el motivo dice cuántas horas pasaron entre el evento y el exceso: a menos horas, menos probable la casualidad.
+
+## 7. Qué **no** se puede inferir de un evento sintético (reto 2 del kit · U3)
+
+1. **Un `login_fallido` no dice quién ni desde dónde.** El kit no trae usuario ni IP. No se distingue un ataque de alguien que se equivocó de contraseña, ni se sabe si después hubo un acceso exitoso.
+2. **Un `cambio_config_no_autorizado` no dice qué cambió.** Sin el parámetro y el valor, no se sabe si podía tener efecto físico ni cuándo.
+3. **El cambio del kit ocurre al final de los datos.** Es el 18 de octubre a las 04:00–05:00 UTC y los datos terminan a las 23:00: solo se observan 18 de las 24 h de su ventana. «Sin efecto físico» vale solo para esas 18 h.
+4. **Las horas son UTC.** Los eventos de SIM-C (01:00–05:00 UTC) son las 19:00–23:00 del día anterior en Mérida. No decir «de madrugada» sin aclarar la zona horaria.
+5. **Un exceso no distingue falla de ataque.** Por eso no existe una clase «ataque»: el escalón sin registro manda a revisar la configuración antes que a mantenimiento.
+6. **El resultado base es optimista.** La línea base tiene la misma forma que el generador del kit (propuesta §3.1). La cifra honesta es la del doble de ruido.
+7. **El agua del kit no trae ruido**, así que detectar sus excesos es fácil. Con ±4 % de ruido se siguen viendo todos, pero en una planta real hay que comprobarlo.
+8. **Un evento sintético es solo el rastro final.** No reproduce el reconocimiento, el acceso ni el movimiento lateral de un ataque real.
+9. **Nada se probó contra equipos ni redes reales** (regla 18): los ataques solo existen como cambios en copias de un CSV.
+
+**Revisión de la narrativa (U3), 21 oct:**
+- Ningún texto del repositorio, del dashboard o del pitch afirma que un exceso pruebe un ataque.
+- Corregí los IDs revocados en `app/textos.py`, `docs/08`, `docs/00-propuesta.md`, `docs/notebooklm-contexto.md` y `src/ataques/escenarios.py`.
+- El dashboard solo lee el kit, `alertas.csv` y el JSON oficial. No manda nada a ningún equipo ni a internet: hasta las fuentes tipográficas vienen dentro del repositorio.
+
+## 8. Cómo se instala DripSafe sin abrir una puerta nueva
 
 Un detector conectado a la planta también puede ser atacado. Por eso:
-- **Solo lee.** Recibe una copia del tráfico (puerto espejo o diodo de datos, que deja pasar información en un solo sentido) y **nunca manda órdenes** a PLCs ni bombas.
-- **Alerta a una persona; no actúa solo.** Si DripSafe pudiera cambiar el enfriamiento, quien engañe al modelo controlaría la planta. Esto aplica también al bono: la IA **recomienda** cuándo activar el respaldo con agua tratada y el operador confirma.
-- **Vive en su propia zona** de la red (IEC 62443): separado de la red de oficina y sin salida a internet.
-- **Se entrena solo con periodos verificados como limpios** y cada versión del modelo queda registrada. Así nadie le «enseña» a ver un ataque como normal (envenenamiento del modelo).
-- **Si el atacante conoce el modelo:** puede imitar la estadística de un sensor, pero tendría que falsificar a la vez temperatura, caudal y energía de forma físicamente coherente, y los medidores de energía suelen ser otro sistema.
+- **Solo lee.** Recibe una copia de los datos por un diodo de datos (información en un solo sentido) o un puerto espejo, y **nunca manda órdenes** a controladores ni bombas.
+- **Alerta a una persona; no actúa solo.** Si DripSafe pudiera cambiar el enfriamiento, quien lo engañe controlaría la planta. Esto aplica también al bono: la IA **recomienda** cuándo activar el respaldo y el operador confirma (D4).
+- **Vive en su propia zona** de la red (IEC 62443), sin salida a internet.
+- **Se entrena solo con periodos verificados como limpios** y cada versión queda registrada. Así nadie le «enseña» a ver un ataque como normal (envenenamiento del modelo).
+- **Si el atacante conoce el modelo:** tendría que falsificar a la vez el registro del BMS y los medidores de energía, que suelen ser otro sistema (EPMS), de forma coherente con la carga y el clima. Con el kit no se puede probar; es una pregunta para el mentor.
 
-## 6. Lo que trae el kit sobre OT (19 oct)
+## 9. Recomendaciones de defensa
 
-- **No trae** equipos, protocolos ni diagrama de red. El kit es solo de lectura local: sin PLC, sin red OT, sin actuadores y sin respuesta automatizada.
-- **Sí trae** una columna `ot_event` con eventos ficticios resumidos: `login_fallido` y `cambio_config_no_autorizado`, sin IPs ni credenciales.
-- El kit advierte que **un login fallido no prueba un ataque**. Proponemos tratarlo como `evento_ot` que requiere revisión humana, no como "ataque" confirmado (ver D14).
-- Mapeo tentativo para la tabla final: `cambio_config_no_autorizado` → **Modify Parameter (T0836)**. Para `login_fallido`, documentar que es un indicio de acceso, no una técnica confirmada; verificar en la matriz si conviene citar alguna técnica de acceso inicial.
-- Los escenarios de `src/ataques/` que necesitan columnas que el kit no trae (temperaturas del agua, chiller, caudal) **siguen sirviendo con los sintéticos** para mostrar la idea de "no cuadra físicamente". Sobre el kit, solo se usan los que tengan sus columnas.
-- **Acuífero y gobernanza (#13) también son de Guille desde D13.** Ver [07-agua-y-acuifero.md](07-agua-y-acuifero.md).
+Basadas en ISA/IEC 62443 (zonas y conductos) y en las mitigaciones de MITRE para cada técnica.
 
-## 7. Entregable de Guille
+| Recomendación | Contra qué | Mitigación MITRE |
+|---|---|---|
+| Separar la red del enfriamiento de la de oficina y sin acceso directo a internet | T0883, T0886 | M0930 Network Segmentation, M0937 Filter Network Traffic |
+| Acceso remoto del proveedor solo por un equipo de salto, con MFA y en horario acordado | T0822, T0886 | M0932 Multi-factor Authentication, M0801 Access Management |
+| Bloqueo tras varios intentos fallidos; cambiar todas las contraseñas de fábrica | T0859, T1694.001 | M0936 Account Use Policies, M0927 Password Policies |
+| Solo ciertos usuarios cambian setpoints, y el controlador valida rangos | T0836 | M0800 Authorization Enforcement, M0818 Validate Program Inputs |
+| Configuración aprobada con huella y comparación periódica. Es lo que pide la acción de DripSafe «comparar contra la configuración aprobada» | T0836, T0838 | M0947 Audit |
+| Lista blanca de comandos y mensajes autenticados | T1692.001, T1692.002 | M0807 Network Allowlists, M0802 Communication Authenticity |
+| Una medición independiente para validar la principal. DripSafe usa los medidores de energía como testigo | T1692.002, T0832 | M0810 Out-of-Band Communications Channel |
+| Modo seguro manual y respaldo de la configuración | T0831, T0826 | M0953 Data Backup |
 
-- 1 o 2 diapositivas: amenazas → cómo las detectamos → recomendaciones.
-- Tabla final de técnicas de ATT&CK aplicadas al caso del kit.
-- Escenarios simulados sobre el kit (contrato 2) y `deteccion_por_escenario.csv` con el modelo final de Gadiel: qué detecta, en cuánto tiempo y con cuántas falsas alarmas.
-- Diagrama del modelo de amenazas (niveles Purdue y puntos de entrada).
+## 10. Para el pitch
+
+**Diapositiva 1 · Del evento al efecto.** El diagrama de §2 y tres frases:
+1. Un atacante entra por el BMS o por el acceso del proveedor y cambia un setpoint con comandos válidos, como en FrostyGoop.
+2. DripSafe no mira la red: mira si la energía y el agua cuadran con la carga y el clima.
+3. Cruza ese exceso con el registro OT y dice qué revisar primero. Nunca actúa solo.
+
+**Diapositiva 2 · Lo que las reglas fijas no ven.** La tabla de §6 reducida a cuatro filas (energía +20 %, agua +25 %, cambio sin registro, cambio con efecto), con las columnas «DripSafe» y «reglas del kit», y abajo: *«Datos simulados. Con el doble de ruido, DripSafe ve el 80 % de los excesos de +20 %. Con la ventana de 24 h, 1 de cada 5 atribuciones podría ser casualidad: por eso un incidente se confirma en sitio.»*
+
+**Frase de 20 segundos:**
+> *«En el kit, un exceso de 20 % en la energía no TI no mueve ninguna regla fija: el sitio líquido parte de un PUE de 1.2. DripSafe lo ve en la primera hora. Y cuando hay un cambio de configuración no autorizado, no nos quedamos en "hubo un evento": medimos si tuvo efecto, cuánta energía y agua costó, y qué tan probable es que sea casualidad.»*
+
+**Preguntas probables:**
+
+| Pregunta | Respuesta corta |
+|---|---|
+| ¿Detectan ciberataques? | Detectamos efectos físicos y los cruzamos con el registro OT. No afirmamos que un exceso pruebe un ataque; por eso son cuatro clases y no «ataque sí o no». |
+| ¿Y si el atacante también falsifica los medidores? | Tendría que falsificar a la vez el registro del BMS y los medidores de energía, que suelen ser otro sistema, de forma coherente con la carga y el clima. Con el kit no lo podemos probar y lo decimos. |
+| ¿Por qué 24 h de ventana? | Un setpoint cambiado de noche puede notarse hasta el siguiente pico de calor. El costo lo medimos: 20 % de coincidencias al azar con 24 h y 7 % con 8 h. |
+| ¿DripSafe no es otra puerta de entrada? | Solo lee, por diodo de datos o puerto espejo, en su propia zona y sin internet. No puede mandar órdenes. |
+| ¿Qué técnicas de ATT&CK cubren? | Con el kit: T0859 y T0836 observables, T0831 inyectada. Con sensores de agua helada: T1692.002 y T0832. Usamos la versión 20 de la matriz. |
+
+## 11. Para revisar con el mentor (22 oct)
+
+1. ¿Una ventana de 24 h entre el evento y el efecto es razonable, o en la práctica se usan ventanas distintas según el tipo de cambio?
+2. ¿Tratar un login fallido seguido de un exceso como «incidente OT con efecto» es demasiado agresivo?
+3. En centros de datos reales, ¿qué tan común es que los medidores de energía (EPMS) estén separados del BMS? Nuestro argumento del testigo independiente depende de eso.
+4. ¿Los BMS suelen registrar los cambios de setpoint con usuario y hora? Sin ese registro, todo cae en «escalón sin registro».
+5. Para un sitio mediano, ¿diodo de datos o puerto espejo? ¿Qué cuesta cada uno?
+6. ¿Cómo se lleva la «configuración aprobada» (gestión de cambios) en IEC 62443 para que la acción «comparar contra la configuración aprobada» tome minutos y no días?
+
+## Apéndice A. Escenarios con sensores por equipo (datos sintéticos)
+
+`src/ataques/escenarios.py` simula ataques y fallas sobre un centro de datos sintético de un solo sitio que **sí** trae chiller, bombas, caudal y temperaturas del agua (`src/sinteticos.py`). **No corren sobre el kit**, porque el kit no trae esas columnas. Sirven para mostrar qué vería DripSafe con la instrumentación que recomendamos medir (propuesta §9).
+
+| Escenario | Técnica (v20) | Huella física que lo delata |
+|---|---|---|
+| `setpoint_alterado` | T0836 | El chiller gasta ~9 % más con la misma carga de TI |
+| `sensor_falsificado` | T1692.002 (antes T0856) | Caudal × ΔT ya no alcanza para el calor de los servidores |
+| `vista_repetida` | T0832 + T0831 | La bomba gasta ~70 % menos, pero el caudal «es normal»: rompe la ley de afinidad |
+| `comandos_no_autorizados` | T1692.001 (antes T0855) | Arranques y paros de la bomba sin relación con la carga ni el horario |
+| `denegacion_de_vista` | T0815 | Sensores vacíos mientras la energía sigue llegando |
+| `ensuciamiento` · `sensor_atorado` · `fuga_reposicion` | Fallas | Subida gradual · varianza cero · más agua sin más calor |
+
+```bash
+python -m src.sinteticos --dias 14 --salida data/sinteticos/telemetria.csv
+python -m src.ataques.inyectar --entrada data/sinteticos/telemetria.csv
+```
 
 ## Regla del hackatón
-**Prohibido hacer pruebas o ataques sobre sistemas reales.** Todo se hace sobre el kit de datos o en simulaciones. Los "ataques" se simulan modificando datos en un CSV, nunca contra equipos reales.
+
+**Prohibido hacer pruebas o ataques sobre sistemas reales.** Todo se hace sobre el kit o en simulaciones: los «ataques» son cambios en copias de un CSV, nunca contra equipos reales.
 
 ## Para leer más
-Ver la sección "Ciberseguridad OT" en [09-recursos.md](09-recursos.md).
+
+- MITRE ATT&CK for ICS (v20): <https://attack.mitre.org/matrices/ics/>. Técnicas citadas: T0836, T0831, T0859, T1694.001, T1692, T0883, T0822, T0886, T0838, T0815, T0832, T0828, T0879, T0826.
+- FrostyGoop: campaña C0041 y software S1165 en MITRE; informe de Dragos (julio de 2024).
+- Ver también la sección «Ciberseguridad OT» en [09-recursos.md](09-recursos.md).

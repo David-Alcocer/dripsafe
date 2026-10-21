@@ -116,9 +116,11 @@ TECNICAS = [
      "Cambio de configuración no autorizado (SIM-C): clase «cambio no autorizado».", "kit"),
     ("T0831", "Manipulation of Control", "El atacante altera el control físico del proceso.",
      "Exceso de energía después de un evento OT: clase «incidente OT con efecto» (se inyecta).", "inyectada"),
-    ("T0855", "Unauthorized Command Message", "Llegan órdenes no autorizadas a bombas o válvulas.",
+    ("T1692.001", "Unauthorized Message: Command Message",
+     "Una orden llega directo al controlador sin pasar por el BMS, así que no deja registro (antes T0855).",
      "Escalón sin evento OT: «escalón sin registro», se revisa la configuración antes de mantenimiento.", "inyectada"),
-    ("T0856", "Spoof Reporting Message", "Un sensor reporta valores inventados pero creíbles.",
+    ("T1692.002", "Unauthorized Message: Reporting Message",
+     "Un sensor reporta valores inventados pero creíbles (antes T0856).",
      "Requiere caudal y temperaturas del agua, que el kit no trae.", "fuera"),
     ("T0832", "Manipulation of View", "El operador ve datos falsos en su pantalla.",
      "Requiere un balance de calor con sensores que el kit no trae.", "fuera"),
@@ -176,7 +178,7 @@ LIMITES = [
     ("Datos simulados", "Tres sitios ficticios durante siete días, con un generador casi lineal. "
                         "La validación demuestra el método, no su eficacia en una planta real."),
     ("Sin balance de calor", "El kit no trae caudal ni temperaturas del agua: no se detectan sensores falsificados "
-                             "por balance de calor (T0856, T0832)."),
+                             "por balance de calor (T1692.002, T0832)."),
     ("Falla brusca contra cambio sin registro", "Con datos de proceso no se distinguen. DripSafe no los separa: "
                                                "manda a revisar la configuración antes de mantenimiento."),
     ("Épocas del año", "El kit cubre una semana de 15 a 31 °C. Las líneas base por época y la humedad no se "

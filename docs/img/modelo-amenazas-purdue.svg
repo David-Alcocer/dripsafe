@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <title>Modelo de amenazas del enfriamiento de un centro de datos por niveles Purdue</title>
+  <desc>Cinco puntos de ataque mapeados a MITRE ATT&amp;CK for ICS v20 y lo que DripSafe ve de cada uno con los datos del kit.</desc>
+  <defs>
+    <marker id="flecha-roja" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#C62828"/>
+    </marker>
+    <marker id="flecha-verde" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#00796B"/>
+    </marker>
+    <marker id="flecha-gris" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5B6470"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="#FFFFFF"/>
+
+  <!-- Título -->
+  <text x="40" y="58" font-size="30" font-weight="700" fill="#1B1F24">Modelo de amenazas del enfriamiento de un centro de datos</text>
+  <text x="40" y="88" font-size="18" fill="#5B6470">Niveles Purdue · técnicas de MITRE ATT&amp;CK for ICS v20 · los números rojos son los puntos de ataque</text>
+
+  <!-- Bandas de nivel -->
+  <g font-size="17" fill="#1B1F24">
+    <rect x="30" y="110" width="1120" height="112" rx="10" fill="#F1F3F5"/>
+    <text x="48" y="150" font-weight="700">Nivel 4–5</text><text x="48" y="174" fill="#5B6470">Red corporativa</text><text x="48" y="196" fill="#5B6470">e internet</text>
+
+    <rect x="30" y="228" width="1120" height="112" rx="10" fill="#FFFFFF" stroke="#9AA4AE" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="48" y="268" font-weight="700">Nivel 3.5</text><text x="48" y="292" fill="#5B6470">DMZ industrial</text>
+
+    <rect x="30" y="346" width="1120" height="112" rx="10" fill="#F1F3F5"/>
+    <text x="48" y="386" font-weight="700">Nivel 3</text><text x="48" y="410" fill="#5B6470">Operaciones</text>
+
+    <rect x="30" y="464" width="1120" height="112" rx="10" fill="#E9EDF1"/>
+    <text x="48" y="504" font-weight="700">Nivel 2</text><text x="48" y="528" fill="#5B6470">Supervisión</text>
+
+    <rect x="30" y="582" width="1120" height="112" rx="10" fill="#F1F3F5"/>
+    <text x="48" y="622" font-weight="700">Nivel 1</text><text x="48" y="646" fill="#5B6470">Control</text>
+
+    <rect x="30" y="700" width="1120" height="112" rx="10" fill="#E9EDF1"/>
+    <text x="48" y="740" font-weight="700">Nivel 0</text><text x="48" y="764" fill="#5B6470">Proceso</text>
+  </g>
+
+  <!-- Equipos -->
+  <g font-size="17" fill="#1B1F24" text-anchor="middle">
+    <!-- Nivel 4–5 -->
+    <rect x="270" y="131" width="200" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="370" y="172">Internet</text>
+    <rect x="600" y="131" width="300" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="750" y="162">Proveedor de</text><text x="750" y="184">mantenimiento (remoto)</text>
+    <rect x="930" y="131" width="200" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="1030" y="172">Oficinas y correo</text>
+
+    <!-- Nivel 3.5 -->
+    <rect x="600" y="249" width="300" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="750" y="280">VPN y equipo de salto</text><text x="750" y="302">del proveedor</text>
+
+    <!-- Nivel 3 -->
+    <rect x="270" y="367" width="290" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="415" y="408">Historiador de datos</text>
+    <rect x="600" y="367" width="300" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="750" y="408">Estación de ingeniería</text>
+    <rect x="930" y="361" width="200" height="82" rx="10" fill="#E0F2F1" stroke="#00796B" stroke-width="3"/>
+    <text x="1030" y="392" font-weight="700" fill="#00574B" font-size="19">DripSafe</text>
+    <text x="1030" y="414" fill="#00574B" font-size="15">zona propia · solo lee</text>
+    <text x="1030" y="434" fill="#00574B" font-size="15">alerta a una persona</text>
+
+    <!-- Nivel 2 -->
+    <rect x="270" y="485" width="370" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="455" y="516">BMS / SCADA con pantallas (HMI)</text><text x="455" y="538" fill="#5B6470" font-size="15">deja el registro de eventos OT</text>
+    <rect x="690" y="485" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="850" y="516">Medidores de energía (EPMS)</text><text x="850" y="538" fill="#5B6470" font-size="15">sistema aparte: testigo independiente</text>
+
+    <!-- Nivel 1 -->
+    <rect x="270" y="603" width="250" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="395" y="644">Controladores de chillers</text>
+    <rect x="550" y="603" width="250" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="675" y="634">Manejadoras de aire</text><text x="675" y="656">y CDU (líquido)</text>
+    <rect x="830" y="603" width="250" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="955" y="644">Bombas y torre</text>
+
+    <!-- Nivel 0 -->
+    <rect x="270" y="721" width="250" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="395" y="752">Compresores, válvulas</text><text x="395" y="774">y ventiladores</text>
+    <rect x="600" y="721" width="290" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="745" y="752">Medidores de energía</text><text x="745" y="774">(TI y total) y de agua</text>
+    <rect x="920" y="721" width="210" height="70" rx="8" fill="#FFFFFF" stroke="#C3CAD1" stroke-width="1.5"/>
+    <text x="1025" y="752">Sensores de</text><text x="1025" y="774">temperatura</text>
+  </g>
+
+  <!-- Control normal (gris): el BMS manda a los controladores y estos a los equipos -->
+  <g stroke="#5B6470" stroke-width="2" fill="none">
+    <path d="M395 555 V598" marker-end="url(#flecha-gris)"/>
+    <path d="M395 673 V716" marker-end="url(#flecha-gris)"/>
+    <path d="M815 721 V560" marker-end="url(#flecha-gris)"/>
+  </g>
+
+  <!-- Datos hacia DripSafe (verde): copia en un solo sentido -->
+  <g stroke="#00796B" stroke-width="3" fill="none">
+    <path d="M560 485 V474 H1090 V448" marker-end="url(#flecha-verde)"/>
+    <path d="M980 485 V474"/>
+  </g>
+
+  <!-- Caminos de ataque (rojo) -->
+  <g stroke="#C62828" stroke-width="3" fill="none" stroke-dasharray="9 6">
+    <!-- 1: BMS expuesto a internet -->
+    <path d="M270 166 H252 V520 H263" marker-end="url(#flecha-roja)"/>
+    <!-- 2: acceso remoto del proveedor hasta la estación de ingeniería -->
+    <path d="M750 201 V243" marker-end="url(#flecha-roja)"/>
+    <path d="M750 319 V361" marker-end="url(#flecha-roja)"/>
+    <path d="M640 437 L600 480" marker-end="url(#flecha-roja)"/>
+    <!-- 4b: orden directa al controlador, sin pasar por el BMS -->
+    <path d="M665 437 V478 M665 562 V597" marker-end="url(#flecha-roja)"/>
+    <!-- 4: cambio de setpoint desde el BMS -->
+    <path d="M480 555 V597" marker-end="url(#flecha-roja)"/>
+    <!-- 5: efecto físico -->
+    <path d="M520 756 H594" marker-end="url(#flecha-roja)"/>
+  </g>
+
+  <!-- Marcadores numerados -->
+  <g font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">
+    <circle cx="252" cy="345" r="16" fill="#C62828"/><text x="252" y="351">1</text>
+    <circle cx="790" cy="222" r="16" fill="#C62828"/><text x="790" y="228">2</text>
+    <circle cx="640" cy="498" r="16" fill="#C62828"/><text x="640" y="504">3</text>
+    <circle cx="500" cy="578" r="16" fill="#C62828"/><text x="500" y="584">4</text>
+    <circle cx="558" cy="728" r="16" fill="#C62828"/><text x="558" y="734">5</text>
+  </g>
+
+  <!-- Panel derecho: qué ve DripSafe -->
+  <rect x="1172" y="110" width="400" height="702" rx="12" fill="#FAFBFC" stroke="#C3CAD1" stroke-width="1.5"/>
+  <text x="1192" y="146" font-size="21" font-weight="700" fill="#1B1F24">Qué ve DripSafe con el kit</text>
+
+  <g font-size="16" fill="#1B1F24">
+    <circle cx="1206" cy="183" r="13" fill="#C62828"/><text x="1206" y="189" fill="#FFFFFF" font-weight="700" text-anchor="middle">1</text>
+    <text x="1228" y="182" font-weight="700">BMS expuesto a internet</text>
+    <text x="1228" y="203" fill="#5B6470">T0883 · no lo ve: no mira la red.</text>
+    <text x="1228" y="223" fill="#5B6470">Se cierra con zonas de red.</text>
+
+    <circle cx="1206" cy="263" r="13" fill="#C62828"/><text x="1206" y="269" fill="#FFFFFF" font-weight="700" text-anchor="middle">2</text>
+    <text x="1228" y="262" font-weight="700">Acceso remoto del proveedor</text>
+    <text x="1228" y="283" fill="#5B6470">T0822 → T0886 · no lo ve.</text>
+    <text x="1228" y="303" fill="#5B6470">Se cierra con MFA y equipo de salto.</text>
+
+    <circle cx="1206" cy="343" r="13" fill="#C62828"/><text x="1206" y="349" fill="#FFFFFF" font-weight="700" text-anchor="middle">3</text>
+    <text x="1228" y="342" font-weight="700">Contraseñas válidas o de fábrica</text>
+    <text x="1228" y="363" fill="#5B6470">T0859 · T1694.001</text>
+    <text x="1228" y="384">login_fallido → <tspan font-weight="700">intento de acceso</tspan></text>
+
+    <circle cx="1206" cy="424" r="13" fill="#C62828"/><text x="1206" y="430" fill="#FFFFFF" font-weight="700" text-anchor="middle">4</text>
+    <text x="1228" y="423" font-weight="700">Cambio de setpoint</text>
+    <text x="1228" y="444" fill="#5B6470">T0836 · si llega directo al</text>
+    <text x="1228" y="464" fill="#5B6470">controlador: T1692.001</text>
+    <text x="1228" y="485">con registro → <tspan font-weight="700">cambio no autorizado</tspan></text>
+    <text x="1228" y="506">sin registro → <tspan font-weight="700">escalón sin registro</tspan></text>
+
+    <circle cx="1206" cy="546" r="13" fill="#C62828"/><text x="1206" y="552" fill="#FFFFFF" font-weight="700" text-anchor="middle">5</text>
+    <text x="1228" y="545" font-weight="700">Efecto físico</text>
+    <text x="1228" y="566" fill="#5B6470">T0831 → T0828 (kWh y litros de más)</text>
+    <text x="1228" y="587">evento + exceso en 24 h →</text>
+    <text x="1228" y="608" font-weight="700">incidente OT con efecto</text>
+  </g>
+
+  <line x1="1192" y1="640" x2="1552" y2="640" stroke="#D5DAE0" stroke-width="1.5"/>
+  <g font-size="15" fill="#1B1F24">
+    <line x1="1194" y1="672" x2="1240" y2="672" stroke="#C62828" stroke-width="3" stroke-dasharray="9 6"/>
+    <text x="1252" y="677">camino de ataque</text>
+    <line x1="1194" y1="702" x2="1240" y2="702" stroke="#00796B" stroke-width="3"/>
+    <text x="1252" y="707">copia de datos en un solo sentido</text>
+    <line x1="1194" y1="732" x2="1240" y2="732" stroke="#5B6470" stroke-width="2"/>
+    <text x="1252" y="737">control normal</text>
+    <text x="1192" y="776" fill="#5B6470" font-size="14">DATOS SIMULADOS · el kit no trae red ni equipos:</text>
+    <text x="1192" y="796" fill="#5B6470" font-size="14">el diagrama es la arquitectura típica que suponemos.</text>
+  </g>
+</svg>

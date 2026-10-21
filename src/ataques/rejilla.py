@@ -4,7 +4,7 @@ Toma la telemetría del contrato v2 (varios sitios, una fila por sitio y hora) y
 crea COPIAS con UNA inyección cada una, siempre dentro de `evaluacion`. Las
 horas de ajuste y calibración no se tocan, así que el detector aprende lo mismo
 en todas las copias (detector congelado, G2). La rejilla está escrita en
-docs/06 §3c desde antes de correrla sobre el kit; cambiarla después de ver
+docs/06 §5 desde antes de correrla sobre el kit; cambiarla después de ver
 resultados sería hacer trampa.
 
 Qué se inyecta (REJILLA):

@@ -87,7 +87,7 @@ Sobre el kit (19 oct): datos totalmente simulados, 3 sitios ficticios (enfriamie
 
 **Propuesta para el bono:** enfriamiento híbrido, con circuito cerrado líquido como base y agua residual tratada (no potable) solo en picos de calor. La IA decide cuándo activar el respaldo.
 
-**Ciberseguridad (técnicas de MITRE ATT&CK for ICS que detectaríamos):** Manipulation of View (T0832), Spoof Reporting Message (T0856), Modify Parameter (T0836), Unauthorized Command Message (T0855) y Manipulation of Control (T0831). Lo presentamos como "primera capa de detección", alineada con ISA/IEC 62443.
+**Ciberseguridad (MITRE ATT&CK for ICS v20):** con el kit se observan Valid Accounts (T0859, en los logins fallidos) y Modify Parameter (T0836, en el cambio de configuración), y se inyecta Manipulation of Control (T0831). Con sensores de agua helada se verían también Unauthorized Message: Reporting Message (T1692.002, antes T0856) y Manipulation of View (T0832). DripSafe no afirma que un exceso pruebe un ataque: cruza el registro OT con el efecto físico en cuatro clases. Lo presentamos como "primera capa de detección", alineada con ISA/IEC 62443. Detalle en docs/06.
 
 ---
 

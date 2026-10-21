@@ -1,5 +1,9 @@
 """Mide qué escenarios detecta el modelo (contratos 2 + 3 → deteccion_por_escenario.csv).
 
+Solo para los escenarios sintéticos de un sitio (docs/06, apéndice A). La
+evaluación sobre el kit la hace src/ataques/correr_rejilla.py con la función por
+episodio de Nico (D17).
+
 Para cada escenario responde: ¿lo detectó?, ¿cuánto tardó? y ¿qué parte de la
 ventana marcó? También cuenta las falsas alarmas en las horas normales. Esta
 tabla es la evidencia del criterio «Impacto en ciberseguridad».

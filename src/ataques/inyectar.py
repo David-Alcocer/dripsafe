@@ -1,5 +1,8 @@
 """Mete ataques y fallas simulados en la telemetría (contrato 1 → contrato 2).
 
+Solo para los datos sintéticos de un sitio (src/sinteticos.py). Sobre el kit se
+usa src/ataques/correr_rejilla.py (docs/06 §5).
+
 La primera parte de los datos (por defecto, la mitad) queda intacta y se marca
 como «entrenamiento»: es lo que el modelo aprende como normal. Los escenarios
 van en la otra parte, cada uno en su propia ventana y con huecos normales entre
