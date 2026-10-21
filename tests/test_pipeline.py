@@ -8,13 +8,15 @@ import json
 import subprocess
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from app import kit
-from src import contrato, pipeline
+from src import contrato, pipeline, procedencia
 from src.datos.cargar import cargar
 from src.metricas import balance_neto
 from src.metricas.pue import pue_inicial
+from src.modelo import detector, medicion
 
 RAIZ = Path(__file__).resolve().parents[1]
 
@@ -42,6 +44,115 @@ def test_horas_para_equilibrio_sin_exceso_queda_indefinido():
     resultado = balance_neto.horas_para_equilibrio(2.0, [0.0, 0.0])
     assert resultado["exceso_tipico_kwh_por_hora"] is None
     assert resultado["horas_necesarias_al_año"] is None
+
+
+# ---------- contrato 3 v2: fases separadas y procedencia ----------
+
+def _consumo_v2() -> dict:
+    """Consumo v2 mínimo pero completo, para probar el contrato sin el kit."""
+    def fase(kwh: float, incluye_ajuste: bool) -> dict:
+        return {
+            "kwh_por_repeticion": [kwh, kwh],
+            "ms_por_repeticion": [10.0, 11.0],
+            "kwh_mediana": kwh,
+            "kwh_p95": kwh,
+            "kwh_desviacion": 0.0,
+            "ms_mediana": 10.5,
+            "ms_desviacion": 0.5,
+            "fuente_energia": "tdp_estimado",
+            "baja_resolucion": True,
+            "incluye_ajuste": incluye_ajuste,
+        }
+
+    return {
+        "formato": 2,
+        "repeticiones": 2,
+        "frecuencia": {"horas_anio": 8760, "lotes_inferencia_por_hora": 1,
+                       "reentrenamientos_anio": 4},
+        "lote": {"horas": 168, "sitios": 3, "filas": 504},
+        "entrenamiento": fase(1e-7, True),
+        "inferencia": fase(2e-7, False),
+        "corrida_completa": fase(3e-7, True),
+        "_meta": {
+            "kit": {"csv_sha256": "a" * 64, "manifest_sha256": "b" * 64},
+            "codigo": {"commit": "c" * 40, "sha256_archivos": {"x.py": "d" * 64}},
+            "equipo": {"modelo": "MacTest", "so": "macOS", "python": "3.12"},
+            "metodo": {"herramienta": "codecarbon", "tracker": "OfflineEmissionsTracker",
+                       "pais": "MEX", "fuente_energia": "tdp_estimado", "tipo": "estimado"},
+            "tabla_medida_sha256": "e" * 64,
+        },
+    }
+
+
+def test_costo_v2_suma_inferencia_y_entrenamiento_sin_doble_conteo():
+    desglose = balance_neto.desglose_costo_anual(
+        _consumo_v2(), {"horas_anio": 8760, "lotes_inferencia_por_hora": 1,
+                        "reentrenamientos_anio": 4})
+    assert desglose["modo"] == "fases_separadas"
+    assert desglose["inferencia_kwh_por_hora"] == pytest.approx(2e-7 / 168)
+    assert desglose["inferencia_kwh_anual"] == pytest.approx(2e-7 / 168 * 8760)
+    assert desglose["entrenamiento_kwh_anual"] == pytest.approx(1e-7 * 4)
+    assert desglose["total_kwh_anual"] == pytest.approx(2e-7 / 168 * 8760 + 1e-7 * 4)
+    assert desglose["reentrenamientos_aplicados"] == 4
+
+
+def test_costo_v1_es_cota_superior_y_no_suma_reentrenamiento():
+    desglose = balance_neto.desglose_costo_anual(
+        {"kwh_inferencia_anual": 0.02}, {"reentrenamientos_anio": 4})
+    assert desglose["modo"] == "legacy_corrida_completa"
+    assert desglose["total_kwh_anual"] == pytest.approx(0.02)
+    assert desglose["reentrenamientos_aplicados"] == 0
+    assert "no se suma" in desglose["nota"]
+
+
+def test_validar_consumo_v2_exige_kit_y_repeticiones():
+    assert procedencia.validar_consumo(_consumo_v2()) == []
+    sin_kit = _consumo_v2()
+    sin_kit["_meta"]["kit"] = None
+    assert any("kit" in problema for problema in procedencia.validar_consumo(sin_kit))
+    pocas = _consumo_v2()
+    pocas["inferencia"]["kwh_por_repeticion"] = [2e-7]
+    assert any("inferencia" in problema for problema in procedencia.validar_consumo(pocas))
+    sin_lote = _consumo_v2()
+    sin_lote.pop("lote")
+    assert any("lote" in problema for problema in procedencia.validar_consumo(sin_lote))
+
+
+def test_inferencia_pura_coincide_con_detectar_sin_ajustar(telemetria):
+    params = detector.entrenar(telemetria)
+    pura = medicion.inferir(telemetria, params)
+    completa = detector.detectar(telemetria)
+    pd.testing.assert_frame_equal(pura, completa)
+
+
+def test_huella_kit_encuentra_manifest_un_nivel_arriba(tmp_path):
+    datos = tmp_path / "data"
+    datos.mkdir()
+    csv = datos / "operaciones_simuladas.csv"
+    csv.write_text("timestamp\n2026-01-01\n", encoding="utf-8")
+    (tmp_path / "MANIFEST.json").write_text("{}", encoding="utf-8")
+    huella = procedencia.huella_kit(csv)
+    assert huella["csv_sha256"] == procedencia.sha256_archivo(csv)
+    assert huella["manifest_sha256"] == procedencia.sha256_archivo(tmp_path / "MANIFEST.json")
+
+
+def test_medicion_v2_guarda_cada_repeticion_y_procedencia(tmp_path, crudo, telemetria):
+    kit_csv = tmp_path / "operaciones_simuladas.csv"
+    crudo.to_csv(kit_csv, index=False)
+    (tmp_path / "MANIFEST.json").write_text("{}", encoding="utf-8")
+    consumo = medicion.medir_consumo(
+        telemetria, 1, tmp_path / "consumo.json", kit=kit_csv,
+        frecuencia={"horas_anio": 8760, "lotes_inferencia_por_hora": 1,
+                    "reentrenamientos_anio": 4})
+    assert consumo["formato"] == 2
+    assert len(consumo["inferencia"]["kwh_por_repeticion"]) == 1
+    assert consumo["lote"]["horas"] == 168
+    assert consumo["lote"]["horas_entrenamiento"] == 72
+    assert consumo["kwh_inferencia_anual"] == pytest.approx(
+        consumo["inferencia"]["kwh_mediana"] / 168 * 8760)
+    assert consumo["_meta"]["kit"]["csv_sha256"]
+    assert consumo["_meta"]["tabla_medida_sha256"]
+    assert procedencia.validar_consumo(consumo) == []
 
 
 # ---------- PUE inicial (src/metricas/pue.py) ----------
@@ -185,6 +296,28 @@ def test_pipeline_usa_consumo_ya_medido(salida, tmp_path):
     assert balance["umbral_equilibrio"]["valor"] > 0
     ahorro = balance["ahorro_proyectado_kwh_anual"]["valor"]
     assert balance["razon_ahorro_costo"]["valor"] == pytest.approx(ahorro / 0.02, rel=1e-3)
+
+
+def test_pipeline_v2_anualiza_por_fases_y_deja_validacion_pendiente(salida, tmp_path):
+    carpeta, _ = salida
+    consumo = tmp_path / "consumo_v2.json"
+    consumo.write_text(json.dumps(_consumo_v2()), encoding="utf-8")
+    destino = tmp_path / "numeros_v2.json"
+    pipeline.main([
+        "--ejemplo", "--sin-medir", "--sin-rejilla", "--consumo", str(consumo),
+        "--resultados", str(carpeta / "resultados"), "--clima", str(tmp_path / "sin_clima.json"),
+        "--salida", str(destino),
+    ])
+    numeros = json.loads(destino.read_text(encoding="utf-8"))
+    balance = numeros["balance_neto"]
+    esperado = 2e-7 / 168 * 8760 + 1e-7 * 4
+    assert balance["costo_detector_kwh_anual"]["valor"] == pytest.approx(esperado)
+    assert balance["frecuencia_anualizacion"]["modo"] == "fases_separadas"
+    assert balance["frecuencia_anualizacion"]["horas_lote"] == 168
+    assert balance["frecuencia_anualizacion"]["reentrenamientos_aplicados"] == 4
+    assert balance["validado_por"] is None and balance["nota_validacion"]
+    assert numeros["_meta"]["procedencia_g3"]["kit"]["csv_sha256"] == "a" * 64
+    assert procedencia.validar_balance_oficial(numeros) == []
 
 
 def test_sin_rejilla_exige_una_corrida_previa(tmp_path):

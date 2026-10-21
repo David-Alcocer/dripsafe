@@ -16,6 +16,8 @@ Para regenerar, desde la raíz del repo, con el kit disponible:
 ```
 
 `--sin-medir` evita atribuir una medición de esta laptop a Gadiel. Sin la salida verificada de CodeCarbon de Gadiel, el costo del detector y el balance neto son `null` con `estado: pendiente`, responsable y motivo. Lo mismo ocurre con el PUE del bono sin rendimiento de chiller de Misa y el acuífero sin fuente confirmada por Guille.
+
+La medición G3 usa el formato 2 de `consumo_modelo.json`: sella hashes del kit y del código, equipo y método, y guarda el kWh de **cada** repetición en tres fases (`entrenamiento`, `inferencia`, `corrida_completa`). El balance anualiza `(inferencia / lote.horas) × horas × lotes + entrenamiento × reentrenamientos`; la corrida completa no se suma porque ya incluye el ajuste. Un archivo v1 se acepta como cota superior y no se le suma reentrenamiento. La frecuencia (8 760 h y 4 reentrenamientos) es un supuesto editable, no una medición; `--validacion-conjunta` deja constancia de que Misa y Nico revisaron el balance.
 `--descargar-clima` guarda las 8760 horas de ERA5 2025 bajo `data/` para reproducir los agregados climáticos; sin red también puede pasarse un archivo ya descargado con `--clima`.
 Si ya existen las salidas auditadas de U2 y la serie climática, se pueden
 omitir la corrida de `correr_rejilla` y `--descargar-clima`. El cierre de N2
