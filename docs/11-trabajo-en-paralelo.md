@@ -131,7 +131,7 @@ Un contrato solo cambia con un PR que actualice **este documento y `src/contrato
 | `.github/`, `CONTRIBUTING.md`, este documento | Misa | Guille |
 | `resultados/numeros_oficiales.json` | Nico | Misa |
 
-La misma tabla está en `.github/CODEOWNERS`, para que GitHub pida la revisión automáticamente si el plan de la cuenta lo permite.
+`.github/CODEOWNERS` no repite esta tabla: pone a Misa y a Leo como revisores de cualquier PR, y GitHub les pide la revisión automáticamente si el plan de la cuenta lo permite.
 
 **D13 (19 oct):** Nico se suma al modelo como evaluador; el acuífero pasa a Guille, el bono a Misa y el guion a Leo.
 
