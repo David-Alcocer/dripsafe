@@ -143,16 +143,18 @@ La línea base por sitio, los umbrales de residuo y la media móvil de cuatro ho
 
 | Clase | Condición | Acción | ¿En el kit? |
 |---|---|---|---|
-| **Incidente OT con efecto** | Evento OT **y** residuo físico desde el inicio del evento hasta 24 h después | Máxima: restaurar config aprobada; modo seguro manual | Se inyecta |
-| **Cambio no autorizado** | `cambio_config_no_autorizado`, con o sin efecto | Alta: comparar contra config aprobada; vigilar 24 h | Sí (SIM-C) |
-| **Escalón sin registro** | Residuo supera umbral de golpe sin evento OT | Alta: comparar setpoints; si es agua, inspección física | Sí (SIM-A/B) |
-| **Intento de acceso** | Solo `login_fallido`, residuos normales | Media: revisar accesos | Sí (SIM-C) |
+| **Incidente OT con efecto** | Evento OT **y** un exceso físico que **empieza** entre el inicio del evento y 24 h después de su fin. También sube la hora del cambio que lo causó | Máxima: restaurar config aprobada; modo seguro manual | Se inyecta |
+| **Cambio no autorizado** | Hora con `cambio_config_no_autorizado` sin efecto atribuido (todavía). Si aparece el efecto, sube a incidente | Alta: comparar contra config aprobada; vigilar 24 h | Sí (SIM-C) |
+| **Escalón sin registro** | Exceso (por umbral o por la media de 4 h) sin evento OT que lo cause | Alta: comparar setpoints; si es agua, inspección física | Sí (SIM-A/B) |
+| **Intento de acceso** | Hora con `login_fallido` sin exceso | Media: revisar accesos | Sí (SIM-C) |
+
+**Implementada el 20 oct** en `src/ot/clases.py` (PR #38), con la precedencia, los 12 casos ambiguos y una prueba por caso: ver [06-ciberseguridad-ot.md](06-ciberseguridad-ot.md) §4. La tabla de arriba se actualizó el 21 oct para que diga lo mismo que el código. Un exceso que ya venía de antes del evento queda como escalón, marcado «coincidente, no causal».
 
 **Dos reglas de oro:**
 1. Ningún exceso sin explicar va directo a mantenimiento (podría ser cambio sin registro).
 2. Ningún cambio no autorizado es "sin urgencia" (puede notarse en el siguiente pico de calor).
 
-**Extra, si sobra tiempo:** `incoherencia física` y `deriva gradual`.
+**Extra, si sobra tiempo:** `incoherencia física` y `deriva gradual`. La deriva gradual quedó cubierta dentro del escalón: un exceso visto solo por la media de 4 h sale con forma «gradual» (caso 10 de §4). La incoherencia física necesita sensores que el kit no trae.
 
 **Dueño:** Guille (reglas); Nico (lógica); Gadiel (residuos disponibles).
 
