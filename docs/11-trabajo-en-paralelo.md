@@ -90,11 +90,48 @@ Además se genera un `.manifiesto.json` con las ventanas exactas de cada escenar
 | `variable_principal` | la variable que más pesó en la alerta (opcional) |
 | `kw_esperado_enfriamiento` | lo que el enfriamiento debería gastar en condiciones normales (para medir el exceso) |
 
-`data/resultados/consumo_modelo.json`, medido con CodeCarbon:
+`data/resultados/consumo_modelo.json`, formato 2 (medido con CodeCarbon):
 
 ```json
-{"kwh_entrenamiento": 0.0, "kwh_inferencia_anual": 0.0, "kg_co2e_entrenamiento": 0.0, "fecha": "2026-10-20"}
+{
+  "formato": 2,
+  "_meta": {
+    "kit": {"csv_sha256": "…", "manifest_sha256": "…"},
+    "codigo": {"commit": "…", "sucio": false, "sha256_archivos": {"src/modelo/detector.py": "…"}},
+    "equipo": {"modelo": "…", "chip": "…", "so": "…", "python": "3.12"},
+    "metodo": {"herramienta": "codecarbon", "fuente_energia": "tdp_estimado", "tipo": "estimado"},
+    "tabla_medida_sha256": "…",
+    "telemetria_archivo_sha256": "… (opcional)"
+  },
+  "repeticiones": 10,
+  "frecuencia": {"horas_anio": 8760, "lotes_inferencia_por_hora": 1, "reentrenamientos_anio": 4},
+  "lote": {"horas": 168, "sitios": 3, "filas": 504, "horas_entrenamiento": 72},
+  "entrenamiento": {"kwh_por_repeticion": ["…10 valores…"], "kwh_mediana": 0.0, "ms_mediana": 0.0},
+  "inferencia": {"kwh_por_repeticion": ["…10 valores…"], "kwh_mediana": 0.0, "incluye_ajuste": false},
+  "corrida_completa": {"kwh_por_repeticion": ["…10 valores…"], "incluye_ajuste": true}
+}
 ```
+
+Reglas del formato 2:
+
+- **Fases separadas.** `inferencia` usa parámetros congelados (`src/modelo/medicion.py::inferir`) y **no** ajusta la línea base. `corrida_completa` sí ajusta y se conserva como referencia.
+- **Lote medido.** La inferencia se mide sobre un lote completo (`lote.horas`, por ejemplo 168 h × 3 sitios). Se divide entre `lote.horas` para obtener el costo de **una hora** de producción; si no, se multiplica un lote de 168 h por 8 760 y se sobreestima 168 veces. El entrenamiento se mide solo con la partición de `lote.horas_entrenamiento` (72 h por sitio), no con todo el archivo.
+- **Lotes por hora.** `lotes_inferencia_por_hora` cuenta lotes equivalentes al medido (todos los sitios). Si en producción se corre un job por sitio, el total por hora sigue siendo 1.
+- **Anualización sin doble conteo.** `E_año = (inferencia / lote.horas) × horas_año × lotes_por_hora + entrenamiento × reentrenamientos_año`. La corrida completa no se suma.
+- **Procedencia obligatoria.** Sin hash del kit, commit y equipo, el archivo no pasa `src/procedencia.py::validar_consumo`. Un archivo v1 se acepta solo como cota superior y no se le suma reentrenamiento.
+- **Medido vs estimado.** CodeCarbon offline en macOS estima con el TDP; solo se publica `medido` si `fuente_energia == "sensor_hardware"`. Si la energía cae por debajo de `1e-7 kWh`, se usa TDP y se marca `baja_resolucion`.
+- **Frecuencia confirmada.** 8 760 inferencias/año y 4 reentrenamientos/año son supuestos de diseño (D15); Gadiel debe confirmarlos y Misa + Nico revisarlos. `--validacion-conjunta` firma el balance con ambos nombres.
+
+Para regenerarlo (Gadiel, en la MacBook, sin subir el kit):
+
+```bash
+python -m src.modelo.medicion --kit "$KIT_CSV" \
+  --entrada data/procesado/telemetria.csv \
+  --salida data/resultados/consumo_modelo.json \
+  --repeticiones 10 --reentrenamientos-anio 4 --lotes-inferencia-por-hora 1
+```
+
+`--sensor-hardware` solo si la energía viene de un sensor de potencia real.
 
 ### Contrato 4 · Números oficiales (Nico; PUE inicial de Misa)
 

@@ -11,7 +11,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | § | Requisito | Responsable | Issue | Evidencia esperada | Estado |
 |---|---|---|---|---|---|
 | 10 | Sub-reto 3: reportar el impacto en **PUE** | Misa: inicial; Nico: final proyectado | #2, #3 | `numeros_oficiales.json` → `pue_antes`, `pue_despues` (proyectado) | ⬜ |
-| 11 | **Balance neto positivo**, con cifras | Misa + Nico: cálculo y validación; Gadiel: medición del modelo | #7, #14 | `consumo_modelo.json` + `numeros_oficiales.json` → `balance_neto_*`, con fuentes y supuestos | ⬜ |
+| 11 | **Balance neto positivo**, con cifras | Misa + Nico: cálculo y validación; Gadiel: medición del modelo | #7, #14 | `consumo_modelo.json` v2 (kit, código, equipo, método y kWh por repetición) + `numeros_oficiales.json` → `balance_neto_*` con frecuencia y sin doble conteo | ⬜ |
 | 11 | **Impacto en el acuífero** de Yucatán | Guille (D13) | #13 | Sección en `docs/07` con fuentes citadas | ⬜ |
 | 12 | Propuesta de solución sobre el kit | Todos | #4 | `main` corre de punta a punta con el kit | ⬜ |
 | 12 | Pitch final | Leo (guion y diapositivas) + Nico (cifras) | #16, #19 | Diapositivas en PDF + guion | ⬜ |

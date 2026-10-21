@@ -145,7 +145,7 @@ WUE = Σ agua in situ (L)    / Σ energía de TI (kWh)
 CUE = Σ emisiones CO2e (kg) / Σ energía de TI (kWh)  =  factor de emisión de la red × PUE
 ```
 
-**Umbral de equilibrio (D15 + propuesta §5):** el **número central** del balance no es "el ahorro proyectado anual". Es el **costo anual del detector** (CodeCarbon × 10 repeticiones, inferencia horaria 8760 veces + reentrenamiento por temporada) comparado con **el exceso de una sola hora de ineficiencia típica**. Si el costo son unos pocos Wh y una hora de ineficiencia son decenas de kWh, **basta una detección al año** para que el balance sea positivo. Este número no depende de que el ahorro proyectado sea exacto.
+**Umbral de equilibrio (D15 + propuesta §5):** el **número central** del balance no es "el ahorro proyectado anual". Es el **costo anual del detector** (CodeCarbon × 10 repeticiones, inferencia horaria 8760 veces + reentrenamiento por temporada) comparado con **el exceso de una sola hora de ineficiencia típica**. Para no contar el ajuste dos veces, la medición separa `inferencia` (parámetros congelados) de `entrenamiento`; `corrida_completa` se conserva como referencia y no se suma. La inferencia se mide sobre un lote y se divide entre sus horas antes de multiplicar por 8 760, para no sobreestimar el costo por hora. Si el costo son unos pocos Wh y una hora de ineficiencia son decenas de kWh, **basta una detección al año** para que el balance sea positivo. Este número no depende de que el ahorro proyectado sea exacto.
 
 **PUE inicial y final proyectado:**
 - **Inicial (Misa):** PUE calculado con los datos limpios del kit, para un periodo definido.

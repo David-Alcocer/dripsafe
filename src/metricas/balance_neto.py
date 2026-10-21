@@ -8,24 +8,131 @@ Aquí NO se calcula un ahorro proyectado: eso necesita supuestos que Nico fija
 umbral de equilibrio: cuántas horas de ineficiencia típica al año pagan el
 costo del detector. Si basta con muy pocas, el balance es positivo aunque la
 proyección no sea exacta.
+
+Regla contra el doble conteo
+----------------------------
+``detectar()`` ajusta la línea base en cada llamada. Por eso su energía
+(``corrida_completa``) NO se puede anualizar como inferencia y además sumarle
+reentrenamientos. El formato 2 del contrato separa:
+
+    E_año = E_inferencia_pura × horas_año × lotes_por_hora
+          + E_entrenamiento × reentrenamientos_año
+
+El formato 1 (``kwh_inferencia_anual``) ya incluía el ajuste en cada corrida:
+se trata como cota superior y se ignoran los reentrenamientos.
 """
 
 import statistics
 from collections.abc import Iterable
 
+from src.procedencia import FRECUENCIA_POR_DEFECTO
 
-def costo_anual_kwh(consumo: dict) -> float:
-    """kWh al año que cuesta el detector, desde consumo_modelo.json.
 
-    Se usa `kwh_inferencia_anual` (8 760 corridas completas). Cada corrida ya
-    incluye el ajuste de la línea base, así que es una cota alta del costo.
+def _frecuencia(frecuencia: dict | None) -> dict:
+    """Completa y valida la frecuencia de anualización (supuestos explícitos)."""
+    f = {**FRECUENCIA_POR_DEFECTO, **(frecuencia or {})}
+    for clave in ("horas_anio", "lotes_inferencia_por_hora", "reentrenamientos_anio"):
+        valor = f[clave]
+        if isinstance(valor, bool) or not isinstance(valor, (int, float)) or valor < 0:
+            raise ValueError(f"frecuencia.{clave} debe ser un número no negativo")
+        f[clave] = float(valor)
+    return f
+
+
+def _kwh_fase(consumo: dict, nombre: str) -> float | None:
+    fase = consumo.get(nombre)
+    if isinstance(fase, dict) and fase.get("kwh_mediana") is not None:
+        return float(fase["kwh_mediana"])
+    return None
+
+
+def desglose_costo_anual(consumo: dict, frecuencia: dict | None = None) -> dict:
+    """kWh/año del detector con el desglose que justifica cada sumando.
+
+    Devuelve ``modo``, los dos sumandos, el total y la frecuencia aplicada.
+    Si el archivo es del formato 1, ``reentrenamientos_aplicados`` es 0: su
+    ``kwh_inferencia_anual`` ya incluye el ajuste en cada corrida.
     """
-    if "kwh_inferencia_anual" not in consumo:
-        raise ValueError("consumo_modelo.json no trae 'kwh_inferencia_anual'")
-    costo = float(consumo["kwh_inferencia_anual"])
-    if costo < 0:
-        raise ValueError("el costo del detector no puede ser negativo")
-    return costo
+    # La frecuencia del archivo manda; un valor explícito la puede sobrescribir.
+    del_archivo = consumo.get("frecuencia")
+    base = del_archivo if isinstance(del_archivo, dict) else {}
+    f = _frecuencia({**base, **(frecuencia or {})})
+
+    if consumo.get("formato") == 2 or (
+        isinstance(consumo.get("inferencia"), dict)
+        and isinstance(consumo.get("entrenamiento"), dict)
+    ):
+        inferencia = _kwh_fase(consumo, "inferencia")
+        entrenamiento = _kwh_fase(consumo, "entrenamiento")
+        if inferencia is None:
+            raise ValueError("consumo_modelo.json no trae la mediana de inferencia")
+        entrenamiento = entrenamiento or 0.0
+        lote = consumo.get("lote")
+        horas_lote = lote.get("horas") if isinstance(lote, dict) else None
+        if isinstance(horas_lote, bool) or not isinstance(horas_lote, (int, float)) or horas_lote <= 0:
+            raise ValueError("consumo_modelo.json v2 no trae 'lote.horas' (> 0)")
+        inf_por_hora = inferencia / float(horas_lote)
+        inf_anual = inf_por_hora * f["horas_anio"] * f["lotes_inferencia_por_hora"]
+        ent_anual = entrenamiento * f["reentrenamientos_anio"]
+        return {
+            "modo": "fases_separadas",
+            "inferencia_kwh_por_hora": inf_por_hora,
+            "inferencia_kwh_anual": inf_anual,
+            "entrenamiento_kwh_anual": ent_anual,
+            "total_kwh_anual": inf_anual + ent_anual,
+            "horas_lote": float(horas_lote),
+            "reentrenamientos_aplicados": f["reentrenamientos_anio"],
+            "supuestos": f,
+            "nota": (
+                f"Inferencia por hora (lote medido de {float(horas_lote):g} h) × "
+                "horas × lotes + entrenamiento × reentrenamientos. La corrida "
+                "completa no se suma."
+            ),
+        }
+
+    if "kwh_inferencia_anual" in consumo:
+        total = float(consumo["kwh_inferencia_anual"])
+        if total < 0:
+            raise ValueError("el costo del detector no puede ser negativo")
+        return {
+            "modo": "legacy_corrida_completa",
+            "inferencia_kwh_anual": total,
+            "entrenamiento_kwh_anual": 0.0,
+            "total_kwh_anual": total,
+            "reentrenamientos_aplicados": 0.0,
+            "supuestos": f,
+            "nota": (
+                "Formato 1: kwh_inferencia_anual ya incluye el ajuste en cada "
+                "corrida; no se suma reentrenamiento (cota superior)."
+            ),
+        }
+
+    if "kwh_corrida_completa" in consumo:
+        total = float(consumo["kwh_corrida_completa"]) * f["horas_anio"] * f["lotes_inferencia_por_hora"]
+        if total < 0:
+            raise ValueError("el costo del detector no puede ser negativo")
+        return {
+            "modo": "cota_superior_corrida_completa",
+            "inferencia_kwh_anual": total,
+            "entrenamiento_kwh_anual": 0.0,
+            "total_kwh_anual": total,
+            "reentrenamientos_aplicados": 0.0,
+            "supuestos": f,
+            "nota": (
+                "Solo hay corrida completa y ya incluye ajuste: se anualiza "
+                "como cota superior y no se suma reentrenamiento."
+            ),
+        }
+
+    raise ValueError(
+        "consumo_modelo.json no trae 'inferencia'/'entrenamiento' ni "
+        "'kwh_inferencia_anual' ni 'kwh_corrida_completa'"
+    )
+
+
+def costo_anual_kwh(consumo: dict, frecuencia: dict | None = None) -> float:
+    """kWh al año que cuesta el detector, ya sin doble conteo del ajuste."""
+    return float(desglose_costo_anual(consumo, frecuencia)["total_kwh_anual"])
 
 
 def horas_para_equilibrio(costo_kwh_anual: float, exceso_por_hora_alertada: Iterable[float]) -> dict:

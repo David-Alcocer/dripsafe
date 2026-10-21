@@ -24,12 +24,12 @@ import argparse
 import json
 import subprocess
 import tempfile
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 
-from src import contrato
+from src import contrato, procedencia
 from src.ataques import correr_rejilla
 from src.evaluacion import auditar_rejilla, cerrar_n2
 from src.evaluacion.__main__ import _ruta_kit
@@ -39,7 +39,7 @@ from src.metricas import balance_neto, generar_numeros
 from src.metricas.generar_numeros import metrica
 from src.metricas.impacto import exceso_no_ti
 from src.metricas.pue import unidad_y_horas
-from src.modelo import detector
+from src.modelo import detector, medicion
 
 RAIZ = Path(__file__).resolve().parents[1]
 OFICIAL = RAIZ / "resultados" / "numeros_oficiales.json"
@@ -78,13 +78,53 @@ def _commit() -> str:
     return f"{commit}-sucio" if cambios else commit
 
 
+def _frecuencia_args(args) -> dict:
+    """Supuestos de anualización; solo incluye los que se pasaron explícitamente.
+
+    Si no se pasan, manda la frecuencia sellada en consumo_modelo.json y, en su
+    defecto, la de ``procedencia.FRECUENCIA_POR_DEFECTO``.
+    """
+    valores = {
+        "horas_anio": args.horas_anio,
+        "lotes_inferencia_por_hora": args.lotes_inferencia_por_hora,
+        "reentrenamientos_anio": args.reentrenamientos_anio,
+    }
+    return {clave: valor for clave, valor in valores.items() if valor is not None}
+
+
 def _consumo(args, telemetria: pd.DataFrame) -> dict | None:
-    """Mide con CodeCarbon, o reutiliza una medición previa; None si no hay ninguna."""
+    """Mide con CodeCarbon, o reutiliza una medición previa; None si no hay ninguna.
+
+    Un archivo v2 (con procedencia y fases separadas) se valida contra el
+    contrato 3. Un v1 se acepta como cota superior y se avisa.
+    """
     if not args.sin_medir:
-        return detector._medir_consumo(telemetria, REPETICIONES_CODECARBON, args.consumo)
-    if args.consumo.is_file():
-        return json.loads(args.consumo.read_text(encoding="utf-8"))
-    return None
+        if args.kit is None:
+            print("La medición con procedencia verificable necesita --kit RUTA/operaciones_simuladas.csv")
+            raise SystemExit(1)
+        if procedencia.huella_codigo()["sucio"]:
+            print("Hay cambios sin commit en los archivos de medición; commitea primero "
+                  "para que _meta.codigo.sha256_archivos sea reproducible.")
+            raise SystemExit(1)
+        consumo = medicion.medir_consumo(
+            telemetria, REPETICIONES_CODECARBON, args.consumo,
+            kit=args.kit, frecuencia=_frecuencia_args(args),
+            sensor_hardware=args.sensor_hardware,
+        )
+    elif args.consumo.is_file():
+        consumo = json.loads(args.consumo.read_text(encoding="utf-8"))
+    else:
+        return None
+
+    problemas = procedencia.validar_consumo(consumo)
+    if problemas:
+        print("consumo_modelo.json NO cumple el contrato 3:")
+        for problema in problemas:
+            print(f"  - {problema}")
+        raise SystemExit(1)
+    if consumo.get("formato") != 2:
+        print("  aviso: consumo v1 sin procedencia; el balance lo tratará como cota superior.")
+    return consumo
 
 
 def _deteccion(args, telemetria: pd.DataFrame, fuente: str) -> dict:
@@ -150,24 +190,89 @@ def _exceso_por_hora_alertada(telemetria: pd.DataFrame, alertas: pd.DataFrame) -
     return exceso.loc[exceso["coincide_alerta"], "exceso_no_ti_estimado_kwh"]
 
 
-def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series) -> dict:
+def _es_medicion_hardware(consumo: dict) -> bool:
+    metodo = (consumo.get("_meta") or {}).get("metodo") or {}
+    return metodo.get("tipo") == "medido" and metodo.get("fuente_energia") == "sensor_hardware"
+
+
+def _ms_mediana(consumo: dict) -> float | None:
+    fase = consumo.get("corrida_completa")
+    if isinstance(fase, dict) and fase.get("ms_mediana") is not None:
+        return float(fase["ms_mediana"])
+    if consumo.get("ms_mediana") is not None:
+        return float(consumo["ms_mediana"])
+    return None
+
+
+def _origen_consumo(consumo: dict, modo: str) -> str:
+    meta = consumo.get("_meta") or {}
+    kit = meta.get("kit") or {}
+    codigo = meta.get("codigo") or {}
+    piezas = [f"consumo_modelo.json v{consumo.get('formato', 1)}",
+              f"CodeCarbon, {consumo.get('repeticiones')} repeticiones, {consumo.get('fecha')}"]
+    if kit.get("csv_sha256"):
+        piezas.append(f"kit {str(kit['csv_sha256'])[:12]}")
+    if codigo.get("commit_corto"):
+        piezas.append(f"commit {codigo['commit_corto']}")
+    if meta.get("metodo", {}).get("fuente_energia"):
+        piezas.append(f"energía {meta['metodo']['fuente_energia']}")
+    return f"{' · '.join(piezas)} → {ORIGEN_BALANCE} · {modo}"
+
+
+def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series, args) -> dict:
     """Copia del bloque balance_neto con lo que depende de la medición del detector."""
     actual = dict(numeros["balance_neto"])
     if consumo is None:
         return actual
-    costo = balance_neto.costo_anual_kwh(consumo)
-    origen = (f"consumo_modelo.json (CodeCarbon, {consumo.get('repeticiones')} repeticiones, "
-              f"{consumo.get('fecha')}) → {ORIGEN_BALANCE}")
+
+    desglose = balance_neto.desglose_costo_anual(consumo, _frecuencia_args(args))
+    costo = desglose["total_kwh_anual"]
+    origen = _origen_consumo(consumo, desglose["modo"])
+    frecuencia = desglose["supuestos"]
+    nota_costo = (
+        f"{desglose['nota']} Frecuencia: {frecuencia['horas_anio']:.0f} h/año × "
+        f"{frecuencia['lotes_inferencia_por_hora']:g} lote(s)/h; "
+        f"{desglose['reentrenamientos_aplicados']:g} reentrenamiento(s)/año."
+    )
     actual["costo_detector_kwh_anual"] = metrica(
-        round(costo, 6), "kWh/año", "estimado", origen, "Gadiel", nota=consumo.get("nota"))
-    if consumo.get("ms_mediana") is not None:
+        round(costo, 12), "kWh/año",
+        "medido" if _es_medicion_hardware(consumo) else "estimado",
+        origen, "Gadiel", nota=f"{nota_costo} {consumo.get('nota', '')}".strip())
+    actual["costo_entrenamiento_kwh_anual"] = metrica(
+        round(desglose["entrenamiento_kwh_anual"], 12), "kWh/año", "estimado", origen, "Gadiel",
+        nota="Entrenamiento × reentrenamientos; no se suma si la corrida ya incluye el ajuste.")
+    actual["costo_inferencia_kwh_anual"] = metrica(
+        round(desglose["inferencia_kwh_anual"], 12), "kWh/año", "estimado", origen, "Gadiel",
+        nota="Inferencia pura × horas × lotes; no incluye ajuste.")
+    actual["frecuencia_anualizacion"] = {
+        "modo": desglose["modo"],
+        "horas_anio": frecuencia["horas_anio"],
+        "lotes_inferencia_por_hora": frecuencia["lotes_inferencia_por_hora"],
+        "reentrenamientos_anio": frecuencia["reentrenamientos_anio"],
+        "reentrenamientos_aplicados": desglose["reentrenamientos_aplicados"],
+        "horas_lote": desglose.get("horas_lote"),
+        "nota": desglose["nota"],
+    }
+    if args.validacion_conjunta:
+        actual["validado_por"] = ["Misa", "Nico"]
+        actual["fecha_validacion"] = date.today().isoformat()
+    else:
+        actual["validado_por"] = None
+        actual["nota_validacion"] = "Pendiente de validación conjunta de Misa y Nico."
+
+    ms = _ms_mediana(consumo)
+    if ms is not None:
+        ms_desviacion = (consumo.get("corrida_completa") or {}).get("ms_desviacion")
+        nota_ms = f"Mediana de {consumo.get('repeticiones')} corridas completas."
+        if ms_desviacion is not None:
+            nota_ms += f" Desviación {float(ms_desviacion):.2f} ms."
         actual["tiempo_detector_ms"] = metrica(
-            round(float(consumo["ms_mediana"]), 3), "ms", "medido", origen, "Gadiel",
-            nota=f"Mediana de {consumo.get('repeticiones')} corridas completas.")
+            round(ms, 3), "ms", "medido", origen, "Gadiel", nota=nota_ms)
+
     equilibrio = balance_neto.horas_para_equilibrio(costo, exceso_alertado)
     if equilibrio["horas_necesarias_al_año"] is not None:
         actual["umbral_equilibrio"] = metrica(
-            round(equilibrio["horas_necesarias_al_año"], 6), "h/año", "proyectado",
+            round(equilibrio["horas_necesarias_al_año"], 12), "h/año", "proyectado",
             f"{ORIGEN_BALANCE} · horas_para_equilibrio", "Misa + Nico",
             nota=(f"Horas de ineficiencia típica al año que pagan el costo del detector; "
                   f"exceso típico {equilibrio['exceso_tipico_kwh_por_hora']:.4f} kWh/h "
@@ -175,16 +280,20 @@ def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series) ->
     ahorro = numeros["balance_neto"]["ahorro_proyectado_kwh_anual"]["valor"]
     if ahorro is not None and costo > 0:
         actual["razon_ahorro_costo"] = metrica(
-            round(ahorro / costo, 1), "veces", "proyectado", f"ahorro_proyectado_kwh_anual / costo · {ORIGEN_BALANCE}",
+            round(ahorro / costo, 1), "veces", "proyectado",
+            f"ahorro_proyectado_kwh_anual / costo · {origen}",
             "Misa + Nico", nota="Usa los supuestos editables de ahorro_proyectado_kwh_anual; no es ahorro observado.")
     return actual
 
 
-def _meta(numeros: dict, args, fuente: str) -> dict:
+def _meta(numeros: dict, args, fuente: str, consumo: dict | None = None) -> dict:
     commit = _commit()
     meta = {**numeros["_meta"], "base_main": commit, "generado_con_commit": commit,
             "generado_el": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "fuente_datos": fuente}
+    if consumo and consumo.get("formato") == 2 and consumo.get("_meta"):
+        # Solo hashes y metadatos: nunca filas del kit.
+        meta["procedencia_g3"] = consumo["_meta"]
     if args.ejemplo:
         meta["aviso"] = ("DATOS SIMULADOS · DATOS INVENTADOS (app.kit.ejemplo): "
                          "solo prueban el flujo, NO van al pitch")
@@ -206,6 +315,16 @@ def _argumentos(argv: list[str] | None) -> argparse.Namespace:
                    help="serie ERA5 de Mérida para las horas de respaldo (si no existe, queda pendiente)")
     p.add_argument("--consumo", type=Path, help="consumo_modelo.json (por defecto dentro de --resultados)")
     p.add_argument("--sin-medir", action="store_true", help="no correr CodeCarbon; reutiliza --consumo si existe")
+    p.add_argument("--reentrenamientos-anio", type=float,
+                   help="reentrenamientos completos al año (si se omite, usa el del consumo o 4)")
+    p.add_argument("--lotes-inferencia-por-hora", type=float,
+                   help="lotes de inferencia por hora (si se omite, usa el del consumo o 1)")
+    p.add_argument("--horas-anio", type=float,
+                   help="horas de operación al año (si se omite, usa el del consumo o 8760)")
+    p.add_argument("--sensor-hardware", action="store_true",
+                   help="la energía viene de un sensor de potencia, no del TDP")
+    p.add_argument("--validacion-conjunta", action="store_true",
+                   help="Misa y Nico validaron juntos el balance (firma el JSON)")
     p.add_argument("--sin-rejilla", action="store_true",
                    help="no correr la rejilla; reutiliza deteccion_para_numeros_oficiales.json de --resultados")
     p.add_argument("--semillas-ruido", default="1,2,3,4,5", help="semillas de la prueba de ruido (vacío = sin ruido)")
@@ -221,7 +340,7 @@ def _argumentos(argv: list[str] | None) -> argparse.Namespace:
 
 def _escribir(numeros: dict, salida: Path) -> None:
     """Valida el contrato 4; el oficial se escribe con la vista plana de Leo (generar_numeros.escribir)."""
-    errores = contrato.validar_numeros_oficiales(numeros)
+    errores = contrato.validar_numeros_oficiales(numeros) + procedencia.validar_balance_oficial(numeros)
     if errores:
         print("El JSON NO cumple el contrato 4:")
         for error in errores:
@@ -252,16 +371,20 @@ def main(argv: list[str] | None = None) -> None:
     print(f"2/5 Detector: {int((alertas['alerta_umbral'] | alertas['alerta_media_4h']).sum())} horas con alerta física")
 
     consumo = _consumo(args, telemetria)
-    print("3/5 Consumo: " + ("sin medición (costo queda pendiente)" if consumo is None
-                             else f"{consumo['kwh_inferencia_anual']:.6f} kWh/año"))
+    if consumo is None:
+        print("3/5 Consumo: sin medición (costo queda pendiente)")
+    else:
+        desglose = balance_neto.desglose_costo_anual(consumo, _frecuencia_args(args))
+        print(f"3/5 Consumo: {desglose['total_kwh_anual']:.6f} kWh/año "
+              f"({desglose['modo']}; {desglose['reentrenamientos_aplicados']:g} reentrenos/año)")
 
     deteccion = _deteccion(args, telemetria, fuente)
     print("4/5 Rejilla: " + ("reutilizada" if args.sin_rejilla else f"tablas en {args.resultados}"))
 
     cierre = _cierre_n2(args, telemetria)
     base = generar_numeros.construir(telemetria, alertas, deteccion, args.clima, cierre)
-    numeros = {**base, "_meta": _meta(base, args, fuente),
-               "balance_neto": _balance(base, consumo, _exceso_por_hora_alertada(telemetria, alertas))}
+    numeros = {**base, "_meta": _meta(base, args, fuente, consumo),
+               "balance_neto": _balance(base, consumo, _exceso_por_hora_alertada(telemetria, alertas), args)}
     _escribir(numeros, args.salida)
     print(f"5/5 Contrato 4: PUE referencia {numeros['pue']['referencia']['valor']} · "
           f"antes {numeros['pue']['antes']['valor']} · después proyectado "
