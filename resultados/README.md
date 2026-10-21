@@ -36,7 +36,7 @@ Cada campo numérico sigue este patrón:
 | Sección | Dueño | Qué contiene |
 |---|---|---|
 | `_meta` | Misa (M4) | commit, fecha de generación, periodo, sitios, fuente de datos |
-| `pue` | Misa (antes) + Nico (después proyectado) | PUE antes/después con nota de cociente de sumas |
+| `pue` | Misa (referencia y antes) + Nico (después proyectado) | `referencia` = línea base normal; `antes` = evaluación tal como viene (mismas filas que el exceso); `despues_proyectado` sobre evaluación. Todos cocientes de sumas |
 | `wue` | Misa + Nico | WUE con nota de "captación in situ" (no huella total) |
 | `energia` | Misa | IT, total, **no TI** (D18), agua, acumulados del periodo |
 | `exceso_estimado` | Nico (N3) | kWh y L sobre la evaluación |
@@ -49,7 +49,7 @@ Cada campo numérico sigue este patrón:
 ### Estado actual
 
 El JSON de este commit es un **ejemplo con valores ficticios**:
-- Los **valores `medido`** marcados con número real vienen del `reference_metrics.json` del kit (PUE 1.2676, WUE 0.366 L/kWh, energías del periodo de referencia).
+- Los **valores `medido`** marcados con número real son de la **referencia** del kit (`pue.referencia` 1.2676, `wue.referencia` 0.366 L/kWh, energías del periodo de referencia). `pue.antes` y `wue.antes` son de **evaluación** y los llena `python -m src.pipeline`.
 - Los demás están en `null` esperando a ser llenados en Fase 2 por Gadiel (CodeCarbon), Nico (métricas, exceso, bono) y Misa + Nico (balance).
 
 **Aviso:** la clave `_meta.aviso` siempre debe decir `"DATOS SIMULADOS · ..."` mientras no haya datos de una instalación real. Es un requisito del propio kit (ver [docs/00-propuesta.md §10](../docs/00-propuesta.md)).
