@@ -7,7 +7,7 @@
 - Cruza esos excesos con el registro OT y los clasifica en **4 clases**, con prioridad y acción, sin afirmar nunca que un exceso prueba un ataque (§4).
 - En el kit, con su ruido, **DripSafe ve el 100 % de los excesos inyectados desde +10 %**. Las reglas fijas del kit no ven ninguno por debajo de +80 % ni ningún exceso de agua (§6).
 - En los cambios de configuración con efecto 8 h después, las reglas ven el evento, pero **dejan pasar 1 710 kWh** de exceso; DripSafe deja pasar 5 kWh y lo clasifica como incidente (§6).
-- Lo decimos también cuando no nos favorece: con el doble de ruido, a +10 % DripSafe solo ve un tercio; y con la ventana de 24 h, **1 de cada 5 eventos OT al azar** encontraría un exceso que no causó (§6, §7).
+- Lo decimos también cuando no nos favorece: con el doble de ruido, a +10 % DripSafe solo ve un tercio; con la ventana de 24 h, **1 de cada 5 eventos OT al azar** encontraría un exceso que no causó; y en una ola de calor fuera de lo aprendido el umbral se duplica y un +10 % pasó sin verse en 8 de 11 tardes (§6, §6b, §7).
 
 ## 1. OT en un centro de datos, en una página
 
@@ -167,7 +167,9 @@ Los resultados sobre el kit están en la §6.
 
 ## 6. Resultados sobre el kit (corrida del 21 de octubre)
 
-Corrida de `python -m src.ataques.correr_rejilla --kit …` con el código del commit `cf46ead`: 141 inyecciones por condición (18 por tipo; SIM-C tiene menos lugares limpios por su evento OT). Son **agregados**; las filas del kit no salen de la laptop. Las cifras oficiales del pitch las consolida Nico en `numeros_oficiales.json` (N2) a partir de `data/resultados/deteccion_para_numeros_oficiales.json`, que la corrida deja con esa misma forma.
+Corrida de `python -m src.ataques.correr_rejilla --kit …` con el código del commit `cf46ead`: 141 inyecciones por condición. Son 18 de cada tipo, salvo 17 cambios sin registro y 16 cambios con efecto: en SIM-C, 3 posiciones de 12 h no tenían un lugar limpio por su evento OT y quedan como omitidas (la auditoría de Nico, `src/evaluacion/auditar_rejilla.py`, las cuenta). Son **agregados**; las filas del kit no salen de la laptop.
+
+**Ya son las cifras oficiales.** Nico las integró en `resultados/numeros_oficiales.json` (N2, PR #49). El 21 de octubre se volvió a correr la rejilla con `main` (`c93194d`): los 326 valores del bloque `deteccion` salieron idénticos y la auditoría de denominadores pasó en las 6 corridas.
 
 **Las anomalías originales del kit: empate, como se esperaba.** Los dos métodos detectan los 3 episodios (21 filas), en la primera hora y sin falsas alarmas (0 por día y sitio; IC 95 %: 0 a 0.33, sobre 267 horas limpias sumando los 3 sitios). DripSafe los clasifica así: la ineficiencia de SIM-A y la fuga de SIM-B como **escalón sin registro** (la fuga, con inspección física), los logins de SIM-C como **intento de acceso** y su cambio como **cambio no autorizado**.
 
@@ -198,12 +200,52 @@ Corrida de `python -m src.ataques.correr_rejilla --kit …` con el código del c
 
 Con 24 h, uno de cada cinco «incidentes OT con efecto» podría ser casualidad. Por eso el incidente pide **confirmar en sitio** antes de actuar, y el motivo dice cuántas horas pasaron entre el evento y el exceso: a menos horas, menos probable la casualidad.
 
+### 6b. ¿Y un atacante más cuidadoso? (pruebas exploratorias)
+
+**Aviso:** estas pruebas **no** son parte de la rejilla fijada ni de `numeros_oficiales.json`. Se escribieron el 21 de octubre, **después** de ver la rejilla, para responder con datos tres preguntas probables del jurado. No van en las diapositivas; sirven para las preguntas. Mismas reglas que la rejilla: solo se tocan horas de evaluación de copias y el detector aprende exactamente lo mismo en cada una.
+
+```bash
+python -m src.ataques.exploratorias --kit RUTA/operaciones_simuladas.csv   # agregados → data/resultados/exploratorias.json
+```
+
+**1. ¿Qué tan pequeño tiene que ser un exceso para que no se vea?** Son los umbrales que calibró el detector congelado. Por debajo de ellos, un exceso no se ve, y lo decimos:
+
+| Sitio | Energía no TI, una hora | Energía no TI, sostenido (media de 4 h) |
+|---|---|---|
+| SIM-A (aire) | 6.1 % | 4.1 % |
+| SIM-B (evaporativa) | 10.1 % | 6.8 % |
+| SIM-C (líquida) | 11.3 % | 7.5 % |
+
+En agua, el piso es de 3 % en una hora y 2 % sostenido en los tres sitios, porque el agua del kit no trae ruido.
+
+**2. ¿Y si sube la energía poco a poco?** La línea base **no se reentrena sola**, así que una subida lenta no se vuelve «normal». Rampas de 36 h que suben la energía no TI desde 0 % un poco cada hora, en las posiciones de la rejilla (13 por velocidad; 5 no caben en la evaluación):
+
+| Velocidad | Vistas | Horas hasta verla (mediana · máx.) | Exceso al verla (mediana · máx.) | kWh antes de verla (máx.) |
+|---|---|---|---|---|
+| +0.25 % por hora | 13 de 13 | 19 · 24 h | 5 % · 6.25 % | 31.9 kWh |
+| +0.5 % por hora | 13 de 13 | 10 · 14 h | 5.5 % · 7.5 % | 20.4 kWh |
+| +1 % por hora | 13 de 13 | 7 · 10 h | 8 % · 11 % | 25.5 kWh |
+
+Todas quedaron como escalón sin registro.
+
+**3. ¿Y si ataca en una ola de calor?** Este es el punto débil. Fuera del clima que aprendió (15–31 °C en la referencia), el detector **duplica el umbral** para no llenar de falsas alarmas un clima que no conoce, y la alerta sale con «confianza baja». En el kit ya hay 11 horas de evaluación así. Prueba: 4 tardes por sitio (12:00–15:00) con la temperatura 1 °C por encima de lo más caliente que aprendió; el calor sube la energía, el agua y la temperatura de entrada exactamente lo que espera la línea base, y encima va un ataque de 4 h:
+
+| Ataque | Con calor fuera de rango (11 tardes) | En la rejilla, dentro del rango |
+|---|---|---|
+| Solo calor, sin ataque | 0 alertas | — |
+| +10 % | 3 de 11 | 100 % |
+| +15 % | 7 de 11 | — |
+| +20 % | 10 de 11 | 100 % |
+| +30 % | 11 de 11 | — |
+
+El calor por sí solo no genera falsas alarmas, pero un atacante que espere una ola de calor tiene más margen. Lo que lo cierra es lo que ya propone el equipo: **líneas base por época del año** (secas, lluvias y nortes), entrenadas con periodos verificados, para que una ola de calor de mayo no sea «clima no visto».
+
 ## 7. Qué **no** se puede inferir de un evento sintético (reto 2 del kit · U3)
 
 1. **Un `login_fallido` no dice quién ni desde dónde.** El kit no trae usuario ni IP. No se distingue un ataque de alguien que se equivocó de contraseña, ni se sabe si después hubo un acceso exitoso.
 2. **Un `cambio_config_no_autorizado` no dice qué cambió.** Sin el parámetro y el valor, no se sabe si podía tener efecto físico ni cuándo.
-3. **El cambio del kit ocurre al final de los datos.** Es el 18 de octubre a las 04:00–05:00 UTC y los datos terminan a las 23:00: solo se observan 18 de las 24 h de su ventana. «Sin efecto físico» vale solo para esas 18 h.
-4. **Las horas son UTC.** Los eventos de SIM-C (01:00–05:00 UTC) son las 19:00–23:00 del día anterior en Mérida. No decir «de madrugada» sin aclarar la zona horaria.
+3. **El cambio del kit ocurre al final de los datos.** Va de las 04:00 a las 06:00 del 18 de octubre, y los datos terminan a medianoche: de las 24 h que siguen al evento solo se observan 18. «Sin efecto físico» vale solo para esas 18 h.
+4. **Los sitios son ficticios y no tienen ubicación.** Las horas del kit están en UTC y el día simulado sigue ese reloj: la temperatura exterior es mínima hacia las 02:00 y máxima hacia las 14:00, y la carga es mínima hacia la 01:00. Por eso el evento de SIM-C (de la 01:00 a las 06:00) es **de madrugada en el día simulado**. No se debe pasar a la hora de Mérida: el kit no dice dónde están los sitios.
 5. **Un exceso no distingue falla de ataque.** Por eso no existe una clase «ataque»: el escalón sin registro manda a revisar la configuración antes que a mantenimiento.
 6. **El resultado base es optimista.** La línea base tiene la misma forma que el generador del kit (propuesta §3.1). La cifra honesta es la del doble de ruido.
 7. **El agua del kit no trae ruido**, así que detectar sus excesos es fácil. Con ±4 % de ruido se siguen viendo todos, pero en una planta real hay que comprobarlo.
@@ -260,6 +302,9 @@ Basadas en ISA/IEC 62443 (zonas y conductos) y en las mitigaciones de MITRE para
 | ¿Por qué 24 h de ventana? | Un setpoint cambiado de noche puede notarse hasta el siguiente pico de calor. El costo lo medimos: 20 % de coincidencias al azar con 24 h y 7 % con 8 h. |
 | ¿DripSafe no es otra puerta de entrada? | Solo lee, por diodo de datos o puerto espejo, en su propia zona y sin internet. No puede mandar órdenes. |
 | ¿Qué técnicas de ATT&CK cubren? | Con el kit: T0859 y T0836 observables, T0831 inyectada. Con sensores de agua helada: T1692.002 y T0832. Usamos la versión 20 de la matriz. |
+| ¿Qué tan pequeño puede ser el cambio para que no lo vean? | Depende del ruido de cada sitio: sostenido, de 4 % en el de aire a 7.5 % en el líquido. Por debajo de eso no lo vemos y lo decimos (§6b). |
+| ¿Y si el atacante sube la energía poco a poco? | La línea base no se reentrena sola, así que la subida no se vuelve «normal». En el kit vimos todas las rampas lentas antes de que pasaran de 11 % (§6b; prueba exploratoria). |
+| ¿Y si ataca en una ola de calor? | Es nuestro punto débil: fuera del clima aprendido el umbral se duplica y un +10 % pasó sin verse en 8 de 11 tardes. Se cierra con líneas base por época, entrenadas con periodos verificados (§6b). |
 
 ## 11. Para revisar con el mentor (22 oct)
 
@@ -269,6 +314,7 @@ Basadas en ISA/IEC 62443 (zonas y conductos) y en las mitigaciones de MITRE para
 4. ¿Los BMS suelen registrar los cambios de setpoint con usuario y hora? Sin ese registro, todo cae en «escalón sin registro».
 5. Para un sitio mediano, ¿diodo de datos o puerto espejo? ¿Qué cuesta cada uno?
 6. ¿Cómo se lleva la «configuración aprobada» (gestión de cambios) en IEC 62443 para que la acción «comparar contra la configuración aprobada» tome minutos y no días?
+7. Fuera del clima aprendido, el detector duplica el umbral para no llenar de falsas alarmas un clima que no conoce, pero eso le da margen a un atacante que espere una ola de calor (§6b). ¿Es mejor duplicar, mantener el umbral y aceptar más falsas alarmas, o pedir confirmación humana en esas horas?
 
 ## Apéndice A. Escenarios con sensores por equipo (datos sintéticos)
 
