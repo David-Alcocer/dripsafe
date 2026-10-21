@@ -86,6 +86,11 @@ python -m src.ataques.correr_rejilla --kit "$KIT_CSV"
 python -m src.evaluacion.auditar_rejilla
 ```
 
+La corrida de U2 evalúa cientos de copias y puede tardar varios minutos;
+informa el avance cada 24 posiciones. Si ya existe `rejilla_por_inyeccion.csv`
+y solo se quieren revisar los denominadores, basta ejecutar el segundo
+comando, que no vuelve a correr el detector.
+
 En el kit fijado hubo **144 posiciones planeadas por condición** (3 sitios ×
 8 inyecciones × 6 inicios), **141 ejecutadas y 3 omitidas**. SIM-C no tuvo
 ventana limpia para `cambio_sin_registro` a las 66 h ni para
