@@ -1,6 +1,5 @@
 # Dueños de cada carpeta (ver docs/11-trabajo-en-paralelo.md).
 # GitHub pide la revisión del dueño automáticamente si el plan de la cuenta lo permite.
-# Pendiente: agregar el usuario de GitHub de Gadiel en /src/modelo/.
 
 *                               @David-Alcocer
 /src/metricas/                  @Nicomoguel
@@ -9,10 +8,11 @@
 /src/metricas/balance_neto.py   @David-Alcocer @Nicomoguel
 /resultados/numeros_oficiales.json @Nicomoguel
 /src/ataques/                   @Ghosflot
+/src/ot/                        @Ghosflot
 /docs/06-ciberseguridad-ot.md   @Ghosflot
 /app/                           @Leosanlo30
 /docs/07-agua-y-acuifero.md     @Ghosflot @David-Alcocer
 /docs/08-pitch.md               @Leosanlo30 @Nicomoguel
 # D13: Nico evalúa el detector que construye Gadiel.
-/src/modelo/                    @Nicomoguel
+/src/modelo/                    @uicabg1 @Nicomoguel
 /src/evaluacion/                @Nicomoguel
