@@ -1,246 +1,895 @@
 {
-  "_ejemplo": true,
-  "_nota": "VALORES FICTICIOS para probar el dashboard. No son resultados del proyecto y nunca van al pitch. La forma es la propuesta de Leo para el contrato 4 (ver app/ejemplos/README.md); la define Misael con Nico (M2).",
+  "_ejemplo": false,
+  "_meta": {
+    "aviso": "DATOS SIMULADOS · cifras del kit, no de una instalación real",
+    "estado": "parcial",
+    "fecha_corte_datos": "2026-10-18T23:00:00+00:00",
+    "base_main": "f2e5c4b",
+    "fuente_datos": "kit CIFOX, operaciones_simuladas.csv (fuera de Git)",
+    "periodos": {
+      "referencia": {
+        "inicio": "2026-10-12T00:00:00+00:00",
+        "fin": "2026-10-14T23:00:00+00:00",
+        "horas_sitio": 216,
+        "sitios": [
+          "SIM-A",
+          "SIM-B",
+          "SIM-C"
+        ],
+        "intervalo_h": 1,
+        "fin_inclusivo": true
+      },
+      "evaluacion": {
+        "inicio": "2026-10-15T00:00:00+00:00",
+        "fin": "2026-10-18T23:00:00+00:00",
+        "horas_sitio": 288,
+        "sitios": [
+          "SIM-A",
+          "SIM-B",
+          "SIM-C"
+        ],
+        "intervalo_h": 1,
+        "fin_inclusivo": true
+      }
+    },
+    "unidad_energia_entrada": "kWh/intervalo",
+    "responsable": "Nico (N2/N3/N4)"
+  },
   "generado": {
-    "fecha": "2026-10-19",
-    "commit": "ejemplo"
+    "fecha_corte_datos": "2026-10-18T23:00:00+00:00",
+    "base_main": "f2e5c4b"
+  },
+  "pue_referencia": {
+    "valor": 1.2676,
+    "unidad": "ratio",
+    "tipo": "observado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Misa + Nico",
+    "estado": "disponible",
+    "periodo": "referencia"
   },
   "pue_antes": {
-    "valor": 1.27,
-    "unidad": "",
+    "valor": 1.2778,
+    "unidad": "ratio",
     "tipo": "observado",
-    "origen": "src/metricas/pue.py",
-    "responsable": "Misael",
-    "nota": "Σ energía total ÷ Σ energía IT de la evaluación"
-  },
-  "wue_antes": {
-    "valor": 0.4,
-    "unidad": "L/kWh",
-    "tipo": "observado",
-    "origen": "src/metricas/pue.py",
-    "responsable": "Misael"
-  },
-  "punto_ciego_pct": {
-    "valor": 140,
-    "unidad": "%",
-    "tipo": "observado",
-    "origen": "src/evaluacion/",
-    "responsable": "Nico",
-    "nota": "cuánto puede subir la energía de enfriamiento del sitio líquido, en su hora más caliente, sin cruzar PUE 1.6"
-  },
-  "exceso_energia_kwh": {
-    "valor": 650,
-    "unidad": "kWh",
-    "tipo": "estimado",
-    "origen": "src/metricas/",
-    "responsable": "Nico",
-    "nota": "real − esperado durante las alertas"
-  },
-  "exceso_agua_l": {
-    "valor": 1900,
-    "unidad": "L",
-    "tipo": "estimado",
-    "origen": "src/metricas/",
-    "responsable": "Nico"
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Misa + Nico",
+    "estado": "disponible",
+    "periodo": "evaluacion",
+    "nota": "Cociente de sumas; antes y después usan el mismo periodo."
   },
   "pue_sin_exceso": {
-    "valor": 1.25,
-    "unidad": "",
-    "tipo": "estimado",
-    "origen": "src/metricas/",
+    "valor": 1.2675,
+    "unidad": "ratio",
+    "tipo": "proyectado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
     "responsable": "Nico",
-    "nota": "cota: si cada exceso se cortara al llegar su alerta"
+    "estado": "disponible",
+    "periodo": "evaluacion",
+    "nota": "Contrafactual: restar solo residuo positivo en horas con alerta física. No es ahorro observado."
+  },
+  "wue_referencia": {
+    "valor": 0.3665,
+    "unidad": "L/kWh IT",
+    "tipo": "observado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Misa + Nico",
+    "estado": "disponible",
+    "periodo": "referencia"
+  },
+  "wue_antes": {
+    "valor": 0.3941,
+    "unidad": "L/kWh IT",
+    "tipo": "observado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Misa + Nico",
+    "estado": "disponible",
+    "periodo": "evaluacion",
+    "nota": "Captación in situ, no huella hídrica total."
+  },
+  "wue_sin_exceso": {
+    "valor": 0.3663,
+    "unidad": "L/kWh IT",
+    "tipo": "proyectado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Nico",
+    "estado": "disponible",
+    "periodo": "evaluacion",
+    "nota": "Contrafactual de agua en horas con alerta; no ahorro observado."
+  },
+  "punto_ciego_pct": {
+    "valor": 158,
+    "unidad": "% de energía no TI",
+    "tipo": "estimado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Nico",
+    "estado": "disponible",
+    "periodo": "evaluacion / SIM-C / horas limpias",
+    "nota": "Piso del mínimo de ((1.6×IT−total)/(total−IT))×100 en 91 horas limpias; solo aumenta no TI."
+  },
+  "exceso_energia_kwh": {
+    "valor": 488.9785,
+    "unidad": "kWh",
+    "tipo": "estimado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Nico",
+    "estado": "disponible",
+    "periodo": "evaluacion",
+    "nota": "Residuo positivo solo en horas con alerta física; no es ahorro observado."
+  },
+  "exceso_agua_l": {
+    "valor": 1310.6203,
+    "unidad": "L",
+    "tipo": "estimado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Nico",
+    "estado": "disponible",
+    "periodo": "evaluacion",
+    "nota": "Agua in situ; solo horas con alerta física."
   },
   "detector_cpu_ms": {
-    "valor": 9.5,
+    "valor": null,
     "unidad": "ms",
     "tipo": "medido",
-    "origen": "src/evaluacion/",
+    "origen": "benchmark del equipo",
     "responsable": "Gadiel",
-    "dispersion": 0.8,
-    "repeticiones": 10,
-    "nota": "ajuste + inferencia de los 3 sitios, MacBook del equipo"
+    "estado": "pendiente",
+    "motivo_pendiente": "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
   },
   "detector_kwh_anual": {
-    "valor": 0.0008,
+    "valor": null,
     "unidad": "kWh/año",
     "tipo": "estimado",
-    "origen": "src/evaluacion/",
+    "origen": "CodeCarbon (10 repeticiones) × frecuencia anual",
     "responsable": "Gadiel",
-    "supuestos": "30 W, una corrida por hora (8 760 al año)"
+    "estado": "pendiente",
+    "motivo_pendiente": "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
   },
   "detector_gco2e_anual": {
-    "valor": 0.36,
-    "unidad": "g CO₂e/año",
+    "valor": null,
+    "unidad": "gCO2e/año",
     "tipo": "estimado",
-    "origen": "src/evaluacion/",
-    "responsable": "Gadiel",
-    "supuestos": "factor del SEN vigente (CRE/SEMARNAT)"
+    "origen": "CodeCarbon × factor SEN",
+    "responsable": "Gadiel + Nico",
+    "estado": "pendiente",
+    "motivo_pendiente": "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
   },
   "equilibrio_horas": {
-    "valor": 0.0001,
+    "valor": null,
     "unidad": "h/año",
-    "tipo": "estimado",
-    "origen": "src/metricas/balance_neto.py",
-    "responsable": "Misael + Nico",
-    "nota": "horas de exceso que pagan la energía anual del detector"
+    "tipo": "proyectado",
+    "origen": "costo detector/exceso típico por hora",
+    "responsable": "Misa + Nico",
+    "estado": "pendiente",
+    "motivo_pendiente": "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
+  },
+  "ahorro_proyectado_kwh_anual": {
+    "valor": 10767.9234,
+    "unidad": "kWh/año",
+    "tipo": "proyectado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Nico",
+    "estado": "disponible",
+    "nota": "Seis fallas por sitio/año en tres sitios; escenario editable, no ahorro observado.",
+    "supuestos": {
+      "fallas_por_sitio_al_anio": 6,
+      "exceso_pct_no_ti": 20,
+      "horas_sin_alerta": 72,
+      "horas_con_alerta_hasta_correccion": 4,
+      "energia_no_ti_referencia_kwh_por_hora_tres_sitios": 131.9598,
+      "agua_sim_b_referencia_l_por_hora": 140.457
+    }
+  },
+  "agua_proyectada_l_anual": {
+    "valor": 11461.2884,
+    "unidad": "L/año",
+    "tipo": "proyectado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Nico",
+    "estado": "disponible",
+    "nota": "Solo SIM-B evaporativo; escenario editable.",
+    "supuestos": {
+      "fallas_por_sitio_al_anio": 6,
+      "exceso_pct_no_ti": 20,
+      "horas_sin_alerta": 72,
+      "horas_con_alerta_hasta_correccion": 4,
+      "energia_no_ti_referencia_kwh_por_hora_tres_sitios": 131.9598,
+      "agua_sim_b_referencia_l_por_hora": 140.457
+    }
+  },
+  "co2_proyectado_kg_anual": {
+    "valor": null,
+    "unidad": "kgCO2e/año",
+    "tipo": "proyectado",
+    "origen": "ahorro × factor SEN",
+    "responsable": "Nico",
+    "estado": "pendiente",
+    "motivo_pendiente": "Factor SEN vigente no verificado; no se publica un producto sin fuente."
+  },
+  "pue_con_bono": {
+    "valor": null,
+    "unidad": "ratio",
+    "tipo": "proyectado",
+    "origen": "modelo de chiller",
+    "responsable": "Misa",
+    "estado": "pendiente",
+    "motivo_pendiente": "Pendiente de Misa: rendimiento y potencia del chiller de respaldo."
+  },
+  "acuifero_3105": {
+    "valor": null,
+    "unidad": "hm³/año",
+    "tipo": "observado",
+    "origen": "DOF/CONAGUA",
+    "responsable": "Guille",
+    "estado": "pendiente",
+    "motivo_pendiente": "Pendiente de Guille: fuente y año del dato del acuífero."
   },
   "comparacion": {
     "tipo": "observado",
-    "origen": "src/evaluacion/",
+    "estado": "disponible",
+    "unidad_conteo": "episodios",
+    "periodo": "evaluacion",
+    "horas_anomalas": 21,
+    "origen": "src/ataques/correr_rejilla.py",
     "responsable": "Nico",
-    "nota": "21 anomalías originales del kit, horas de evaluación",
+    "nota": "Tres episodios originales abarcan 21 horas anómalas; las horas se reportan aparte.",
     "filas": [
       {
         "metodo": "DripSafe",
-        "tp": 21,
+        "tp": 3,
         "fp": 0,
         "fn": 0,
         "precision": 1.0,
-        "recall": 1.0,
-        "falsas_por_dia": 0.0,
-        "latencia_h": 0
+        "recall": 1.0
       },
       {
         "metodo": "Reglas del kit",
-        "tp": 21,
+        "tp": 3,
         "fp": 0,
         "fn": 0,
         "precision": 1.0,
-        "recall": 1.0,
-        "falsas_por_dia": 0.0,
-        "latencia_h": 0
+        "recall": 1.0
+      }
+    ]
+  },
+  "rejilla_completa": {
+    "tipo": "observado",
+    "estado": "disponible",
+    "periodo": "evaluacion",
+    "unidad_conteo": "inyecciones",
+    "origen": "src/ataques/correr_rejilla.py",
+    "responsable": "Nico",
+    "filas": [
+      {
+        "nombre": "energia_+10",
+        "variable": "energia",
+        "magnitud_pct": 10,
+        "metodo": "dripsafe",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 100.0,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 312.3651,
+        "no_visto": 28.4179,
+        "pct_no_visto": 9.1,
+        "unidad": "kWh",
+        "clase_correcta_pct": 100.0
+      },
+      {
+        "nombre": "energia_+10",
+        "variable": "energia",
+        "magnitud_pct": 10,
+        "metodo": "reglas_kit",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 0.0,
+        "mediana_horas_ver_efecto": null,
+        "inyectado": 312.3651,
+        "no_visto": 312.3651,
+        "pct_no_visto": 100.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": null
+      },
+      {
+        "nombre": "energia_+20",
+        "variable": "energia",
+        "magnitud_pct": 20,
+        "metodo": "dripsafe",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 100.0,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 624.7301,
+        "no_visto": 0.0,
+        "pct_no_visto": 0.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": 100.0
+      },
+      {
+        "nombre": "energia_+20",
+        "variable": "energia",
+        "magnitud_pct": 20,
+        "metodo": "reglas_kit",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 0.0,
+        "mediana_horas_ver_efecto": null,
+        "inyectado": 624.7301,
+        "no_visto": 624.7301,
+        "pct_no_visto": 100.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": null
+      },
+      {
+        "nombre": "energia_+40",
+        "variable": "energia",
+        "magnitud_pct": 40,
+        "metodo": "dripsafe",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 100.0,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 1249.4603,
+        "no_visto": 0.0,
+        "pct_no_visto": 0.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": 100.0
+      },
+      {
+        "nombre": "energia_+40",
+        "variable": "energia",
+        "magnitud_pct": 40,
+        "metodo": "reglas_kit",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 0.0,
+        "mediana_horas_ver_efecto": null,
+        "inyectado": 1249.4603,
+        "no_visto": 1249.4603,
+        "pct_no_visto": 100.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": null
+      },
+      {
+        "nombre": "energia_+80",
+        "variable": "energia",
+        "magnitud_pct": 80,
+        "metodo": "dripsafe",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 100.0,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 2498.9206,
+        "no_visto": 0.0,
+        "pct_no_visto": 0.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": 100.0
+      },
+      {
+        "nombre": "energia_+80",
+        "variable": "energia",
+        "magnitud_pct": 80,
+        "metodo": "reglas_kit",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 33.3,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 2498.9206,
+        "no_visto": 1382.3698,
+        "pct_no_visto": 55.3,
+        "unidad": "kWh",
+        "clase_correcta_pct": null
+      },
+      {
+        "nombre": "agua_+25",
+        "variable": "agua",
+        "magnitud_pct": 25,
+        "metodo": "dripsafe",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 100.0,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 1115.7411,
+        "no_visto": 0.0,
+        "pct_no_visto": 0.0,
+        "unidad": "L",
+        "clase_correcta_pct": 100.0
+      },
+      {
+        "nombre": "agua_+25",
+        "variable": "agua",
+        "magnitud_pct": 25,
+        "metodo": "reglas_kit",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 0.0,
+        "mediana_horas_ver_efecto": null,
+        "inyectado": 1115.7411,
+        "no_visto": 1115.7411,
+        "pct_no_visto": 100.0,
+        "unidad": "L",
+        "clase_correcta_pct": null
+      },
+      {
+        "nombre": "agua_+50",
+        "variable": "agua",
+        "magnitud_pct": 50,
+        "metodo": "dripsafe",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 100.0,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 2231.4821,
+        "no_visto": 0.0,
+        "pct_no_visto": 0.0,
+        "unidad": "L",
+        "clase_correcta_pct": 100.0
+      },
+      {
+        "nombre": "agua_+50",
+        "variable": "agua",
+        "magnitud_pct": 50,
+        "metodo": "reglas_kit",
+        "inyecciones": 18,
+        "pct_efectos_vistos": 0.0,
+        "mediana_horas_ver_efecto": null,
+        "inyectado": 2231.4821,
+        "no_visto": 2231.4821,
+        "pct_no_visto": 100.0,
+        "unidad": "L",
+        "clase_correcta_pct": null
+      },
+      {
+        "nombre": "cambio_sin_registro",
+        "variable": "energia",
+        "magnitud_pct": 20,
+        "metodo": "dripsafe",
+        "inyecciones": 17,
+        "pct_efectos_vistos": 100.0,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 1887.4097,
+        "no_visto": 0.0,
+        "pct_no_visto": 0.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": 100.0
+      },
+      {
+        "nombre": "cambio_sin_registro",
+        "variable": "energia",
+        "magnitud_pct": 20,
+        "metodo": "reglas_kit",
+        "inyecciones": 17,
+        "pct_efectos_vistos": 0.0,
+        "mediana_horas_ver_efecto": null,
+        "inyectado": 1887.4097,
+        "no_visto": 1887.4097,
+        "pct_no_visto": 100.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": null
+      },
+      {
+        "nombre": "cambio_con_efecto",
+        "variable": "energia",
+        "magnitud_pct": 20,
+        "metodo": "dripsafe",
+        "inyecciones": 16,
+        "pct_efectos_vistos": 100.0,
+        "mediana_horas_ver_efecto": 0.0,
+        "inyectado": 1710.2473,
+        "no_visto": 5.4278,
+        "pct_no_visto": 0.3,
+        "unidad": "kWh",
+        "clase_correcta_pct": 100.0
+      },
+      {
+        "nombre": "cambio_con_efecto",
+        "variable": "energia",
+        "magnitud_pct": 20,
+        "metodo": "reglas_kit",
+        "inyecciones": 16,
+        "pct_efectos_vistos": 0.0,
+        "mediana_horas_ver_efecto": null,
+        "inyectado": 1710.2473,
+        "no_visto": 1710.2473,
+        "pct_no_visto": 100.0,
+        "unidad": "kWh",
+        "clase_correcta_pct": null
       }
     ]
   },
   "curva_sensibilidad": {
     "tipo": "observado",
-    "origen": "src/evaluacion/",
-    "responsable": "Nico",
-    "nota": "rejilla fija de inyecciones, energía no TI durante 4 h, 3 sitios",
+    "nota": "Una inyección por copia; ajuste y calibración intactos. Efecto visto = alerta física en las horas del exceso.",
     "filas": [
       {
         "magnitud_pct": 10,
         "metodo": "DripSafe",
-        "detectados": 1,
-        "total": 3,
-        "horas_hasta_detectar": 3,
-        "kwh_no_vistos": 20
-      },
-      {
-        "magnitud_pct": 20,
-        "metodo": "DripSafe",
-        "detectados": 3,
-        "total": 3,
-        "horas_hasta_detectar": 1,
-        "kwh_no_vistos": 6
-      },
-      {
-        "magnitud_pct": 40,
-        "metodo": "DripSafe",
-        "detectados": 3,
-        "total": 3,
-        "horas_hasta_detectar": 0,
-        "kwh_no_vistos": 0
-      },
-      {
-        "magnitud_pct": 80,
-        "metodo": "DripSafe",
-        "detectados": 3,
-        "total": 3,
-        "horas_hasta_detectar": 0,
-        "kwh_no_vistos": 0
+        "detectados": 18,
+        "total": 18,
+        "horas_hasta_detectar": 0.0,
+        "kwh_no_vistos": 28.4179
       },
       {
         "magnitud_pct": 10,
         "metodo": "Reglas del kit",
         "detectados": 0,
-        "total": 3,
+        "total": 18,
         "horas_hasta_detectar": null,
-        "kwh_no_vistos": 25
+        "kwh_no_vistos": 312.3651
+      },
+      {
+        "magnitud_pct": 20,
+        "metodo": "DripSafe",
+        "detectados": 18,
+        "total": 18,
+        "horas_hasta_detectar": 0.0,
+        "kwh_no_vistos": 0.0
       },
       {
         "magnitud_pct": 20,
         "metodo": "Reglas del kit",
         "detectados": 0,
-        "total": 3,
+        "total": 18,
         "horas_hasta_detectar": null,
-        "kwh_no_vistos": 50
+        "kwh_no_vistos": 624.7301
+      },
+      {
+        "magnitud_pct": 40,
+        "metodo": "DripSafe",
+        "detectados": 18,
+        "total": 18,
+        "horas_hasta_detectar": 0.0,
+        "kwh_no_vistos": 0.0
       },
       {
         "magnitud_pct": 40,
         "metodo": "Reglas del kit",
         "detectados": 0,
-        "total": 3,
+        "total": 18,
         "horas_hasta_detectar": null,
-        "kwh_no_vistos": 100
+        "kwh_no_vistos": 1249.4603
+      },
+      {
+        "magnitud_pct": 80,
+        "metodo": "DripSafe",
+        "detectados": 18,
+        "total": 18,
+        "horas_hasta_detectar": 0.0,
+        "kwh_no_vistos": 0.0
       },
       {
         "magnitud_pct": 80,
         "metodo": "Reglas del kit",
-        "detectados": 1,
-        "total": 3,
-        "horas_hasta_detectar": 0,
-        "kwh_no_vistos": 140
+        "detectados": 6,
+        "total": 18,
+        "horas_hasta_detectar": 0.0,
+        "kwh_no_vistos": 1382.3698
       }
-    ]
+    ],
+    "estado": "disponible",
+    "origen": "src/ataques/correr_rejilla.py",
+    "responsable": "Nico",
+    "periodo": "evaluacion",
+    "unidad_conteo": "inyecciones"
   },
   "robustez": {
     "tipo": "observado",
-    "origen": "src/evaluacion/",
-    "responsable": "Nico",
-    "nota": "+20 % de energía no TI durante 4 h",
     "filas": [
       {
-        "condicion": "Ruido del kit",
+        "condicion": "Doble de ruido · Agua +25 %",
         "metodo": "DripSafe",
-        "detectados": 3,
-        "total": 3,
-        "falsas_por_dia": 0.0
+        "pct": 100.0,
+        "pct_min": 100.0,
+        "pct_max": 100.0,
+        "falsas_por_dia": 0.0719
       },
       {
-        "condicion": "Ruido gaussiano del doble",
+        "condicion": "Doble de ruido · Agua +25 %",
+        "metodo": "Reglas del kit",
+        "pct": 0.0,
+        "pct_min": 0.0,
+        "pct_max": 0.0,
+        "falsas_por_dia": null
+      },
+      {
+        "condicion": "Doble de ruido · Agua +50 %",
         "metodo": "DripSafe",
-        "detectados": 2,
-        "total": 3,
-        "falsas_por_dia": 0.5
+        "pct": 100.0,
+        "pct_min": 100.0,
+        "pct_max": 100.0,
+        "falsas_por_dia": 0.0719
+      },
+      {
+        "condicion": "Doble de ruido · Agua +50 %",
+        "metodo": "Reglas del kit",
+        "pct": 0.0,
+        "pct_min": 0.0,
+        "pct_max": 0.0,
+        "falsas_por_dia": null
+      },
+      {
+        "condicion": "Doble de ruido · Cambio con efecto",
+        "metodo": "DripSafe",
+        "pct": 97.5,
+        "pct_min": 93.8,
+        "pct_max": 100.0,
+        "falsas_por_dia": 0.0719
+      },
+      {
+        "condicion": "Doble de ruido · Cambio con efecto",
+        "metodo": "Reglas del kit",
+        "pct": 0.0,
+        "pct_min": 0.0,
+        "pct_max": 0.0,
+        "falsas_por_dia": null
+      },
+      {
+        "condicion": "Doble de ruido · Cambio sin registro",
+        "metodo": "DripSafe",
+        "pct": 97.6,
+        "pct_min": 94.1,
+        "pct_max": 100.0,
+        "falsas_por_dia": 0.0719
+      },
+      {
+        "condicion": "Doble de ruido · Cambio sin registro",
+        "metodo": "Reglas del kit",
+        "pct": 0.0,
+        "pct_min": 0.0,
+        "pct_max": 0.0,
+        "falsas_por_dia": null
+      },
+      {
+        "condicion": "Doble de ruido · Energía +10 %",
+        "metodo": "DripSafe",
+        "pct": 33.3,
+        "pct_min": 22.2,
+        "pct_max": 50.0,
+        "falsas_por_dia": 0.0719
+      },
+      {
+        "condicion": "Doble de ruido · Energía +10 %",
+        "metodo": "Reglas del kit",
+        "pct": 0.0,
+        "pct_min": 0.0,
+        "pct_max": 0.0,
+        "falsas_por_dia": null
+      },
+      {
+        "condicion": "Doble de ruido · Energía +20 %",
+        "metodo": "DripSafe",
+        "pct": 80.0,
+        "pct_min": 72.2,
+        "pct_max": 88.9,
+        "falsas_por_dia": 0.0719
+      },
+      {
+        "condicion": "Doble de ruido · Energía +20 %",
+        "metodo": "Reglas del kit",
+        "pct": 0.0,
+        "pct_min": 0.0,
+        "pct_max": 0.0,
+        "falsas_por_dia": null
+      },
+      {
+        "condicion": "Doble de ruido · Energía +40 %",
+        "metodo": "DripSafe",
+        "pct": 100.0,
+        "pct_min": 100.0,
+        "pct_max": 100.0,
+        "falsas_por_dia": 0.0719
+      },
+      {
+        "condicion": "Doble de ruido · Energía +40 %",
+        "metodo": "Reglas del kit",
+        "pct": 0.0,
+        "pct_min": 0.0,
+        "pct_max": 0.0,
+        "falsas_por_dia": null
+      },
+      {
+        "condicion": "Doble de ruido · Energía +80 %",
+        "metodo": "DripSafe",
+        "pct": 100.0,
+        "pct_min": 100.0,
+        "pct_max": 100.0,
+        "falsas_por_dia": 0.0719
+      },
+      {
+        "condicion": "Doble de ruido · Energía +80 %",
+        "metodo": "Reglas del kit",
+        "pct": 33.3,
+        "pct_min": 33.3,
+        "pct_max": 33.3,
+        "falsas_por_dia": null
       }
-    ]
+    ],
+    "estado": "disponible",
+    "origen": "src/ataques/correr_rejilla.py",
+    "responsable": "Nico",
+    "periodo": "evaluacion",
+    "unidad_conteo": "inyecciones"
   },
   "bono_horas_respaldo": {
     "tipo": "estimado",
-    "origen": "docs/07-agua-y-acuifero.md",
-    "responsable": "Misael",
-    "supuestos": "clase W40; horas por encima de cada umbral en Mérida (SMN o ERA5)",
     "filas": [
       {
         "umbral_c": 27,
-        "horas_anio": 2400
+        "horas_anio": 3955
       },
       {
         "umbral_c": 30,
-        "horas_anio": 1300
+        "horas_anio": 2235
       },
       {
         "umbral_c": 33,
-        "horas_anio": 600
+        "horas_anio": 981
       },
       {
         "umbral_c": 35,
-        "horas_anio": 250
+        "horas_anio": 390
       }
-    ]
+    ],
+    "nota": "Temperatura exterior estimada; umbrales ilustrativos, no horas reales de operación del chiller.",
+    "estado": "disponible",
+    "origen": "https://archive-api.open-meteo.com/v1/archive?latitude=20.9674&longitude=-89.5926&start_date=2025-01-01&end_date=2025-12-31&hourly=temperature_2m&models=era5&timezone=America%2FMexico_City",
+    "responsable": "Nico",
+    "periodo": "2025"
   },
   "escenario_anual": {
     "tipo": "proyectado",
-    "origen": "src/metricas/",
+    "estado": "disponible",
+    "origen": "src/metricas/generar_numeros.py",
     "responsable": "Nico",
-    "nota": "valores iniciales del escenario editable",
+    "nota": "Supuestos editables, no ahorro observado.",
     "parametros": {
       "fallas": 6,
       "exceso_pct": 20,
       "horas_sin": 72,
       "horas_con": 4
     }
+  },
+  "periodos_y_sitios": {
+    "tipo": "observado",
+    "origen": "src/metricas/generar_numeros.py + kit CIFOX (simulado)",
+    "responsable": "Nico",
+    "unidad_energia": "kWh",
+    "unidad_agua": "L",
+    "unidad_tiempo": "horas-sitio",
+    "referencia": {
+      "energia_it_kwh": 35509.846,
+      "energia_total_kwh": 45010.9549,
+      "energia_no_ti_kwh": 9501.1089,
+      "agua_in_situ_l": 13013.0147,
+      "pue": 1.2676,
+      "wue_in_situ_l_kwh": 0.3665,
+      "sitios": [
+        {
+          "site_id": "SIM-A",
+          "horas": 72,
+          "energia_it_kwh": 11835.7182,
+          "energia_total_kwh": 16190.6329,
+          "agua_in_situ_l": 379.0029,
+          "pue": 1.3679,
+          "wue_in_situ_l_kwh": 0.032
+        },
+        {
+          "site_id": "SIM-B",
+          "horas": 72,
+          "energia_it_kwh": 11846.1327,
+          "energia_total_kwh": 14655.8247,
+          "agua_in_situ_l": 10112.9015,
+          "pue": 1.2372,
+          "wue_in_situ_l_kwh": 0.8537
+        },
+        {
+          "site_id": "SIM-C",
+          "horas": 72,
+          "energia_it_kwh": 11827.9951,
+          "energia_total_kwh": 14164.4973,
+          "agua_in_situ_l": 2521.1103,
+          "pue": 1.1975,
+          "wue_in_situ_l_kwh": 0.2131
+        }
+      ]
+    },
+    "evaluacion": {
+      "energia_it_kwh": 47146.5777,
+      "energia_total_kwh": 60245.0502,
+      "energia_no_ti_kwh": 13098.4725,
+      "agua_in_situ_l": 18580.1297,
+      "pue": 1.2778,
+      "wue_in_situ_l_kwh": 0.3941,
+      "sitios": [
+        {
+          "site_id": "SIM-A",
+          "horas": 96,
+          "energia_it_kwh": 15759.8496,
+          "energia_total_kwh": 22037.202,
+          "agua_in_situ_l": 503.9004,
+          "pue": 1.3983,
+          "wue_in_situ_l_kwh": 0.032
+        },
+        {
+          "site_id": "SIM-B",
+          "horas": 96,
+          "energia_it_kwh": 15735.2628,
+          "energia_total_kwh": 19464.3951,
+          "agua_in_situ_l": 14736.5319,
+          "pue": 1.237,
+          "wue_in_situ_l_kwh": 0.9365
+        },
+        {
+          "site_id": "SIM-C",
+          "horas": 96,
+          "energia_it_kwh": 15651.4653,
+          "energia_total_kwh": 18743.4531,
+          "agua_in_situ_l": 3339.6974,
+          "pue": 1.1976,
+          "wue_in_situ_l_kwh": 0.2134
+        }
+      ]
+    },
+    "exceso_evaluacion_por_sitio": [
+      {
+        "site_id": "SIM-A",
+        "horas": 96,
+        "exceso_no_ti_con_alerta_kwh": 484.2541,
+        "exceso_agua_con_alerta_l": 0.0001,
+        "pue_observado": 1.3983,
+        "pue_proyectado": 1.3676,
+        "wue_observado_l_kwh": 0.032,
+        "wue_proyectado_l_kwh": 0.032,
+        "residuo_positivo_total_kwh": 540.0842,
+        "residuo_positivo_total_l": 0.0012
+      },
+      {
+        "site_id": "SIM-B",
+        "horas": 96,
+        "exceso_no_ti_con_alerta_kwh": 4.7244,
+        "exceso_agua_con_alerta_l": 1310.6201,
+        "pue_observado": 1.237,
+        "pue_proyectado": 1.2367,
+        "wue_observado_l_kwh": 0.9365,
+        "wue_proyectado_l_kwh": 0.8532,
+        "residuo_positivo_total_kwh": 70.2923,
+        "residuo_positivo_total_l": 1310.6365
+      },
+      {
+        "site_id": "SIM-C",
+        "horas": 96,
+        "exceso_no_ti_con_alerta_kwh": 0.0,
+        "exceso_agua_con_alerta_l": 0.0,
+        "pue_observado": 1.1976,
+        "pue_proyectado": 1.1976,
+        "wue_observado_l_kwh": 0.2134,
+        "wue_proyectado_l_kwh": 0.2134,
+        "residuo_positivo_total_kwh": 61.2631,
+        "residuo_positivo_total_l": 0.005
+      }
+    ]
+  },
+  "deteccion_detalle": {
+    "falsas_alarmas_por_dia": {
+      "valor": 0.0,
+      "intervalo_confianza_95": [
+        0.0,
+        0.3316
+      ],
+      "sobre_horas_limpias": 267.0,
+      "nota": "Por sitio y día, evaluación sin inyecciones.",
+      "unidad": "alarmas/día/sitio",
+      "periodo": "evaluacion",
+      "tipo": "observado",
+      "origen": "src/ataques/correr_rejilla.py",
+      "responsable": "Nico",
+      "estado": "disponible"
+    },
+    "clases_ot_conteo": {
+      "incidente_ot": 0,
+      "cambio_no_autorizado": 2,
+      "escalon_sin_registro": 16,
+      "intento_acceso": 3,
+      "nota": "Horas por clase en la evaluación del kit sin inyecciones.",
+      "unidad": "horas",
+      "periodo": "evaluacion",
+      "tipo": "observado",
+      "origen": "src/ataques/correr_rejilla.py",
+      "responsable": "Nico"
+    },
+    "latencia_horas_hasta_detectar_por_episodio": [
+      0.0,
+      0.0,
+      0.0
+    ]
   }
 }

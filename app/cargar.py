@@ -5,8 +5,8 @@ Fuentes, de la más oficial a la de respaldo:
   laptop (por ejemplo en el CI), se usan datos de ejemplo inventados con el mismo formato.
 - Detector: data/resultados/alertas.csv (Gadiel construye, Guille clasifica), con las columnas
   de app/linea_base.COLUMNAS. Mientras no exista, la vista previa de app/linea_base.py.
-- Cifras: resultados/numeros_oficiales.json (contrato 4, Nico). Mientras no exista,
-  app/ejemplos/numeros_ejemplo.json, con valores FICTICIOS que la app marca como ejemplo.
+- Cifras: app/ejemplos/numeros_ejemplo.json es la vista oficial plana generada
+  desde resultados/numeros_oficiales.json. Sin kit, numeros_demo.json es ficticio.
 
 El dashboard no inventa cifras oficiales: solo las muestra y dice de dónde salió cada una.
 """
@@ -24,7 +24,8 @@ RUTAS = {
     "alertas": RAIZ / "data/resultados/alertas.csv",
     "consumo": RAIZ / "data/resultados/consumo_modelo.json",
     "numeros": RAIZ / "resultados/numeros_oficiales.json",
-    "ejemplo": Path(__file__).resolve().parent / "ejemplos/numeros_ejemplo.json",
+    "leo": Path(__file__).resolve().parent / "ejemplos/numeros_ejemplo.json",
+    "ejemplo": Path(__file__).resolve().parent / "ejemplos/numeros_demo.json",
 }
 
 
@@ -93,23 +94,24 @@ def cargar() -> Datos:
     # Las salidas del equipo se calculan con el kit: con datos de ejemplo no se mezclan (no cuadrarían).
     del_kit = fuentes["telemetria"] == "kit"
     avisos = []
-    detector = _detector_oficial(avisos)
+    detector = _detector_oficial(avisos) if del_kit else None
     if detector is not None and del_kit:
         fuentes["detector"] = "modelo"
     else:
         detector, fuentes["detector"] = linea_base.detectar(datos), "vista_previa"
     tabla = unir(datos, detector)
 
-    if RUTAS["numeros"].exists() and del_kit:
-        numeros = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
-        meta = numeros.get("_meta", {})
-        es_borrador = (meta.get("generado_con_commit") == "ejemplo-sin-commit"
-                      or "VALORES DE EJEMPLO" in meta.get("aviso", "").upper())
-        if es_borrador:
-            numeros = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8"))
-        else:
-            numeros = adaptar_oficial(numeros)
-        fuentes["numeros"] = "ejemplo" if es_borrador else "oficial"
+    if del_kit and RUTAS["leo"].exists() and RUTAS["numeros"].exists():
+        numeros = json.loads(RUTAS["leo"].read_text(encoding="utf-8"))
+        canonico = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
+        from src.metricas.generar_numeros import plano
+        if numeros.get("_ejemplo") is not False or numeros != plano(canonico):
+            # El canónico manda. Si alguien regeneró solo uno de los dos, la demo no se cae: se usa la vista
+            # calculada del canónico y se avisa en pantalla para correr `python -m src.pipeline` otra vez.
+            numeros = plano(canonico)
+            avisos.append("app/ejemplos/numeros_ejemplo.json no coincide con resultados/numeros_oficiales.json: "
+                          "se muestran las cifras del canónico. Corre python -m src.pipeline para regenerar los dos.")
+        fuentes["numeros"] = "oficial"
     else:
         numeros, fuentes["numeros"] = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8")), "ejemplo"
 
@@ -178,7 +180,8 @@ def adaptar_oficial(o: dict) -> dict:
     filas = [{"umbral_c": int(k.removeprefix("umbral_").removesuffix("c")), "horas_anio": v}
              for k, v in horas.items() if k.startswith("umbral_") and v is not None]
     if filas and "bono_horas_respaldo" not in o:
-        n["bono_horas_respaldo"] = {"tipo": horas.get("tipo", "estimado"), "filas": filas}
+        n["bono_horas_respaldo"] = {"tipo": horas.get("tipo", "estimado"), "filas": filas,
+                                    "nota": horas.get("nota", "")}
     return n
 
 

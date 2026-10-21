@@ -162,9 +162,8 @@ def test_ejemplo_de_numeros_es_ficticio_y_completo():
 
 def test_cargar_sin_kit_usa_ejemplo_y_vista_previa(sin_kit):
     d = cargar.cargar()
-    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "ejemplo"} or \
-        d.fuentes["numeros"] == "oficial"
-    assert d.cifras_de_ejemplo == (d.fuentes["numeros"] != "oficial")
+    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "ejemplo"}
+    assert d.cifras_de_ejemplo and d.numeros["_ejemplo"] is True
     assert len(d.eventos) >= 3
 
 
@@ -174,12 +173,14 @@ def test_cifra_derivada_hereda_la_etiqueta_mas_debil():
     assert cargar.mas_debil("observado", "estimado") == "estimado"
 
 
-def test_alertas_con_otro_formato_avisan_y_no_se_ignoran(sin_kit, monkeypatch, tmp_path):
+def test_alertas_con_otro_formato_avisan_y_no_se_ignoran(monkeypatch, tmp_path):
     """Si alertas.csv tiene el contrato 3 anterior, la app avisa en pantalla y usa la vista previa."""
     viejo = tmp_path / "alertas.csv"
     pd.DataFrame({"timestamp": ["2026-10-12T00:00:00Z"], "score": [0.1], "anomalia": [False],
                   "tipo_sugerido": ["normal"], "kw_esperado_enfriamiento": [10.0]}).to_csv(viejo, index=False)
     monkeypatch.setitem(cargar.RUTAS, "alertas", viejo)
+    monkeypatch.setattr(kit, "disponible", lambda: True)
+    monkeypatch.setattr(kit, "leer", kit.ejemplo)
     d = cargar.cargar()
     assert d.fuentes["detector"] == "vista_previa"
     assert d.avisos and "site_id" in d.avisos[0]
@@ -279,3 +280,19 @@ def test_cifra_oficial_que_falta_se_marca_pendiente():
     assert cargar.tipo_cifra(n, "punto_ciego_pct", ejemplo=False) == "pendiente"   # no existe
     assert cargar.tipo_cifra(n, "equilibrio_horas", ejemplo=False) == "pendiente"  # existe, pero en null
     assert cargar.mas_debil("medido", "pendiente") == "pendiente"
+
+
+def test_vista_plana_desfasada_avisa_y_no_tumba_la_app(monkeypatch, tmp_path):
+    """Si alguien regeneró solo uno de los dos JSON, la app usa el canónico y avisa; no se cae en la demo."""
+    from src.metricas.generar_numeros import plano
+    monkeypatch.setattr(cargar.kit, "disponible", lambda: True)
+    monkeypatch.setattr(cargar.kit, "leer", kit.ejemplo)
+    vieja = tmp_path / "numeros_ejemplo.json"
+    vieja.write_text(json.dumps({"_ejemplo": False, "desfasado": True}), encoding="utf-8")
+    monkeypatch.setitem(cargar.RUTAS, "leo", vieja)
+    monkeypatch.setitem(cargar.RUTAS, "alertas", tmp_path / "no-existe.csv")
+    monkeypatch.setitem(cargar.RUTAS, "consumo", tmp_path / "no-existe.json")
+    d = cargar.cargar()
+    assert d.fuentes["numeros"] == "oficial"
+    assert d.numeros == plano(json.loads(cargar.RUTAS["numeros"].read_text(encoding="utf-8")))
+    assert any("no coincide" in a for a in d.avisos)

@@ -15,7 +15,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | 11 | **Impacto en el acuífero** de Yucatán | Guille (D13) | #13 | Sección en `docs/07` con fuentes citadas | ⬜ |
 | 12 | Propuesta de solución sobre el kit | Todos | #4 | `main` corre de punta a punta con el kit | ⬜ |
 | 12 | Pitch final | Leo (guion y diapositivas) + Nico (cifras) | #16, #19 | Diapositivas en PDF + guion | ⬜ |
-| 14 | Bono de cero agua dulce | Misa (D13) | #15 | Sección del bono en `docs/07` con WUE estimado | ⬜ |
+| 14 | Bono de cero agua dulce | Misa (D13) | #15 | [`docs/07` §5](07-agua-y-acuifero.md#5-bono-zero-freshwater-footprint-5-a-15) (comparación de los 3 sitios, híbrido y WUE potable con supuestos) + `src/metricas/refrigeracion.py` | 🟨 falta *f* real de Mérida (N4) |
 | 17 | Kit confidencial | Todos | pruebas automáticas | Pruebas automáticas: ningún archivo de datos en el repo | ✅ |
 | 18 | Nada de ataques a sistemas reales | Guille | #9 | Los ataques solo existen como cambios en CSV (`src/ataques/`) | ✅ |
 
@@ -24,7 +24,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | Criterio | Responsable | Issues | Evidencia que lo demuestra | Estado |
 |---|---|---|---|---|
 | Innovación | Gadiel + Nico | #6, #8, #22 | Detector híbrido con coherencia física por sitio y comparación justa frente a las reglas del kit | ⬜ |
-| Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números | ⬜ |
+| Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números (`python -m src.pipeline`) | 🟨 faltan los supuestos de Nico para completar el JSON oficial |
 | Impacto en ciberseguridad | Guille | #9–#12, #30, #32 | Tabla de decisión de las 4 clases (`src/ot/clases.py`), rejilla corrida sobre el kit (`src/ataques/correr_rejilla.py`) y modelo de amenazas con tabla ATT&CK v20 (`docs/06`) | 🟨 PR #38, #39 y #40 |
 | Eficiencia Green AI | Nico: impacto y costo del detector; Misa: PUE inicial; Gadiel: consumo esperado | #2, #3, #5, #22 | PUE inicial y final proyectado + tabla calidad frente a costo | ⬜ |
 | Balance neto y gobernanza hídrica | Misa + Nico: balance; Guille: acuífero | #13, #14 | Balance en kWh y litros + análisis del acuífero | ⬜ |

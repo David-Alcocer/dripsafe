@@ -154,7 +154,7 @@ IMPACTO_ACUIFERO = [
 
 # Épocas del año en Yucatán para el enfriamiento (propuesta §3.4). Rangos por confirmar con SMN o ERA5.
 EPOCAS = [
-    ("Secas calurosas", "marzo – mayo", "Calor extremo y aire seco; máximas medias de unos 37 °C en abril y mayo.",
+    ("Secas calurosas", "marzo – mayo", "Periodo cálido y relativamente seco; intensidad por validar con la serie climática.",
      "El enfriador seco se queda corto en las tardes: más horas de respaldo y PUE más alto."),
     ("Lluvias", "junio – octubre", "Calor con humedad muy alta.",
      "Al evaporativo le afecta el bulbo húmedo: a igual temperatura rinde menos y gasta más."),
