@@ -79,30 +79,60 @@ Son datos sintéticos: los números finales salen del kit.
 **Mensaje clave para el pitch:**
 > "DripSafe funciona como **primera capa de detección**: no reemplaza un firewall ni un SOC, pero detecta cuando los datos físicos del enfriamiento no tienen sentido, que es justo lo que pasa cuando alguien manipula sensores o controladores."
 
-## 4. Las 4 clases oficiales de alerta (D16, MVP)
+## 4. Las 4 clases de alerta: tabla de decisión (D16 · U1)
 
-En vez de clasificar en "falla vs ataque" (una heurística que falla en los casos interesantes), **DripSafe clasifica el cruce entre el registro OT y los residuos físicos** en 4 clases:
+DripSafe no adivina si algo es «falla» o «ataque»: con datos de proceso esas dos cosas a veces se ven igual. Lo que sí puede hacer es **cruzar el registro OT con los excesos físicos** y ordenar la respuesta. Las reglas viven en un solo lugar, [`src/ot/clases.py`](../src/ot/clases.py); el detector las llama y el dashboard muestra lo que sale de ahí. Cada fila de las tablas de abajo tiene una prueba en [`tests/test_clases.py`](../tests/test_clases.py).
 
-| Clase | Condición | Acción | ¿En el kit? |
+**Palabras que usamos (todo es por sitio):**
+- **Exceso:** una hora en la que el detector marca energía no TI, agua o temperatura de entrada por encima de lo esperado (por umbral o por la media de 4 h).
+- **Tramo:** horas seguidas con exceso. Un hueco en los datos corta el tramo.
+- **Evento OT:** horas seguidas con `ot_event` distinto de `normal` (`login_fallido` o `cambio_config_no_autorizado`).
+- **Ventana de efecto:** desde la primera hora del evento hasta 24 h después de su última hora. Si el evento ocupa la hora de las 04:00, cuentan los excesos que **empiecen** entre las 04:00 y las 04:00 del día siguiente.
+- **Causal:** el tramo **empieza** dentro de la ventana. **Coincidente, no causal:** el tramo ya venía de antes y el evento cae a la mitad.
+
+| Clase | Cuándo | Prioridad | Acción sugerida |
 |---|---|---|---|
-| **Incidente OT con efecto** | Evento OT **y** residuo físico desde el inicio del evento hasta 24 h después | Máxima: restaurar config aprobada; modo seguro manual | Se inyecta (prueba U2) |
-| **Cambio no autorizado** | `cambio_config_no_autorizado`, con o sin efecto | Alta: comparar contra config aprobada; vigilar 24 h | Sí (SIM-C) |
-| **Escalón sin registro** | Un residuo supera el umbral de golpe (en ≤ 1 h) sin evento OT | Alta: comparar setpoints; **si es agua, inspección física en paralelo** | Sí (SIM-A energía, SIM-B agua) |
-| **Intento de acceso** | Solo `login_fallido`, residuos normales | Media: revisar accesos y cuentas | Sí (SIM-C) |
+| **Incidente OT con efecto** | Un tramo empieza dentro de la ventana de un evento OT. También sube a esta clase la hora del cambio que lo causó | Máxima | Restaurar la configuración aprobada y pasar a modo seguro manual; confirmar en sitio |
+| **Cambio no autorizado** | Hora con `cambio_config_no_autorizado` sin efecto atribuido (todavía) | Alta | Comparar contra la configuración aprobada y vigilar 24 h |
+| **Escalón sin registro** | Exceso sin ningún evento OT que lo cause | Alta | Comparar los setpoints contra la versión aprobada **antes** de mandar a mantenimiento. Si el exceso es de agua, inspección física en paralelo (posible fuga) |
+| **Intento de acceso** | Hora con `login_fallido` y sin exceso | Media | Revisar accesos y cuentas. Un login fallido no prueba una intrusión |
+
+**Precedencia:** incidente > cambio no autorizado > escalón sin registro > intento de acceso > normal. Ninguna regla baja la clase que ya tiene una hora.
 
 **Dos reglas de oro:**
-1. **Ningún exceso sin explicar va directo a mantenimiento.** Un ataque que cambia un setpoint sin dejar registro (T0836 sin log) se ve igual que una falla brusca; se trata como posible cambio no autorizado hasta comprobar la configuración.
-2. **Ningún cambio no autorizado es "sin urgencia"**, aunque no tenga efecto físico aún. Puede notarse en el siguiente pico de calor.
+1. **Ningún exceso sin explicar va directo a mantenimiento.** Un cambio de setpoint sin registro (T0836 sin log) se ve igual que una falla brusca, así que primero se revisa la configuración.
+2. **Ningún cambio no autorizado es «sin urgencia»**, aunque todavía no tenga efecto: puede notarse en el siguiente pico de calor.
 
-**Ventana de 24 h:** en el kit el cambio de configuración ocurre de madrugada (04:00–05:00 UTC) con carga baja; un setpoint alterado puede notarse hasta la tarde. Un residuo que ya existía **antes** del evento se marca `coincidente, no causal`.
+### Casos ambiguos y su respuesta
 
-**Extra, si sobra tiempo:**
-- **Incoherencia física:** sube la temperatura de entrada y baja la energía no TI (sensor descompuesto o manipulado).
-- **Deriva gradual:** la media móvil sube sin escalón (degradación lenta).
+| # | Situación | Respuesta | Por qué |
+|---|---|---|---|
+| 1 | Cambio a las 04:00 y exceso desde las 12:00 | Incidente (el exceso y la hora del cambio) | La ventana de 24 h cubre el siguiente pico de calor |
+| 2 | El exceso empieza 25 h después del cambio | Escalón; el cambio sigue como cambio no autorizado | Fuera de la ventana: se revisa, pero no se atribuye |
+| 3 | El exceso ya venía 4 h antes del cambio | Escalón, marcado **coincidente, no causal**; el cambio no baja de prioridad | Un cambio no puede causar algo que ya pasaba |
+| 4 | Ese exceso coincidente termina y empieza otro dentro de la ventana | El nuevo es incidente | Es un efecto nuevo después del evento |
+| 5 | Un segundo cambio cae a la mitad de un incidente | Sigue siendo incidente | Precedencia. La versión anterior del detector bajaba esa hora |
+| 6 | Login fallido y, 6 h después, un exceso | Incidente; el login sigue como intento | Un acceso que sí funcionó no deja evento en el kit: el login pudo ser el paso previo |
+| 7 | Tres logins y luego dos horas de cambio (patrón de SIM-C) sin efecto | Intento en los logins y cambio no autorizado en el cambio | Cada hora conserva lo que registró |
+| 8 | Login y luego cambio, ambos antes del mismo exceso | Se atribuye al cambio | Es la causa más directa |
+| 9 | Login en una hora que ya tenía exceso | Escalón, con una nota del login en el motivo | El exceso es más grave que el intento |
+| 10 | Exceso pequeño y sostenido, visto solo por la media de 4 h | Escalón, con forma «gradual» | Mientras «deriva gradual» sea un extra, se trata como posible cambio sin registro |
+| 11 | Exceso de agua sin evento | Escalón + inspección física | Posible fuga |
+| 12 | Falta una hora de datos a la mitad de un exceso | El tramo se corta en dos | No se inventan horas |
+
+**Límites que declaramos:**
+- Un exceso que ya venía de antes y **empeora** después del evento, sin cortarse, se queda como coincidente. Distinguir ese «escalón dentro del escalón» necesita el umbral de cada variable; por ahora lo resuelve una persona.
+- Con una ventana de 24 h, un exceso que no tiene nada que ver puede caer dentro **por casualidad**. Por eso lo medimos (siguiente sección) en lugar de suponerlo.
+
+### 4b. ¿Cuántas atribuciones serían pura coincidencia?
+
+La propuesta (§3.3) pide reportar cuántas coincidencias al azar habría. `clases.coincidencias_al_azar()` lo calcula así: sobre la evaluación **sin inyecciones**, pone un evento OT ficticio de 1 h en cada hora posible y revisa si algún tramo de exceso empieza dentro de su ventana. El porcentaje de aciertos es la probabilidad de llamar «incidente OT con efecto» a algo que el evento no causó.
+
+Se reporta para ventanas de 1, 4, 8, 12 y 24 h, porque es un intercambio: una ventana corta casi no se equivoca por casualidad, pero se pierde el caso del cambio que se nota 8 h después. Las cifras salen de la corrida de la rejilla sobre el kit (U2, #32) y van al JSON oficial.
 
 ### Mensaje honesto para el pitch
 
-> *"DripSafe no afirma que un residuo pruebe un ciberataque. Clasifica cuatro cosas distintas: un intento (login fallido), un cambio (sin confirmar que haya efecto), un escalón sin registro (podría ser falla o ataque, requiere comparar config) y un incidente con efecto (evento OT + residuo físico medible)."*
+> *"DripSafe no afirma que un residuo pruebe un ciberataque. Distingue un intento (login fallido), un cambio (sin efecto confirmado), un escalón sin registro (falla o cambio no registrado: primero se revisa la configuración) y un incidente con efecto (evento OT seguido de un exceso físico medible). Y dice qué tan seguido esa atribución podría ser casualidad."*
 
 ## 5. Recomendaciones de defensa (para la propuesta)
 
