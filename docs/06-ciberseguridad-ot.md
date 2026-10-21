@@ -79,6 +79,45 @@ Son datos sintéticos: los números finales salen del kit.
 **Mensaje clave para el pitch:**
 > "DripSafe funciona como **primera capa de detección**: no reemplaza un firewall ni un SOC, pero detecta cuando los datos físicos del enfriamiento no tienen sentido, que es justo lo que pasa cuando alguien manipula sensores o controladores."
 
+## 3c. Rejilla de inyecciones sobre el kit (U1 · U2)
+
+Las 21 anomalías del kit están hechas para que las reglas fijas las vean, así que ahí lo esperado es un empate. Para medir **desde qué tamaño** ve cada método un problema, metemos excesos controlados en copias de la evaluación. La rejilla quedó fijada aquí y en [`src/ataques/rejilla.py`](../src/ataques/rejilla.py) **antes de correrla sobre el kit**, y una prueba (`test_la_rejilla_es_la_que_fijo_la_propuesta`) impide cambiarla sin que se note.
+
+| Inyección | Qué se cambia | Duración | Evento OT | Clase esperada |
+|---|---|---|---|---|
+| `energia_+10` … `energia_+80` | Energía no TI +10, +20, +40 y +80 % | 4 h | No | Escalón sin registro |
+| `agua_+25`, `agua_+50` | Agua +25 y +50 % | 4 h | No | Escalón sin registro |
+| `cambio_sin_registro` | Energía no TI +20 % (setpoint cambiado sin dejar registro, T0836) | 12 h | No | Escalón sin registro, **nunca** mantenimiento directo |
+| `cambio_con_efecto` | `cambio_config_no_autorizado` y, **8 h después**, energía no TI +20 % | 12 h | Sí | Incidente OT con efecto |
+
+**Dónde se pone cada una:**
+- Una inyección por copia, en cada sitio, a 6, 18, 30, 42, 54 y 66 h del inicio de la evaluación (noche, mañana y tarde).
+- Si ahí estorba una anomalía original del kit (con 2 h de margen) o hay un evento OT del kit en las 24 h previas, se recorre hora por hora hasta un lugar limpio. Se anota cuánto se recorrió y no se repite un lugar.
+- Solo se toca la evaluación. Ajuste y calibración quedan idénticos, así que el detector aprende exactamente lo mismo en todas las copias: la corrida lo verifica en cada copia y se detiene si no es así.
+- Las respuestas correctas van en `etiqueta_*`, que el detector nunca lee (prueba `test_el_detector_no_ve_las_etiquetas_de_la_inyeccion`).
+
+**Robustez (prueba c):** se repite toda la rejilla con sensores peores en **todas** las horas: el ruido de la energía se duplica (gaussiano de 1.5 % de la energía TI encima del ±1.5 % uniforme del kit) y el agua lleva ±4 %. Se corre con 5 semillas para ver la dispersión.
+
+**Qué mide la corrida** ([`src/ataques/correr_rejilla.py`](../src/ataques/correr_rejilla.py)), para DripSafe y para las reglas del kit en la misma tabla:
+
+| Columna | Qué responde |
+|---|---|
+| `detectado`, `horas_hasta_detectar` | ¿Hubo alguna alerta en el episodio? Se cuenta por episodio (D17) con la función de Nico |
+| `efecto_visto`, `horas_hasta_ver_efecto` | ¿Se vio el exceso físico, no solo el evento OT? |
+| `inyectado_kwh`, `no_visto_kwh` (o `_l`) | Exceso exacto que metimos y la parte que pasó antes de verlo |
+| `clase_obtenida`, `clase_correcta_pct` | ¿La clase OT fue la esperada? (solo DripSafe) |
+
+La corrida también da las falsas alarmas por día de la evaluación **sin** inyecciones y las coincidencias al azar de la §4b.
+
+```bash
+python -m src.ataques.correr_rejilla --kit RUTA/operaciones_simuladas.csv   # o --entrada data/procesado/telemetria.csv
+python -m src.ataques.correr_rejilla --ejemplo                              # sin el kit: datos inventados
+```
+
+Salidas, todas fuera de Git: `data/escenarios/rejilla.manifiesto.json` (cada inyección con su ventana y sus etiquetas) y `data/resultados/rejilla_por_inyeccion.csv`, `rejilla_resumen.csv` (la curva por magnitud), `rejilla_base_limpia.csv` y `coincidencias_al_azar.csv`. Nico (N2) toma de ahí la tabla y la curva oficiales; solo los agregados van a `numeros_oficiales.json`.
+
+**Lo que ya se ve con datos inventados** (`--ejemplo`, solo para probar el flujo): las reglas no ven ningún exceso de energía de +10 o +20 % y solo un tercio de los de +80 %, mientras que DripSafe ve todos desde +40 %. En los 15 cambios con efecto, las reglas disparan por el evento OT pero no ven ninguno de los excesos que llegan 8 h después; DripSafe los ve todos y los clasifica como incidente. Las cifras del pitch salen del kit.
+
 ## 4. Las 4 clases de alerta: tabla de decisión (D16 · U1)
 
 DripSafe no adivina si algo es «falla» o «ataque»: con datos de proceso esas dos cosas a veces se ven igual. Lo que sí puede hacer es **cruzar el registro OT con los excesos físicos** y ordenar la respuesta. Las reglas viven en un solo lugar, [`src/ot/clases.py`](../src/ot/clases.py); el detector las llama y el dashboard muestra lo que sale de ahí. Cada fila de las tablas de abajo tiene una prueba en [`tests/test_clases.py`](../tests/test_clases.py).
