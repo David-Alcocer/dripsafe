@@ -15,7 +15,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | 11 | **Impacto en el acuífero** de Yucatán | Guille (D13) | #13 | Sección en `docs/07` con fuentes citadas | ⬜ |
 | 12 | Propuesta de solución sobre el kit | Todos | #4 | `main` corre de punta a punta con el kit | ⬜ |
 | 12 | Pitch final | Leo (guion y diapositivas) + Nico (cifras) | #16, #19 | Diapositivas en PDF + guion | ⬜ |
-| 14 | Bono de cero agua dulce | Misa (D13) | #15 | Sección del bono en `docs/07` con WUE estimado | ⬜ |
+| 14 | Bono de cero agua dulce | Misa (D13) | #15 | [`docs/07` §5](07-agua-y-acuifero.md#5-bono-zero-freshwater-footprint-5-a-15) (comparación de los 3 sitios, híbrido y WUE potable con supuestos) + `src/metricas/refrigeracion.py` | 🟨 falta *f* real de Mérida (N4) |
 | 17 | Kit confidencial | Todos | pruebas automáticas | Pruebas automáticas: ningún archivo de datos en el repo | ✅ |
 | 18 | Nada de ataques a sistemas reales | Guille | #9 | Los ataques solo existen como cambios en CSV (`src/ataques/`) | ✅ |
 
