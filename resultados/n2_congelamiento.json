@@ -1,0 +1,222 @@
+{
+  "_meta": {
+    "aviso": "DATOS SIMULADOS · fijación técnica de N2",
+    "estado": "fijado localmente; pendiente de confirmación de Gadiel",
+    "sin_medicion_codecarbon": true
+  },
+  "kit": {
+    "nombre": "operaciones_simuladas.csv",
+    "tipo": "DATOS SIMULADOS · kit CIFOX",
+    "identificador": "sha256 del MANIFEST.json; el kit no declara número de versión",
+    "manifest_sha256": "10b0655610ddd7dc84617f66e24efac7f71363259f87ebcbf81f6181d920b19a",
+    "csv_sha256": "a498db9c2251a8f9dc761ab08f30f59f3e8269ac5a71546219a2d1b5552e7088",
+    "csv_bytes": 59133,
+    "semilla_documentada": 22102026
+  },
+  "codigo": {
+    "commit_corte": "ac24bf89ceb4bdfaf25e8c9767ae93360bc166d1",
+    "sha256_archivos": {
+      "src/modelo/detector.py": "aaa987be240d16742c266f0ed0677e6f0d2624b236264767e557fcb17610e2a9",
+      "src/ot/clases.py": "f43d58d4b4595208fb57c8e3eb4e911096d16158788e785900746dc2ec023242",
+      "src/datos/cargar.py": "5122f4ddad1067a5845668bb51ba28f5ff8912d85a4caed8242136cc80eb4476",
+      "src/contrato.py": "a566e9de372f88ff2f19f8572a3ade731b7ab731260014707330f03edd6b9692",
+      "config/columnas.json": "88970896af064cb0650b498d19543f87d85a25890b6fd722afb243eb3fe746d4"
+    },
+    "generador_sha256": "c325f7c2c2d234917758ce9059ae0f2f5721f8be4137f33e059b7b3228027f31",
+    "entorno": {
+      "python": "3.12.3",
+      "numpy": "2.5.4",
+      "pandas": "3.0.6"
+    }
+  },
+  "protocolo": {
+    "detector_actual": "mínimos cuadrados por sitio + umbrales de residuo + EWMA + clasificación OT",
+    "incluye_isolation_forest": false,
+    "intervalo_h": 1,
+    "horas_ajuste_por_sitio": 48,
+    "horas_calibracion_por_sitio": 24,
+    "horas_evaluacion_por_sitio": 96,
+    "margen_umbral": 1.5,
+    "minimos": {
+      "energia": 3.0,
+      "agua": 3.0,
+      "entrada": 0.5
+    },
+    "span_ewma": 4,
+    "columnas_entrada_detector": [
+      "timestamp",
+      "site_id",
+      "kw_ti",
+      "kw_total",
+      "agua_reposicion_l",
+      "t_exterior",
+      "inlet_temp_c",
+      "ot_event",
+      "etiqueta_particion"
+    ],
+    "columnas_resultado_excluidas": [
+      "etiqueta_escenario",
+      "etiqueta_tipo",
+      "is_simulated",
+      "simulated_anomaly"
+    ],
+    "etiqueta_particion": "solo selecciona las ventanas; no es predictor numérico",
+    "ot_event": "entrada legítima para clasificación OT; no interviene en el ajuste numérico",
+    "coeficientes_energia_y_agua": [
+      "1",
+      "energia_it_kwh",
+      "energia_it_kwh × max(t_exterior_c - 20, 0)"
+    ],
+    "coeficientes_entrada": [
+      "1",
+      "max(t_exterior_c - 20, 0)"
+    ],
+    "unidades_limites": {
+      "energia": "% residuo no TI",
+      "agua": "% residuo agua",
+      "entrada": "°C residuo entrada"
+    },
+    "etiquetas_no_alteran_predicciones": true,
+    "evaluacion_no_altera_parametros": true
+  },
+  "sitios": {
+    "SIM-A": {
+      "ajuste": {
+        "inicio_utc": "2026-10-12T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-13T23:00:00+00:00",
+        "horas": 48
+      },
+      "calibracion": {
+        "inicio_utc": "2026-10-14T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-14T23:00:00+00:00",
+        "horas": 24
+      },
+      "evaluacion": {
+        "inicio_utc": "2026-10-15T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-18T23:00:00+00:00",
+        "horas": 96
+      },
+      "parametros": {
+        "coef_energia": [
+          1.7838886294397571,
+          0.3388690991853619,
+          0.004099835824061704
+        ],
+        "coef_agua": [
+          -9.782891240708948e-05,
+          0.030000736580486766,
+          0.00044997652900170826
+        ],
+        "coef_entrada": [
+          22.938134550356942,
+          0.18088152961504236
+        ],
+        "limites": {
+          "energia": 6.135471753094106,
+          "agua": 3.0,
+          "entrada": 0.7431893667983935
+        },
+        "limites_media": {
+          "energia": 4.090314502062737,
+          "agua": 2.0,
+          "entrada": 0.4954595778655957
+        },
+        "t_min_c": 15.414,
+        "t_max_c": 30.567
+      },
+      "parametros_sha256": "0e14b96014a02ceb9ca06f98c3dceb66aded471ee2a8498d37bd33569dc519cb"
+    },
+    "SIM-B": {
+      "ajuste": {
+        "inicio_utc": "2026-10-12T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-13T23:00:00+00:00",
+        "horas": 48
+      },
+      "calibracion": {
+        "inicio_utc": "2026-10-14T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-14T23:00:00+00:00",
+        "horas": 24
+      },
+      "evaluacion": {
+        "inicio_utc": "2026-10-15T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-18T23:00:00+00:00",
+        "horas": 96
+      },
+      "parametros": {
+        "coef_energia": [
+          7.934573901505578,
+          0.16462483807477676,
+          0.005287534088714324
+        ],
+        "coef_agua": [
+          -0.0026512343023670742,
+          0.8000188232701054,
+          0.011999490922278255
+        ],
+        "coef_entrada": [
+          22.999786084752394,
+          0.1892925443070418
+        ],
+        "limites": {
+          "energia": 10.123482614441233,
+          "agua": 3.0,
+          "entrada": 0.7943435815993745
+        },
+        "limites_media": {
+          "energia": 6.748988409627488,
+          "agua": 2.0,
+          "entrada": 0.5973570070375509
+        },
+        "t_min_c": 15.489,
+        "t_max_c": 30.661
+      },
+      "parametros_sha256": "75f247c18dac5f57a0c4ccdddade315f40cc80562b4c3d3161d71ecea2fa9aef"
+    },
+    "SIM-C": {
+      "ajuste": {
+        "inicio_utc": "2026-10-12T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-13T23:00:00+00:00",
+        "horas": 48
+      },
+      "calibracion": {
+        "inicio_utc": "2026-10-14T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-14T23:00:00+00:00",
+        "horas": 24
+      },
+      "evaluacion": {
+        "inicio_utc": "2026-10-15T00:00:00+00:00",
+        "fin_utc_inclusivo": "2026-10-18T23:00:00+00:00",
+        "horas": 96
+      },
+      "parametros": {
+        "coef_energia": [
+          3.529086792463332,
+          0.154823761046477,
+          0.004616693789851634
+        ],
+        "coef_agua": [
+          -0.00048280093426792536,
+          0.20000347996770146,
+          0.0029999091170357928
+        ],
+        "coef_entrada": [
+          23.047375014429566,
+          0.1773120711241642
+        ],
+        "limites": {
+          "energia": 11.298751365058148,
+          "agua": 3.0,
+          "entrada": 0.744562521644351
+        },
+        "limites_media": {
+          "energia": 7.532500910038765,
+          "agua": 2.0,
+          "entrada": 0.49637501442956733
+        },
+        "t_min_c": 15.098,
+        "t_max_c": 30.473
+      },
+      "parametros_sha256": "918f0b9dd903191b24cd99208c016d68b9af442cb33b4fd9b311ca21af3c44cf"
+    }
+  }
+}

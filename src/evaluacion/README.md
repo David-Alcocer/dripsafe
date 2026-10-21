@@ -44,6 +44,32 @@ Isolation Forest. Se congelan sus parámetros antes de abrir la evaluación.
 Las múltiples corridas corresponden a semillas o inyecciones diferentes; no
 se vuelven a ajustar umbrales usando los resultados de evaluación.
 
+### Fijación técnica para N2
+
+Antes de la comparación, `congelar_n2` contrasta el CSV con el `MANIFEST.json`
+entregado por CIFOX y registra en `resultados/n2_congelamiento.json` los hashes
+del kit y del código, el commit de corte, las ventanas y los parámetros
+aprendidos por sitio. El JSON contiene solo metadatos y agregados; no incluye
+filas del kit ni rutas de la laptop. Para reproducir la fijación actual:
+
+```bash
+KIT_CSV=/ruta/local/al/kit/data/operaciones_simuladas.csv
+.venv/bin/python -m src.evaluacion.congelar_n2 --kit "$KIT_CSV" --revision ac24bf8
+git diff --exit-code -- resultados/n2_congelamiento.json
+```
+
+El comando rechaza un CSV que no coincida con el inventario y un código fuente
+distinto del commit indicado. Verifica además que cambiar las etiquetas de
+resultado no altere las predicciones y que cambiar la evaluación no altere los
+parámetros aprendidos. `etiqueta_particion` solo selecciona las 48 h de ajuste
+y las 24 h de calibración por sitio; las 96 h posteriores son evaluación.
+`ot_event` es una entrada legítima para clasificar, pero no ajusta la línea
+base numérica. El estado del manifiesto es **fijación local pendiente de
+confirmación de Gadiel**; no contiene ni sustituye su medición de CodeCarbon.
+El detector fijado en este commit usa mínimos cuadrados, umbrales y EWMA; no
+incluye Isolation Forest. Si Gadiel incorpora otro modelo, N2 necesita un
+nuevo commit de corte y debe repetir la evaluación con esa versión.
+
 ## Métricas de impacto
 
 `src/metricas/impacto.py` calcula PUE y WUE como cocientes de sumas por sitio
