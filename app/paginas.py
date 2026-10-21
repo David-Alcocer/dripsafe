@@ -681,7 +681,7 @@ def agua(d: Datos, v: Vista) -> None:
                           "nulo en el de aire. Los sitios son simulados: la diferencia no prueba que una tecnología sea mejor.")))
 
     with fila("Acuífero de Yucatán", "acuifero"):
-        st.html(c.panel("Acuífero 3105", '<p class="txt-d">Pendiente de Guille: confirmar la fuente, '
+        st.html(c.panel("Acuífero 3105", '<p class="txt-d">Pendiente de Nico: confirmar la fuente, '
                         'el año y la disponibilidad del acuífero antes de publicar cifras o conclusiones.</p>'))
 
     with fila("Las épocas del año en Yucatán", "epocas"):
@@ -719,7 +719,7 @@ def agua(d: Datos, v: Vista) -> None:
         rejilla([
             c.stat("PUE con bono", "Pendiente de Misa", color="gris",
                    sub=con_tag("requiere rendimiento del chiller", "proyectado")),
-            c.stat("Acuífero 3105", "Pendiente de Guille", color="gris",
+            c.stat("Acuífero 3105", "Pendiente de Nico", color="gris",
                    sub=con_tag("requiere fuente y año confirmados", "observado")),
         ])
     mostrar_aviso_ejemplo(d)

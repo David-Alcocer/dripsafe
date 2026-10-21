@@ -95,13 +95,21 @@ def test_curva_y_falsas_alarmas_de_leo_usen_los_agregados_n2(cifras):
 
 def test_pendientes_no_se_convierten_en_balance(cifras):
     c, leo = cifras
-    for clave, responsable in (("detector_cpu_ms", "Gadiel"), ("detector_kwh_anual", "Gadiel"),
-                               ("equilibrio_horas", "Gadiel"), ("pue_con_bono", "Misa"),
-                               ("acuifero_3105", "Guille")):
+    for clave, responsable in (("pue_con_bono", "Misa"), ("acuifero_3105", "Nico")):
         x = leo[clave]
         assert x["valor"] is None and x["estado"] == "pendiente"
         assert responsable in x.get("motivo_pendiente", "")
-    assert c["balance_neto"]["razon_ahorro_costo"]["valor"] is None
+    # G3 ya está medido: cada cifra lleva la etiqueta honesta de su origen.
+    for clave, tipo in (("detector_cpu_ms", "medido"), ("detector_kwh_anual", "estimado"),
+                        ("equilibrio_horas", "proyectado")):
+        x = leo[clave]
+        assert x["valor"] > 0 and x["estado"] == "disponible" and x["tipo"] == tipo
+    b = c["balance_neto"]
+    assert b["razon_ahorro_costo"]["tipo"] == "proyectado"
+    assert "no es ahorro observado" in b["razon_ahorro_costo"]["nota"]
+    assert b["costo_entrenamiento_kwh_anual"]["valor"] + b["costo_inferencia_kwh_anual"]["valor"] == \
+        pytest.approx(b["costo_detector_kwh_anual"]["valor"])
+    assert b["validado_por"] is None
     assert c["balance_neto"]["ahorro_proyectado_kwh_anual"]["tipo"] == "proyectado"
     assert "ahorro observado" in c["balance_neto"]["ahorro_proyectado_kwh_anual"]["nota"]
 
