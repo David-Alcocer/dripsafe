@@ -169,7 +169,7 @@ Los resultados sobre el kit están en la §6.
 
 Corrida de `python -m src.ataques.correr_rejilla --kit …` con el código del commit `cf46ead`: 141 inyecciones por condición. Son 18 de cada tipo, salvo 17 cambios sin registro y 16 cambios con efecto: en SIM-C, 3 posiciones de 12 h no tenían un lugar limpio por su evento OT y quedan como omitidas (la auditoría de Nico, `src/evaluacion/auditar_rejilla.py`, las cuenta). Son **agregados**; las filas del kit no salen de la laptop.
 
-**Ya son las cifras oficiales.** Nico las integró en `resultados/numeros_oficiales.json` (N2, PR #49). El 21 de octubre se volvió a correr la rejilla con `main` (`c93194d`): los 326 valores del bloque `deteccion` salieron idénticos y la auditoría de denominadores pasó en las 6 corridas.
+**Ya son las cifras oficiales.** Nico las integró en `resultados/numeros_oficiales.json` (N2, PR #49). El 21 de octubre se volvió a correr la rejilla con `main` (`c93194d`): los 326 valores del bloque `deteccion` salieron idénticos y la auditoría de denominadores pasó en las 6 corridas. Esa noche se repitió con `58158e0`, que ya incluye el tipo sugerido de Gadiel (#59), y el resultado fue el mismo: el #59 no mueve ninguna cifra oficial.
 
 **Las anomalías originales del kit: empate, como se esperaba.** Los dos métodos detectan los 3 episodios (21 filas), en la primera hora y sin falsas alarmas (0 por día y sitio; IC 95 %: 0 a 0.33, sobre 267 horas limpias sumando los 3 sitios). DripSafe los clasifica así: la ineficiencia de SIM-A y la fuga de SIM-B como **escalón sin registro** (la fuga, con inspección física), los logins de SIM-C como **intento de acceso** y su cambio como **cambio no autorizado**.
 
@@ -187,6 +187,7 @@ Corrida de `python -m src.ataques.correr_rejilla --kit …` con el código del c
 | Cambio con efecto 8 h después (+20 %) | 100 % | 98 % (94–100) | 0 % del efecto; sí ven el evento | 1 710 kWh |
 
 - **Clase OT:** en el 100 % de las horas con efecto visto, DripSafe puso la clase esperada, con y sin ruido. Todos los cambios sin registro quedaron como escalón sin registro, que manda a revisar la configuración antes que a mantenimiento.
+- **Tipo sugerido** (`tipo_sugerido`, #8, `src/modelo/explicar.py`): las fallas salen como ineficiencia en el 100 % (108 de 108) y los cambios con efecto como posible ataque en el 100 % (16 de 16); los cambios sin registro, en el 0 % (0 de 17), porque sin evento OT nada los distingue de una falla (§7, punto 5). Con ruido da lo mismo. **No es una cifra de precisión:** el tipo sale solo de la clase OT, así que da 100 % o 0 % por construcción y mide si el ataque dejó registro. Además, las fallas dan 100 % porque la rejilla las pone lejos de los eventos OT; una falla en las 24 h siguientes a un login saldría como posible ataque. No está en `numeros_oficiales.json` ni va en las diapositivas.
 - **Rapidez:** DripSafe ve el efecto en la misma hora en que empieza, salvo a +10 %, que tarda en promedio 0.4 h. Lo que deja pasar: 28 kWh en los de +10 % y 5 kWh en los cambios con efecto.
 - **Por qué las reglas no ven:** el sitio líquido trabaja con un PUE cercano a 1.2 y el evaporativo con un WUE cercano a 0.9 L/kWh. Les cabe mucho exceso antes de llegar a 1.6 o a 1.5 L/kWh.
 - **Falsas alarmas con el doble de ruido:** suben de 0 a 0.07 por día y sitio.
