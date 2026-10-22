@@ -45,9 +45,11 @@ Efectos que DripSafe puede analizar y límites de atribución:
 **Misa + Nico calculan y validan juntos:** el balance neto final, descontando el consumo del modelo del ahorro estimado con unidades y periodos compatibles. La firma y las cifras vigentes están en `resultados/numeros_oficiales.json`; este análisis hídrico no modifica ese archivo.
 
 **A Nico le toca conseguir y citar:**
-- [ ] Factor de emisión del Sistema Eléctrico Nacional de México, en su valor oficial más reciente.
-- [ ] Intensidad hídrica de la generación eléctrica (L/kWh), o un valor de referencia citado.
-- [ ] Consumo de agua o WUE del caso; si se usa un valor de referencia, justificar su aplicación y presentarlo como escenario supuesto.
+- [x] Factor de emisión del Sistema Eléctrico Nacional de México: **0.444 kgCO₂e/kWh**. Es el FESEN 2024 que el [aviso de SEMARNAT del 29 de mayo de 2026](https://www.gob.mx/cms/uploads/attachment/file/1081506/aviso_factor_de_emision_electrico_coa_2026.pdf) indica usar en la COA 2026 mientras se publica el factor 2025. El valor aparece en el [aviso FESEN 2024](https://www.gob.mx/cms/uploads/attachment/file/981194/aviso_fesen_2024.pdf).
+- [x] Intensidad hídrica de la generación eléctrica: **2.0632 L/kWh**, estimada con la mezcla de generación neta del SEN 2024 del [Reporte de Confiabilidad 2024 de la CNE](https://www.cne.gob.mx/Electricidad%20CNE/Codigo%20de%20red/Anexo%20Acuerdo%20RCSEN2024%20R00.pdf) y los factores medianos de consumo de [Macknick et al. (NREL, 2012)](https://openei.org/datasets/files/969/pub/1748-9326_7_4_045802.pdf). **No es un factor oficial mexicano**: es una estimación trazable. La hidroeléctrica aporta 1.1492 L/kWh y domina el resultado; incluye evaporación de embalses, no solo agua potable.
+- [x] Consumo de agua del caso: el kit entrega `water_l` como **captación in situ simulada**. El WUE in situ se calcula como `suma(water_l) / suma(energía IT)` y se publica por separado del agua indirecta. No es consumo neto, no descuenta purga y no dice si el agua es potable.
+
+La cuenta publicada en `resultados/numeros_oficiales.json` usa el ahorro **proyectado** de 10 767.9234 kWh/año: 4 780.9580 kgCO₂e/año evitados y 22 216.3796 L/año de agua de generación evitada. Son proyecciones con factores externos, no ahorros observados. El agua in situ proyectada (11 461.2884 L/año) se mantiene separada para no sumar captaciones de distinta naturaleza.
 
 **Gadiel aporta:** alertas, consumo esperado del enfriamiento y mediciones de energía y emisiones del modelo con CodeCarbon.
 

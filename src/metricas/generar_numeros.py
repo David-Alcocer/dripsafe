@@ -21,6 +21,7 @@ from app.cargar import adaptar_oficial
 from src import contrato
 from src.evaluacion import cerrar_n2
 from src.evaluacion.episodios import episodios_desde_etiquetas
+from src.metricas import balance_neto
 from src.metricas.impacto import exceso_no_ti, pue_wue_por_sitio
 from src.metricas.refrigeracion import estimar_pue_respaldo_aire
 
@@ -211,6 +212,7 @@ def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
     horas_ev = sup["fallas_por_sitio_al_anio"] * (sup["horas_sin_alerta"] - sup["horas_con_alerta_hasta_correccion"])
     anual_kwh = horas_ev * sup["exceso_pct_no_ti"] / 100 * base_h
     anual_agua = horas_ev * sup["exceso_pct_no_ti"] / 100 * agua_evap
+    ahorro_publicado = _r(anual_kwh)
     episodios = episodios_desde_etiquetas(tabla, horas_por_intervalo=1)
     horas_anomalas = int(tabla.loc[(tabla["etiqueta_particion"] == "evaluacion") &
                                      tabla["etiqueta_escenario"].fillna("").ne(""), "timestamp"].size)
@@ -272,15 +274,31 @@ def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
         "balance_neto": {
             "costo_detector_kwh_anual": metrica(None, "kWh/año", "estimado", "CodeCarbon (10 repeticiones) × frecuencia anual", "Gadiel", motivo=pend_g),
             "tiempo_detector_ms": metrica(None, "ms", "medido", "benchmark del equipo", "Gadiel", motivo=pend_g),
-            "emisiones_detector_gco2e_anual": metrica(None, "gCO2e/año", "estimado", "CodeCarbon × factor SEN", "Gadiel + Nico", motivo=pend_g),
-            "ahorro_proyectado_kwh_anual": metrica(_r(anual_kwh), "kWh/año", "proyectado", origen, "Nico", supuestos=sup,
+            "emisiones_detector_gco2e_anual": metrica(
+                None, "gCO2e/año", "estimado", "CodeCarbon × factor SEN", "Gadiel + Nico",
+                motivo="Falta el costo anual del detector para multiplicarlo por el FESEN ya verificado."),
+            "ahorro_proyectado_kwh_anual": metrica(ahorro_publicado, "kWh/año", "proyectado", origen, "Nico", supuestos=sup,
                                                     nota="Seis fallas por sitio/año en tres sitios; escenario editable, no ahorro observado."),
             "agua_in_situ_evitada_l_anual": metrica(_r(anual_agua), "L/año", "proyectado", origen, "Nico", supuestos=sup,
                                                      nota="Solo SIM-B evaporativo; escenario editable."),
-            "co2_evitado_kg_anual": metrica(None, "kgCO2e/año", "proyectado", "ahorro × factor SEN", "Nico",
-                                            motivo="Factor SEN vigente no verificado; no se publica un producto sin fuente."),
-            "agua_indirecta_evitada_l_anual": metrica(None, "L/año", "proyectado", "ahorro × intensidad hídrica SEN", "Nico",
-                                                       motivo="Falta mezcla SEN verificable para combinar intensidades NREL."),
+            "co2_evitado_kg_anual": metrica(
+                _r(balance_neto.co2_evitado_kg_anual(ahorro_publicado)), "kgCO2e/año", "proyectado",
+                "ahorro_proyectado_kwh_anual × FESEN 2024 aplicable a 2026", "Nico",
+                nota=("Producto de una proyección, no de un ahorro observado. "
+                      "El factor es el 0.444 kgCO₂e/kWh que SEMARNAT indica usar en la COA 2026."),
+                supuestos={"factor_emision_kg_kwh": balance_neto.FACTOR_EMISION_SEN_KG_KWH,
+                           "fesen": balance_neto.URL_FESEN_2024,
+                           "aviso_coa_2026": balance_neto.URL_AVISO_COA_2026}),
+            "agua_indirecta_evitada_l_anual": metrica(
+                _r(balance_neto.agua_indirecta_evitada_l_anual(ahorro_publicado)), "L/año", "proyectado",
+                "ahorro_proyectado_kwh_anual × estimación NREL 2012 × mezcla CNE 2024", "Nico",
+                nota=("Estimación, no factor oficial mexicano: aplica factores medianos de consumo "
+                      "de NREL 2012 a la mezcla de generación neta del SEN en 2024. "
+                      "Incluye la evaporación hidroeléctrica; no es agua potable ni agua in situ."),
+                supuestos={"intensidad_l_kwh": balance_neto.INTENSIDAD_HIDRICA_SEN_L_KWH,
+                           "mezcla": balance_neto.URL_MEZCLA_CNE_2024,
+                           "factores": balance_neto.URL_NREL_2012,
+                           "metodo": "suma(participación por tecnología × factor de consumo)"}),
             "razon_ahorro_costo": metrica(None, "veces", "proyectado", "ahorro/costo detector", "Misa + Nico", motivo=pend_g),
             "umbral_equilibrio": metrica(None, "h/año", "proyectado", "costo detector/exceso típico por hora", "Misa + Nico",
                                          motivo=pend_g, supuestos=_agregado_equilibrio(residuos)),
@@ -292,10 +310,25 @@ def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
                                  "horas_respaldo_mérida_al_año": clima_bono,
                                  "pue_con_bono": _pue_con_bono(ref, clima_bono)},
         "fuentes_externas": {
-            "factor_emision_sen": metrica(None, "kgCO2e/kWh", "estimado", "SEMARNAT/CNE aviso vigente", "Nico",
-                                           motivo="El aviso vigente aún no se ha extraído y comprobado."),
-            "intensidad_hidrica_sen": metrica(None, "L/kWh", "estimado", "NREL 2012 × mezcla SEN", "Nico",
-                                              motivo="Falta mezcla de generación verificable y ponderación."),
+            "factor_emision_sen": metrica(
+                balance_neto.FACTOR_EMISION_SEN_KG_KWH, "kgCO2e/kWh", "observado",
+                "SEMARNAT · FESEN 2024, aplicable a la COA 2026", "Nico",
+                periodo="2026 (reporte COA); factor calculado para 2024",
+                nota=("El aviso del 29 de mayo de 2026 indica usar 0.444 tCO₂e/MWh mientras "
+                      "se publica el factor 2025. Es un factor oficial, no una medición local."),
+                supuestos={"fesen": balance_neto.URL_FESEN_2024,
+                           "aviso_coa_2026": balance_neto.URL_AVISO_COA_2026}),
+            "intensidad_hidrica_sen": metrica(
+                balance_neto.INTENSIDAD_HIDRICA_SEN_L_KWH, "L/kWh", "estimado",
+                "NREL 2012 × mezcla de generación CNE 2024", "Nico",
+                periodo="mezcla 2024",
+                nota=("Estimación trazable, no factor oficial. Usa la mezcla neta del SEN 2024 "
+                      "y factores medianos de consumo de NREL 2012; la hidroeléctrica aporta "
+                      "1.1492 L/kWh y domina el resultado. Es agua de generación, no captación in situ."),
+                supuestos={"mezcla": balance_neto.URL_MEZCLA_CNE_2024,
+                           "factores": balance_neto.URL_NREL_2012,
+                           "metodo": "suma(participación por tecnología × factor de consumo)",
+                           "advertencia": "No sustituye un factor hídrico oficial de México."}),
             "disponibilidad_acuifero_3105": metrica(None, "hm³/año", "observado", "DOF/CONAGUA", "Nico",
                                                       motivo="Pendiente de Nico: fuente y año del dato del acuífero."),
         },

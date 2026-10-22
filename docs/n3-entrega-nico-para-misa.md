@@ -1,9 +1,10 @@
 # N3 · Entrega de Nico para revisión con Misa
 
-Estado: **preparación técnica de Nico completada para revisar y firmar el
-balance; firma conjunta pendiente**. El JSON contiene los cálculos y sus
-agregados para revisar un resultado concreto. `validado_por: null` significa
-que todavía no se ha registrado la aprobación conjunta. El kit y las tablas
+Estado: **balance energético firmado por Misa y Nico; factores externos
+integrados**. La firma cubre los cálculos, supuestos y límites del balance
+energético. CO₂ y agua indirecta se publican como proyecciones con factores
+externos: el FESEN es oficial y la intensidad hídrica es una estimación
+trazable NREL/CNE, no un factor oficial mexicano. El kit y las tablas
 intermedias permanecen fuera de Git.
 
 ## Cuenta anual auditada
@@ -34,6 +35,11 @@ En `resultados/numeros_oficiales.json` y su vista plana para Leo:
 | Razón ahorro/costo | 833676835.2 veces | proyectado |
 | Saldo energético anual | 10767.923387083816 kWh/año | proyectado |
 | Umbral de equilibrio | 2.38926e-07 h/año | proyectado |
+| Emisiones del detector | 0.00573479 gCO₂e/año | estimado |
+| CO₂ evitado | 4780.9580 kgCO₂e/año | proyectado |
+| Agua indirecta evitada | 22216.3796 L/año | proyectado |
+| Factor de emisión SEN | 0.444 kgCO₂e/kWh | oficial |
+| Intensidad hídrica SEN | 2.0632 L/kWh | estimado |
 
 La anualización usa fases separadas: 168 h por lote, 8760 h/año,
 1 lote/h y 4 reentrenamientos/año. Entrenamiento + inferencia = costo total;
@@ -77,16 +83,18 @@ Si otra corrida no aporta una mediana positiva, el umbral queda `null` con motiv
    entrenamiento e inferencia pura; no se añade la corrida completa.
 3. Revisar el agregado del umbral y el saldo calculado. Ambos se presentan
    como `proyectado`; la disponibilidad del cálculo no equivale a firma.
-4. Conservar CO₂ en `null`: falta un factor SEN con fuente y periodo
-   verificados. La firma energética no permite afirmar ahorro ni balance de CO₂.
+4. Publicar CO₂ y agua indirecta solo como **proyecciones**: usan el ahorro
+   proyectado, no un ahorro observado. El factor de emisión es el 0.444
+   kgCO₂e/kWh del FESEN 2024 aplicable a la COA 2026. La intensidad hídrica
+   de 2.0632 L/kWh es una estimación NREL 2012 × mezcla CNE 2024; debe
+   revisarse antes de presentarla como cifra propia del proyecto.
 5. Registrar la firma conjunta solo cuando Misa y Nico hayan aprobado
-   explícitamente el resultado. Esta entrega prepara los cálculos, sin
-   atribuirle a Misa una aprobación.
+   explícitamente el resultado. La firma existente cubre el balance
+   energético; no acredita los nuevos factores externos.
 
-Fuera de esta firma permanecen `pue_con_bono` (Misa, #15), el dato oficial del
-acuífero 3105 (Nico, #13, ajuste `678b5ff`), el factor SEN y la intensidad
-hídrica de la electricidad. Se mantienen `null` y sus motivos; `_meta.estado`
-permanece `parcial`.
+Fuera de esta firma permanecen `pue_con_bono` (Misa, #15) y el dato oficial
+del acuífero 3105 (Nico, #13, ajuste `678b5ff`). Se mantienen `null` y sus
+motivos; `_meta.estado` permanece `parcial`.
 
 ## Alcance respecto de G3 en `1be2759`
 
@@ -104,8 +112,10 @@ G3 no mide el consumo de ejecutar toda la rejilla ni de generar el informe.
 `_meta.procedencia_g3.codigo.commit` identifica el código de la medición.
 
 La corrida completa del pipeline sobre el kit conservó PUE, WUE, evaluación
-N2, ahorro proyectado, costo y razón. Los cambios numéricos son el saldo y el
-umbral, con su denominador agregado; CO₂ conserva `null`.
+N2, ahorro proyectado, costo y razón. Los cambios numéricos son el saldo, el
+umbral, las emisiones del detector, el CO₂ evitado y el agua indirecta. Estos
+tres últimos son proyecciones o estimaciones con factores externos, no
+mediciones locales.
 
 ## Cómo regenerar y firmar
 
