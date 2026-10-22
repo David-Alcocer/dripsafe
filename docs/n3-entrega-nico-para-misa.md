@@ -112,8 +112,10 @@ G3 no mide el consumo de ejecutar toda la rejilla ni de generar el informe.
 `_meta.procedencia_g3.codigo.commit` identifica el código de la medición.
 
 La corrida completa del pipeline sobre el kit conservó PUE, WUE, evaluación
-N2, ahorro proyectado, costo y razón. Los cambios numéricos son el saldo y el
-umbral, con su denominador agregado; CO₂ conserva `null`.
+N2, ahorro proyectado, costo y razón. Los cambios numéricos son el saldo, el
+umbral, las emisiones del detector, el CO₂ evitado y el agua indirecta. Estos
+tres últimos son proyecciones o estimaciones con factores externos, no
+mediciones locales.
 
 ## Cómo regenerar y firmar
 
