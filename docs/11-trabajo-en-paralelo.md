@@ -137,7 +137,7 @@ python -m src.modelo.medicion --kit "$KIT_CSV" \
 
 `resultados/numeros_oficiales.json` es **la única fuente** de las cifras que aparecen en el dashboard, las diapositivas y el pitch. Cada número dice de dónde salió:
 
-**Nico consolida** el JSON canónico y genera `app/ejemplos/numeros_ejemplo.json`, la vista plana que consume Leo. Misa aporta y revisa el PUE; Gadiel entrega tiempo medido y energía estimada o medida del detector; Nico confirma el dato del acuífero 3105 (ajuste #13, commit `678b5ff`). Misa y Nico validan conjuntamente el balance neto.
+**Nico consolida** el JSON canónico y genera `app/ejemplos/numeros_ejemplo.json`, la vista plana que consume Leo. Misa aporta y revisa el PUE; Gadiel entrega tiempo medido y energía estimada o medida del detector; Nico integra el dato del acuífero 3105 (ajuste #13, commit `678b5ff`). Misa y Nico validan conjuntamente el balance neto. La [actualización técnica de CONAGUA de 2024, §8.4](https://sigagis.conagua.gob.mx/gas1/Edos_Acuiferos_18/yucatan/DR_3105.pdf) calcula **2059.634923 hm³/año** de disponibilidad media anual para el acuífero regional, con volumen de extracción registrado al **30 de diciembre de 2022**. Esta cifra no acredita disponibilidad, calidad, suministro ni autorización de extracción para un predio.
 
 Cada cifra lleva `valor`, `unidad`, `tipo`, `origen`, `responsable`, `estado` y, si queda en `null`, `motivo_pendiente`. `tipo` distingue `observado` (kit simulado), `medido` (hardware con repeticiones), `estimado` (modelo) y `proyectado` (escenario). `_meta.periodos` fija referencia (216 horas-sitio) y evaluación (288 horas-sitio), con fechas inclusivas, sitios e intervalo de una hora. Las energías de entrada son kWh por intervalo, el agua es captación in situ en L; PUE es ratio y WUE L/kWh IT.
 
@@ -179,10 +179,11 @@ representan precisión física de TDP.
 `python -m src.procedencia --validar-oficial resultados/numeros_oficiales.json`
 comprueba el contrato, las operaciones y el estado de firma. Añadir
 `--exigir-firma` hace fallar la comprobación si todavía falta la firma conjunta.
-La firma no completa CO₂, agua indirecta, PUE con bono ni acuífero: cada
-pendiente conserva su motivo y el archivo permanece `parcial`.
+La firma valida el balance energético revisado por Misa y Nico; CO₂, agua
+indirecta y PUE con bono siguen siendo proyecciones con sus supuestos. Los
+campos aún pendientes conservan su motivo y el archivo permanece `parcial`.
 
-El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit usa `app/ejemplos/numeros_demo.json`, rotulada **Ejemplo**. El pipeline incorpora G3 y calcula el saldo y el umbral para revisión conjunta. El PUE con bono, el acuífero y los factores externos conservan sus pendientes hasta recibir evidencia.
+El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit usa `app/ejemplos/numeros_demo.json`, rotulada **Ejemplo**. El pipeline incorpora G3 y calcula el saldo y el umbral para revisión conjunta. La disponibilidad regional calculada del acuífero queda `disponible`; los factores externos y el PUE con bono conservan sus fuentes, supuestos y límites propios.
 
 ### Cambiar un contrato
 

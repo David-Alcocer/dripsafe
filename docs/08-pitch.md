@@ -10,7 +10,7 @@ Sí tenemos que demostrar que la solución **podría** usarse en el mundo real, 
 
 ## La idea en una línea
 
-**DripSafe aprende cómo debería comportarse cada sitio según su carga y su clima, avisa cuando la física no cuadra, distingue un intento OT de un incidente con efecto real y ordena las alertas por los litros del acuífero en juego.**
+**DripSafe aprende cómo debería comportarse cada sitio según su carga y su clima, avisa cuando la física no cuadra, distingue un intento OT de un incidente con efecto real y muestra la captación de agua en exceso para investigarla.**
 
 ## Estructura
 
@@ -56,6 +56,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 
 ### 5 · Impacto y escala (60 s)
 > "En agua, el ahorro depende del tipo de enfriamiento: es grande en el evaporativo y casi nulo en el de aire.
+> En la evaluación simulada estimamos **1,311 L de captación en exceso** durante horas con alerta física. No son litros extraídos del acuífero ni ahorro observado: para atribuir un beneficio local debemos conocer el origen del suministro y el destino de la purga.
 > Para el bono proponemos **cero agua potable de enfriamiento** en obra nueva: circuito cerrado W40, enfriador seco y un chiller enfriado por aire para las horas más calientes, unas **2,235 al año** arriba de 30 °C en Mérida según ERA5. Con supuestos visibles, el **PUE proyectado es 1.284**: es un escenario, no un diseño verificado en Mérida.
 > DripSafe corre en local, sin nube y sin GPU, con seis medidores que casi cualquier centro de datos ya tiene. Cuesta por kW, y con nuestro precio supuesto la cuota se paga sola con menos del 0.5 % del consumo auxiliar de un sitio de 1 MW.
 > Nuestros límites: datos simulados, una sola semana de clima y sin sensores de agua helada. La siguiente validación es con datos reales de una sala de cómputo en Yucatán.
@@ -63,11 +64,11 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 
 ## Checklist: los 7 criterios deben escucharse
 
-- [ ] **Innovación:** línea base física por sitio aplicada a detectar + fusión evento–efecto + prioridad por litros (diapositivas 3 y 4).
+- [ ] **Innovación:** línea base física por sitio aplicada a detectar + fusión evento–efecto + cuantificación de captación en exceso (diapositivas 3, 4 y 8).
 - [ ] **Viabilidad técnica:** demo funcionando sobre el kit real, en una laptop, sin internet.
 - [ ] **Impacto en ciberseguridad:** cuatro clases, T0859 y T0836 observables, T0831 inyectada y el cambio sin registro (T0836 sin log o T1692.001, antes T0855); solo lectura (diapositiva 4). Cifras y frases en `docs/06` §6 y §10.
 - [ ] **Eficiencia Green AI:** PUE y WUE con sumas (antes observado, después proyectado), exceso sobre la línea base y curva de sensibilidad (diapositiva 6).
-- [ ] **Balance neto y gobernanza:** umbral de equilibrio, acuífero y reporte para CONAGUA (diapositivas 7 y 8).
+- [ ] **Balance neto y gobernanza:** umbral de equilibrio y análisis del acuífero —captación, presión local, descargas y autorizaciones— (diapositivas 7 y 8). No se genera ni envía un reporte a CONAGUA.
 - [ ] **Escalabilidad y negocio:** seis medidores, autocalibración y precio por kW (diapositiva 9).
 - [ ] **Presentación:** una idea por diapositiva y la demo en modo presentación.
 - [ ] **Bono:** meta condicionada de cero agua potable con respaldo seco y PUE proyectado con supuestos visibles (contenido para Leo en `docs/n4-entrega-para-leo.md`).

@@ -11,12 +11,13 @@ Entrega para Leo. Las afirmaciones de diseño son **propuesta**, los datos del k
 **Texto visible:**
 
 - CONAGUA describe drenaje principalmente subterráneo, cavernas y cenotes en el acuífero 3105.
-- La disponibilidad oficial es regional; no prueba calidad, permiso ni abasto para un predio.
-- DripSafe señala captación en exceso. El origen del agua y el destino de la purga requieren datos del operador.
+- **≈2 060 hm³/año de disponibilidad media anual calculada** para todo el acuífero (CONAGUA 2024); no prueba calidad, permiso ni abasto para un predio.
+- **≈1 311 L de captación en exceso estimada** durante horas con alerta en el kit simulado; no es ahorro observado ni extracción atribuible al acuífero.
+- Para atribuir un beneficio local se necesitan el origen del suministro y el destino de la purga.
 
-**Nota para exponer:** la profundidad del agua varía por zona. Si Leo incluye la disponibilidad numérica o litros proyectados, debe tomarlos del JSON oficial, con año, unidad y etiqueta de estimación; si el campo sigue pendiente, se omite la cifra. Nunca convertir automáticamente `water_l` del kit en extracción del acuífero ni en purga evitada.
+**Nota para exponer:** 2 060 hm³/año redondea `fuentes_externas.disponibilidad_acuifero_3105.valor = 2059.634923`; es una estimación regional de CONAGUA publicada en 2024 con volumen de extracción registrado al 30 de diciembre de 2022. Los 1 311 L redondean `exceso_estimado.litros_sobre_evaluacion.valor = 1310.6203` del kit simulado. Ambas cifras están en `resultados/numeros_oficiales.json` y tienen procedencias distintas. La profundidad del agua varía por zona. Nunca convertir automáticamente `water_l` del kit en extracción del acuífero ni en purga evitada.
 
-**Fuente al pie:** [CONAGUA, *Actualización de la disponibilidad del acuífero Península de Yucatán (3105)*, 2024](https://sigagis.conagua.gob.mx/gas1/Edos_Acuiferos_18/yucatan/DR_3105.pdf), §§3.1, 3.3, 5.4–5.5 y 8.4. Para purga, [DOE, *Cooling Towers*](https://www.energy.gov/sites/default/files/2013/10/f3/waterfs_coolingtowers.pdf), ecuaciones 1–7.
+**Fuentes al pie:** [CONAGUA, *Actualización de la disponibilidad del acuífero Península de Yucatán (3105)*, 2024](https://sigagis.conagua.gob.mx/gas1/Edos_Acuiferos_18/yucatan/DR_3105.pdf), §§3.1, 3.3, 5.4–5.5 y 8.4; `resultados/numeros_oficiales.json`, `exceso_estimado.litros_sobre_evaluacion` (**DATOS SIMULADOS**). Para purga, [DOE, *Cooling Towers*](https://www.energy.gov/sites/default/files/2013/10/f3/waterfs_coolingtowers.pdf), ecuaciones 1–7.
 
 ## Lámina 2 · El intercambio agua–energía
 
@@ -36,6 +37,6 @@ Entrega para Leo. Las afirmaciones de diseño son **propuesta**, los datos del k
 
 ## Integración pendiente
 
-1. Nico incorpora al JSON oficial, mediante el flujo de firma del equipo, fuente, fecha y disponibilidad del acuífero 3105 tras confirmar el valor que se publicará. Este archivo no sirve como sustituto del JSON.
+1. Nico comprueba que la cifra regional, fuente, fecha y límites del acuífero 3105 estén en el JSON oficial y coincidan con la lámina. Este archivo no sirve como sustituto del JSON.
 2. Misa valida con fichas y despacho horario del enfriador seco, chiller y bombas el escenario PUE publicado; hasta entonces permanece `proyectado`.
 3. Leo incorpora las dos láminas al PDF del pitch, alinea el guion y comprueba cada cifra visible contra el JSON final. Misa revisa el bono y Nico el acuífero; Leo revisa los cambios de `app/`.

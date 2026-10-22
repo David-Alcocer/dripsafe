@@ -8,14 +8,14 @@
 
 ## 1. El problema
 
-1. **Agua.** En Yucatán el acuífero kárstico Península de Yucatán (clave CONAGUA 3105) es prácticamente la única fuente de agua: nivel freático somero, cenotes conectados y sin ríos. Un centro de datos con enfriamiento evaporativo extrae y evapora agua de ahí, y su purga con sales concentradas se puede infiltrar.
+1. **Agua.** En Yucatán predomina el drenaje subterráneo en el acuífero kárstico Península de Yucatán (clave CONAGUA 3105), con cenotes y nivel freático que varía por zona. Si un centro de datos usa agua de ese acuífero para enfriamiento evaporativo, importan tanto la captación como la ruta autorizada de su purga; el kit no identifica el origen del agua ni el destino de la descarga.
 2. **Energía.** Cada kWh que el enfriamiento desperdicia sube el PUE, las emisiones y el agua usada para generar electricidad.
 3. **Ciberseguridad OT.** El enfriamiento lo controlan PLCs y un BMS. Un cambio de configuración no autorizado puede disparar el consumo o dañar equipos sin que nadie lo note.
 4. **El hueco que atacamos: los umbrales fijos.** Las reglas del kit (y muchos BMS) usan un umbral igual para todos: PUE > 1.6, agua > 1.5 L/kWh de TI, entrada > 29 °C. En el kit, el sitio de enfriamiento líquido opera con un PUE cercano a 1.2. Puede subir su energía de enfriamiento **+140 %** (hasta un PUE de unos 1.57) en cualquier hora, incluso la más calurosa, sin disparar ninguna regla. El umbral fijo protege al sitio menos eficiente y deja ciegos a los eficientes.
 
 ## 2. La idea en una línea
 
-**DripSafe aprende cómo debería comportarse cada sitio según su carga y su clima, avisa cuando la física no cuadra, distingue un intento OT de un incidente con efecto real y ordena las alertas por los litros del acuífero en juego.**
+**DripSafe aprende cómo debería comportarse cada sitio según su carga y su clima, avisa cuando la física no cuadra, distingue un intento OT de un incidente con efecto real y muestra la captación de agua en exceso para investigarla.**
 
 Esto responde al reto 2 del kit: proponer un criterio nuevo, justificar su costo y separar ajuste, validación y prueba.
 
@@ -24,7 +24,7 @@ Esto responde al reto 2 del kit: proponer un criterio nuevo, justificar su costo
 - **Nuestro:**
   1. Aplicar la línea base de M&V a la **detección por sitio** y **medir su sensibilidad** frente al umbral fijo. La curva de sensibilidad es la evidencia; detectar con una línea base, por sí solo, ya lo hacen el M&V continuo y el FDD.
   2. La **fusión evento–efecto**, que cruza el registro OT con la física para separar el intento del incidente.
-  3. Priorizar por **litros del acuífero** y decidir entre gastar litros o kWh en el bono.
+  3. Cuantificar la **captación in situ en exceso**; el bono compara agua y energía como escenario de diseño. La prioridad operativa vigente depende de la clase OT.
 
 ## 3. Cómo funciona
 
@@ -124,14 +124,14 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
 
 ## 6. Impacto en el acuífero de Yucatán
 
-- **Disponibilidad:** el acuífero 3105 tiene disponibilidad oficial positiva. Se cita una sola cifra: la del acuerdo de disponibilidad vigente publicado en el DOF (Nico la obtiene; el DOF de 2013 reporta la de 2009). El riesgo principal no es agotarlo en total, sino la **calidad**: suelo kárstico, freático somero, intrusión salina en la costa y baja cobertura de saneamiento.
+- **Disponibilidad:** la actualización técnica de CONAGUA de 2024 calcula **2059.634923 hm³/año** para todo el acuífero 3105; la cifra y su procedencia están en `resultados/numeros_oficiales.json`. La disponibilidad regional no resuelve los riesgos de calidad, presión local ni autorizaciones: el terreno es kárstico y la profundidad del agua varía por zona.
 - **Purga cuantificada como escenario:** en una torre estable, sin pérdidas adicionales y a ciclos constantes, `purga = evaporación ÷ (ciclos de concentración − 1)`. Con 4 ciclos supuestos, 3 L evaporados generan 1 L de purga y requieren 4 L de reposición. Si se evita 1 L de reposición **por menor evaporación**, se evita ¼ L de purga; una fuga evitada no implica esa reducción. La descarga necesita una ruta autorizada: el kit no registra su destino.
 - **El beneficio hídrico depende del tipo de enfriamiento** (el kit lo ilustra, no lo prueba):
   - **Evaporativo:** es grande.
   - **Aire:** es casi nulo; solo cuenta el agua de la red eléctrica.
   - DripSafe lo dice en lugar de prometer agua en todos los sitios.
-- **Gobernanza:** un reporte de captación observada y excesos estimados, útil para contrastar la operación con la autorización del sitio. La purga exige medidor o balance físico aparte.
-- **Justicia ambiental:** la prioridad por litros ayuda a investigar excesos; solo puede atribuirse beneficio a usuarios del mismo acuífero cuando se conoce la fuente de suministro.
+- **Gobernanza:** los agregados de captación simulada y excesos estimados ilustran la información que podría contrastarse con la autorización de un sitio real. El producto actual no genera ni envía un reporte para CONAGUA; la purga exige medidor o balance físico aparte.
+- **Justicia ambiental:** investigar excesos de captación podría beneficiar a otros usuarios solo si se conoce la fuente de suministro y se verifica una reducción real.
 
 ## 7. Bono Zero Freshwater Footprint: transición guiada por datos
 
@@ -188,13 +188,13 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
   - **Umbral de equilibrio del cliente:** la licencia se paga sola si DripSafe evita 16 MWh al año, **menos del 0.5 % del overhead** de un sitio de 1 MW. Basta con detectar a tiempo unas pocas fallas al año.
   - **Referencia externa:** en edificios, las herramientas de diagnóstico automático de fallas (FDD) logran una mediana de **9 %** de ahorro anual de energía (LBNL, Smart Energy Analytics Campaign, 2019–2020). Nuestro rango ilustrativo de 1–5 % del overhead es deliberadamente más conservador, porque DripSafe no toca UPS ni iluminación y es solo una capa de detección.
 - **Auditoría de línea base al instalar:** se compara el PUE de referencia del sitio con el de diseño del fabricante o con sitios del mismo tipo de enfriamiento. Así una ineficiencia crónica, que la línea base aprendería como "normal", sale a la luz desde el día uno.
-- **Expansión:** Querétaro, el polo nacional de centros de datos, también con estrés hídrico, y otros acuíferos sobreexplotados. El método no depende de Yucatán; solo cambia la prioridad por litros.
+- **Expansión:** Querétaro, el polo nacional de centros de datos, también con estrés hídrico, y otros acuíferos sobreexplotados. El método no depende de Yucatán; el impacto hídrico local se evalúa según la fuente de suministro y el destino de las descargas.
 - **Competencia:**
   - **Diagnóstico automático de fallas (FDD) y analítica de BMS:** Schneider EcoStruxure, Siemens Desigo, SkyFoundry SkySpark. Detectan fallas de equipos y se enfocan en energía.
   - **Monitoreo OT:** Nozomi, Claroty, Dragos. Ven el tráfico de red y también variables de proceso leídas de los protocolos industriales. No modelan la línea base de energía y agua por carga y clima, ni priorizan por litros.
   - **Lo que DripSafe hace distinto:**
     1. Una **línea base de energía y agua** por sitio, ajustada por carga y clima.
-    2. Pone el **agua primero**: prioriza por litros del acuífero y verifica que el agua potable sea cero.
+    2. Hace visible la **captación de agua en exceso**; la meta de cero agua potable del bono requiere un medidor y una fuente no potable verificada.
     3. **Clasifica cada evento OT por su efecto en esa línea base**: intento sin efecto contra incidente con efecto.
     4. Corre **local, sin nube**, en CPU, y cuesta **por kW**, al alcance de sitios medianos.
   - DripSafe **complementa** a estas herramientas; no compite con ellas.

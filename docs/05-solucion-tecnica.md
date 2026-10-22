@@ -47,7 +47,7 @@ CSV del kit (6 medidores + registro OT)
 1. **La línea base** aprende cómo debería comportarse cada sitio según su **carga** (energía de TI) y su **clima** (pérdida de enfriamiento gratuito arriba de 20 °C).
 2. **El residuo** (real menos esperado) delata los excesos sostenidos. El umbral se calibra con 24 h extra de referencia.
 3. **Las 4 clases OT (D16)** cruzan el registro OT con los residuos: incidente con efecto, cambio no autorizado, escalón sin registro e intento de acceso.
-4. **La prioridad es por litros del acuífero** (ver [07-agua-y-acuifero.md](07-agua-y-acuifero.md)).
+4. **La prioridad operativa depende de la clase OT.** Los litros de captación en exceso se muestran como contexto para investigar; solo podrían atribuirse al acuífero si se confirma la fuente del suministro (ver [07-agua-y-acuifero.md](07-agua-y-acuifero.md)).
 
 ## Pipeline
 
