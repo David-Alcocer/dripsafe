@@ -4,7 +4,7 @@
     "aviso": "DATOS SIMULADOS · cifras del kit, no de una instalación real",
     "estado": "parcial",
     "fecha_corte_datos": "2026-10-18T23:00:00+00:00",
-    "base_main": "3b14726",
+    "base_main": "07a3e58",
     "fuente_datos": "kit CIFOX, operaciones_simuladas.csv (fuera de Git)",
     "periodos": {
       "referencia": {
@@ -34,8 +34,8 @@
     },
     "unidad_energia_entrada": "kWh/intervalo",
     "responsable": "Nico (N2/N3/N4)",
-    "generado_con_commit": "3b14726",
-    "generado_el": "2026-10-22T02:11:24Z",
+    "generado_con_commit": "07a3e58",
+    "generado_el": "2026-10-22T02:32:26Z",
     "procedencia_g3": {
       "kit": {
         "csv_sha256": "a498db9c2251a8f9dc761ab08f30f59f3e8269ac5a71546219a2d1b5552e7088",
@@ -84,7 +84,7 @@
   },
   "generado": {
     "fecha_corte_datos": "2026-10-18T23:00:00+00:00",
-    "base_main": "3b14726"
+    "base_main": "07a3e58"
   },
   "pue_referencia": {
     "valor": 1.2676,
