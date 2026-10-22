@@ -205,4 +205,5 @@ La línea base por sitio, los umbrales de residuo y la media móvil de cuatro ho
 - [x] Nombre "energía no TI" → D18.
 - [ ] ¿Quién es el representante oficial ante CIFOX?
 - [ ] Confirmar estado del dashboard (Leo) y punto de corte el 20 a mediodía.
-- [ ] Fuentes externas (Nico): SMN horario, factor SEN vigente, intensidad hídrica, disponibilidad acuífero 3105, JAPAY.
+- [x] Fuentes externas del balance (Nico): FESEN 2024 aplicable a 2026 (0.444 kgCO₂e/kWh) e intensidad hídrica estimada NREL/CNE (2.0632 L/kWh).
+- [ ] Fuentes externas pendientes (Nico): SMN horario, disponibilidad del acuífero 3105 y JAPAY.

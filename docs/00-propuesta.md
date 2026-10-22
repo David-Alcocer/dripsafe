@@ -119,8 +119,8 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
   - **Sobre la rejilla fijada de antemano:** kWh y litros de exceso que **no vio** cada método, como curva por magnitud. Muestra desde qué tamaño de falla cada método deja de perder energía y agua. No es una cifra única elegida por nosotros.
   - **PUE "si se corta el exceso en cada alerta":** se presenta como lo que es, una cota calculada sobre los datos, no un ahorro.
 - **Ahorro anual como escenario paramétrico, no como promesa:** *"si ocurren N horas al año de un exceso de X % y se corrigen en T horas, el ahorro es…"*. N, X y T son editables en el dashboard. Las anomalías del kit sirven de ejemplo, no se anualizan como cifra del pitch.
-- **CUE:** energía × factor de emisión del Sistema Eléctrico Nacional (fuente: el aviso vigente de CRE/SEMARNAT; editable).
-- **Agua de la red eléctrica:** intensidad hídrica por tecnología de generación (fuente: Macknick et al., NREL, 2012), ponderada por la mezcla del SEN. Son factores de tecnologías de EE. UU. aplicados a la mezcla mexicana: supuesto citado y editable.
+- **CUE:** energía × **0.444 kgCO₂e/kWh**, el FESEN 2024 que SEMARNAT indica usar en la COA 2026. Es un factor oficial, no una medición local.
+- **Agua de la red eléctrica:** **2.0632 L/kWh**, estimada con los factores de Macknick et al. (NREL, 2012) ponderados por la mezcla neta del SEN 2024 de la CNE. Son factores de tecnologías de EE. UU. aplicados a la mezcla mexicana: supuesto citado y editable, no un factor oficial mexicano.
 
 ## 6. Impacto en el acuífero de Yucatán
 
@@ -236,4 +236,4 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
 - ASHRAE TC 9.9, Thermal Guidelines (5.ª ed., 2021): 18–27 °C de aire recomendado; clases de agua W32/W40/W45 (The Green Grid, https://www.thegreengrid.org/resources/glossary/W).
 - Normales 1991–2020 de Mérida, fuente secundaria (por confirmar con el SMN): https://www.climatsetvoyages.com/climat/mexique/merida
 - DOF, acuerdo de estudios técnicos del acuífero 3105 (2013, con la disponibilidad de 2009): https://vlex.com.mx/vid/dan-ta-cnicos-nacionales-neas-acua-pena-457884386
-- Pendientes de obtener (Nico): normales y datos horarios oficiales del SMN de Mérida, factor de emisión del SEN vigente, intensidad hídrica de la generación eléctrica y disponibilidad vigente del acuífero 3105.
+- Pendientes de obtener (Nico): normales y datos horarios oficiales del SMN de Mérida y disponibilidad vigente del acuífero 3105. El factor de emisión del SEN ya está integrado (0.444 kgCO₂e/kWh) y la intensidad hídrica se publica como estimación NREL/CNE (2.0632 L/kWh).
