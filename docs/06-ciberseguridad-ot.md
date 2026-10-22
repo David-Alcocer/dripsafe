@@ -420,6 +420,8 @@ Fuentes: [Dragos, informe de FrostyGoop (jul 2024)](https://hub.dragos.com/hubfs
 
 **Sesión del 22 de octubre:** el mentor de ciberseguridad pidió preparar las respuestas de §10b en lenguaje llano: qué pasaría sin DripSafe, qué se modificaría, qué hace DripSafe para que no sea crítico y qué es FrostyGoop. Las preguntas técnicas de abajo siguen siendo la lista para validar con un operador real.
 
+**Analista de ciberseguridad (22 oct):** recomendó cubrir los CIS Controls, ir hacia SOC 2 y hacer al menos tres pruebas de penetración al año. Cómo lo adoptamos, como hoja de ruta y con el mapeo a CIS: `docs/14` §5.
+
 
 1. ¿Una ventana de 24 h entre el evento y el efecto es razonable, o en la práctica se usan ventanas distintas según el tipo de cambio?
 2. ¿Tratar un login fallido seguido de un exceso como «incidente OT con efecto» es demasiado agresivo?

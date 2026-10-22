@@ -19,6 +19,8 @@ Opcional, si hay tiempo: «Somos Leo, Misael, Gadiel, Nico y yo, Guillermo.»
 **Lámina 12 · Escalabilidad (unos 20 s)**
 > «Empezamos con pilotos en Mérida, con los centros de datos que ya operan aquí. El primer cliente de pago está en Querétaro, el estado con más centros de datos del país, que va a publicar su consumo de agua desde 2027. Y cuando llegue la nueva energía a Yucatán, los centros nuevos pueden llegar medidos desde el primer día. Usa seis medidores que ya existen y corre en local, así que sirve en cualquier región con agua bajo presión.»
 
+Frase opcional de confianza al cierre de la lámina 12 (unos 7 s): ver §5.
+
 **Para no cruzarse con las láminas de los demás:**
 
 | En tu lámina | No menciones | Porque lo dice |
@@ -43,6 +45,8 @@ El tema de cumplimiento no tiene lámina: queda para las preguntas (§3).
 | «Protegemos los cenotes» | «Evitamos que un usuario grande sume carga sin medirla» |
 | Un precio de instalación | «Se cotiza por sitio; lo definimos en el piloto» |
 | Que DripSafe habría detectado FrostyGoop | «Es el ejemplo de por qué vigilar la física» |
+| «Cumplimos SOC 2» o «estamos trabajando en SOC 2» | «SOC 2 está en nuestra hoja de ruta para el servicio de soporte» (§5) |
+| «Hacemos pruebas de penetración» | «Nuestra hoja de ruta incluye tres pruebas de penetración independientes al año» (§5) |
 
 ## 3. Refutaciones probables y respuesta
 
@@ -105,8 +109,69 @@ El tema de cumplimiento no tiene lámina: queda para las preguntas (§3).
 | México | ~280 MW hoy; meta de 1,500 MW en 2030 | Expansión (27 may 2026) |
 | Energía en Yucatán | Centrales de CFE (1,519 MW) previstas a plena capacidad a fines de 2027 | *El Economista* (17 sep 2026) · `docs/13` §3 |
 
-## 5. Fuentes nuevas de este documento
+## 5. Recomendaciones del analista de ciberseguridad (22 oct)
 
+**Qué recomendó:**
+1. Cubrir los parámetros de los **CIS Controls** y decir que trabajamos para cumplir **SOC 2**.
+2. Hacer **al menos tres pruebas de penetración al año** para demostrar que el software funciona y vigilar que siga seguro. El mensaje llegó cortado; esta es la lectura más probable.
+
+**Cómo lo adoptamos, con un ajuste.** Hoy el equipo no está trabajando en SOC 2 ni ha hecho pruebas de penetración. Si lo decimos en presente, basta con que un juez pregunte «¿con qué auditor?» para que quede expuesto. Lo decimos como **hoja de ruta**, con su porqué.
+
+### CIS Controls (v8.1): qué cubre DripSafe
+
+Son 18 controles de seguridad del Center for Internet Security, ordenados por prioridad. DripSafe cubre una parte de dos formas: ayuda al cliente a cumplir algunos, y como empresa nos toca cumplir otros.
+
+| Control CIS | Cómo lo cubre | Estado |
+|---|---|---|
+| 4 · Configuración segura | La acción «comparar contra la configuración aprobada» y la detección del efecto físico de un cambio | Diseñado y probado en el kit |
+| 8 · Gestión de registros de auditoría | Lee el registro de cambios y accesos del sistema de control y lo cruza con la física | Diseñado y probado en el kit |
+| 12 · Infraestructura de red | Se instala en su propia zona, con datos en un solo sentido y sin internet | Diseño, sin implementar en un sitio real |
+| 13 · Monitoreo y defensa de la red | Complementa al monitor de red: vigila el proceso físico, no el tráfico | Diseñado y probado en el kit |
+| 17 · Respuesta a incidentes | Cada clase trae la acción a seguir y la prioridad (`docs/06` §4 y §9b) | Diseñado |
+| 3 · Protección de datos | Corre en local; los datos del cliente no salen del sitio | Diseño |
+| 16 · Seguridad del software propio | Pruebas automáticas (309), integración continua, revisión obligatoria de cada cambio y commits firmados | Hecho en el repositorio |
+| 18 · Pruebas de penetración | Ver abajo | Hoja de ruta |
+
+### Pruebas de penetración
+
+- **CIS pide** pruebas externas e internas «no menos de una vez al año» (salvaguardas 18.2 y 18.5). Después de cada una, pide validar las defensas y ajustarlas para detectar lo que usó el probador (18.4).
+- **El analista sugiere tres al año.** Encaja con nuestro ritmo: una por cada época en que reentrenamos la línea base (secas, lluvias y nortes), es decir, una por cada versión nueva del modelo.
+- **Qué se prueba:**
+  - el equipo de DripSafe y su conexión de solo lectura, por un tercero independiente;
+  - si alguien puede usarlo para entrar a la planta o engañarlo.
+- **En una planta real, con cuidado.** Nunca contra el control en vivo sin autorización escrita. Se hacen en una réplica o en una ventana de mantenimiento. En el hackatón está prohibido atacar sistemas reales, así que esto es para el producto, no para hoy.
+
+**Una prueba de penetración no demuestra que DripSafe detecte**: demuestra que es difícil de atacar. Para demostrar que detecta hay dos cosas más:
+1. **Cada temporada**, la misma prueba con fallas simuladas que hicimos en el kit, corrida sobre **copias de los datos del cliente**, sin tocar la planta. El cliente recibe su propia curva de sensibilidad.
+2. **Un simulacro autorizado**, como uno de incendio: en una ventana de mantenimiento, un cambio planeado y aprobado para comprobar que DripSafe lo clasifica bien. Esto también cumple la salvaguarda 18.4.
+
+### SOC 2
+
+- **Qué es.** Un informe de un auditor independiente, bajo el marco de la AICPA (el colegio de contadores de EE. UU.), sobre los controles de una empresa que presta servicios con datos de clientes: seguridad, disponibilidad, confidencialidad y otros.
+  - **Tipo 1:** revisa el diseño de los controles en una fecha.
+  - **Tipo 2:** revisa que funcionen durante un periodo, por lo general de 3 a 12 meses.
+- **Por qué nos aplica.** DripSafe corre en el sitio del cliente, pero la suscripción incluye **reentrenamiento y soporte**, y ahí manejamos sus datos. SOC 2 cubre ese servicio.
+- **Hoja de ruta:** primero alinear los controles internos a CIS, después un SOC 2 tipo 1 y, con clientes de pago, el tipo 2.
+
+### Qué decir
+
+**En el pitch: nada de siglas.** Con 4 minutos y un jurado que puede no ser técnico, «CIS» y «SOC 2» suenan a relleno. Si sobra tiempo en la lámina 12, se puede agregar al final una frase (unos 7 s):
+> «Y para que el cliente confíe: cada temporada volvemos a probar la detección con fallas simuladas sobre sus propios datos, y nuestra hoja de ruta incluye tres pruebas de penetración independientes al año.»
+
+**En preguntas:**
+
+| Te dicen | Respondes |
+|---|---|
+| «¿Cumplen SOC 2?» | «Todavía no: está en la hoja de ruta. Aplica al servicio de reentrenamiento y soporte, porque ahí manejamos datos del cliente. Primero alineamos los controles internos a CIS y después vamos por el tipo 1.» |
+| «¿Qué controles CIS cubren?» | «Ayudamos al cliente con la configuración segura, la revisión de registros, el monitoreo y la respuesta a incidentes (controles 4, 8, 13 y 17). Como empresa ya aplicamos la seguridad del software propio (16): pruebas automáticas, revisión de cada cambio y commits firmados.» |
+| «¿Cómo demuestran que funciona?» | «Una prueba de penetración demuestra que es difícil de atacar, no que detecte. Para la detección, cada temporada corremos la prueba de fallas simuladas sobre copias de los datos del cliente y hacemos un simulacro autorizado en una ventana de mantenimiento.» |
+| «¿Pruebas de penetración en una planta? Es peligroso.» | «Sí, por eso nunca contra el control en vivo: en una réplica o en una ventana de mantenimiento, con autorización escrita y con un tercero independiente.» |
+| «¿Por qué tres al año, si CIS pide una?» | «CIS pide al menos una. Hacemos una por cada versión del modelo, y como reentrenamos por época del año, son tres.» |
+
+## 6. Fuentes nuevas de este documento
+
+- CIS, Control 18 (pruebas de penetración), texto oficial: https://cas.docs.cisecurity.org/en/latest/source/Controls18/
+- Drata, SOC 2 tipo 1 contra tipo 2: https://drata.com/grc-central/soc-2/type-1-vs-type-2
 - Expansión (27 may 2026), capacidad de centros de datos en México: https://expansion.mx/tecnologia/2026/05/27/data-centers-en-queretaro-chocan-con-el-estres-hidrico
 - Expansión Política (5 may 2026), Observatorio Legislativo sobre infraestructura crítica: https://politica.expansion.mx/mexico/2026/05/05/mexico-enfrenta-riesgos-por-falta-de-legislacion-en-torno-a-infraestructura-critica-dice-observatorio
 - Expansión (5 ene 2026), plan y ley de ciberseguridad propuestos: https://expansion.mx/tecnologia/2026/01/05/mexico-primer-plan-de-ciberseguridad-2026
