@@ -137,7 +137,7 @@ python -m src.modelo.medicion --kit "$KIT_CSV" \
 
 `resultados/numeros_oficiales.json` es **la única fuente** de las cifras que aparecen en el dashboard, las diapositivas y el pitch. Cada número dice de dónde salió:
 
-**Nico consolida** el JSON canónico y genera `app/ejemplos/numeros_ejemplo.json`, la vista plana que consume Leo. Misa aporta y revisa el PUE; Gadiel entrega tiempo y energía medidos del detector; Guille confirma el dato del acuífero. Misa y Nico validan el balance neto cuando Gadiel entregue CodeCarbon.
+**Nico consolida** el JSON canónico; la app calcula en memoria la vista plana que consume Leo. Misa aporta y revisa el PUE; Gadiel entrega tiempo y energía medidos del detector; Guille confirma el dato del acuífero. Misa y Nico validan el balance neto cuando Gadiel entregue CodeCarbon.
 
 Cada cifra lleva `valor`, `unidad`, `tipo`, `origen`, `responsable`, `estado` y, si queda en `null`, `motivo_pendiente`. `tipo` distingue `observado` (kit simulado), `medido` (hardware con repeticiones), `estimado` (modelo) y `proyectado` (escenario). `_meta.periodos` fija referencia (216 horas-sitio) y evaluación (288 horas-sitio), con fechas inclusivas, sitios e intervalo de una hora. Las energías de entrada son kWh por intervalo, el agua es captación in situ en L; PUE es ratio y WUE L/kWh IT.
 
@@ -145,7 +145,7 @@ Cada cifra lleva `valor`, `unidad`, `tipo`, `origen`, `responsable`, `estado` y,
 
 Este archivo **sí** se sube al repo, porque solo contiene totales que de todos modos se van a mostrar en el pitch, nunca filas del kit. Así Git guarda el historial de cada cifra. Si un número aparece en una diapositiva y no está aquí, es un error.
 
-El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit usa `app/ejemplos/numeros_demo.json`, rotulada **Ejemplo**. El costo del detector, el balance que depende de él, el PUE con bono y el acuífero siguen pendientes hasta recibir evidencia.
+El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit conserva las cifras oficiales y rotula como **Ejemplo** la telemetría inventada y sus cálculos. El costo del detector, el balance que depende de él, el PUE con bono y el acuífero siguen pendientes hasta recibir evidencia.
 
 ### Cambiar un contrato
 

@@ -43,7 +43,7 @@ SECCIONES = {
 FUENTES = {
     "telemetria": ("Telemetría", {"kit": ("Kit CIFOX", "sim"), "ejemplo": ("Ejemplo", "sim")}),
     "detector": ("Detector", {"vista_previa": ("Vista previa", "sim"), "modelo": ("Del equipo", "ok")}),
-    "numeros": ("Cifras", {"ejemplo": ("Ejemplo", "sim"), "oficial": ("Oficial", "ok")}),
+    "numeros": ("Cifras", {"pendiente": ("Pendiente", "sim"), "oficial": ("Oficial", "ok")}),
 }
 PERIODOS = {"evaluacion": "evaluación", "completo": "completo", "referencia": "referencia"}
 
@@ -121,8 +121,11 @@ vista = paginas.Vista(tabla=tabla, tabla_sitio=tabla_sitio, eventos=calculos.eve
 # Si el kit no está en esta laptop, que nadie confunda los datos de ejemplo con los del kit.
 if d.fuentes.get("telemetria") != "kit":
     st.html(c.aviso_fuerte(
-        "<b>No se encontró el kit CIFOX en esta laptop.</b> Se muestran datos de <b>ejemplo inventados</b>, "
-        "solo para probar la interfaz. Copia el kit a <span class='mono'>~/hackathon/Kit Stack Tecnológico/</span> "
+        "<b>No se encontró el kit CIFOX en esta laptop.</b> Las gráficas y métricas calculadas desde la "
+        "telemetría usan <b>datos de ejemplo inventados</b>. Las cifras consolidadas salen de "
+        "<span class='mono'>resultados/numeros_oficiales.json</span> y corresponden al kit fijado; "
+        "no se deben comparar con esas gráficas. Copia el kit a "
+        "<span class='mono'>~/hackathon/Kit Stack Tecnológico/</span> "
         "o define la variable <span class='mono'>DRIPSAFE_KIT</span> con su carpeta (ver app/README.md)."))
 for texto in d.avisos:
     st.html(c.aviso_fuerte(texto))

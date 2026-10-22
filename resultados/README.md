@@ -1,6 +1,6 @@
 # Contrato 4 · números de DripSafe
 
-`numeros_oficiales.json` es la fuente canónica. `python -m src.metricas.generar_numeros` genera ese archivo y la vista plana de Leo en `app/ejemplos/numeros_ejemplo.json` en la misma corrida. El nombre del archivo de Leo se conserva por compatibilidad; ahora tiene `_ejemplo: false`. La demo ficticia se movió a `app/ejemplos/numeros_demo.json` y solo se usa sin el kit.
+`numeros_oficiales.json` es el único archivo versionado de cifras. `python -m src.metricas.generar_numeros` lo genera; la app deriva la vista plana con `plano()` en memoria. También se muestran estas cifras en la demo sin kit local, con su procedencia y un aviso que las separa de la telemetría inventada.
 
 Las entradas por fila permanecen bajo `data/`, ignorado por Git: `data/procesado/telemetria.csv`, `data/resultados/alertas.csv`, `data/resultados/deteccion_para_numeros_oficiales.json` y `data/clima/merida_era5_2025.json`. El kit crudo se lee fuera del repo. El JSON versionado contiene exclusivamente agregados y rutas relativas de código, sin filas ni rutas locales de la laptop.
 

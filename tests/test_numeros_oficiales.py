@@ -14,17 +14,17 @@ RAIZ = Path(__file__).resolve().parents[1]
 @pytest.fixture(scope="module")
 def cifras():
     canonico = json.loads((RAIZ / "resultados/numeros_oficiales.json").read_text(encoding="utf-8"))
-    leo = json.loads((RAIZ / "app/ejemplos/numeros_ejemplo.json").read_text(encoding="utf-8"))
-    return canonico, leo
+    return canonico, plano(canonico)
 
 
-def test_contrato_y_vista_de_leo_son_identicos(cifras):
+def test_contrato_y_vista_en_memoria_son_consistentes(cifras):
     canonico, leo = cifras
     assert contrato.validar_numeros_oficiales(canonico) == []
-    assert leo == plano(canonico)
     assert leo == plano(canonico)  # proyección determinista
     assert leo["_ejemplo"] is False
     assert "DATOS SIMULADOS" in leo["_meta"]["aviso"]
+    assert not (RAIZ / "app/ejemplos/numeros_demo.json").exists()
+    assert not (RAIZ / "app/ejemplos/numeros_ejemplo.json").exists()
 
 
 def test_periodos_y_unidades_no_se_mezclan(cifras):

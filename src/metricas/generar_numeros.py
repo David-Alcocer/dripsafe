@@ -1,4 +1,4 @@
-"""Genera el contrato 4 canónico y la vista plana de Leo a partir de agregados.
+"""Genera el contrato 4 canónico a partir de agregados.
 
 Uso: python -m src.metricas.generar_numeros --entrada data/procesado/telemetria.csv
      --alertas data/resultados/alertas.csv
@@ -328,10 +328,9 @@ def escribir(o: dict) -> None:
     errores = contrato.validar_numeros_oficiales(o)
     if errores:
         raise ValueError(f"Contrato 4 inválido: {errores}")
-    p = plano(o)
-    for ruta, dato in ((RAIZ / "resultados/numeros_oficiales.json", o),
-                       (RAIZ / "app/ejemplos/numeros_ejemplo.json", p)):
-        ruta.write_text(json.dumps(dato, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    plano(o)  # comprueba que la vista del dashboard se puede derivar antes de escribir
+    ruta = RAIZ / "resultados/numeros_oficiales.json"
+    ruta.write_text(json.dumps(o, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
 
 
 def main() -> None:
@@ -361,7 +360,7 @@ def main() -> None:
                   json.loads(a.deteccion.read_text(encoding="utf-8")), a.clima,
                   cierre)
     escribir(o)
-    print("Contrato 4 y vista de Leo generados desde agregados del kit.")
+    print("Contrato 4 generado desde agregados del kit.")
 
 
 if __name__ == "__main__":

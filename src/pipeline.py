@@ -333,7 +333,7 @@ def _argumentos(argv: list[str] | None) -> argparse.Namespace:
 
 
 def _escribir(numeros: dict, salida: Path) -> None:
-    """Valida el contrato 4; el oficial se escribe con la vista plana de Leo (generar_numeros.escribir)."""
+    """Valida el contrato 4 y escribe el único JSON oficial cuando corresponde."""
     errores = contrato.validar_numeros_oficiales(numeros) + procedencia.validar_balance_oficial(numeros)
     if errores:
         print("El JSON NO cumple el contrato 4:")

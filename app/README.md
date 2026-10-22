@@ -12,9 +12,9 @@ La barra lateral lo dice siempre:
 |---|---|---|
 | Telemetría | CSV del kit, fuera del repo | Datos de ejemplo inventados (aviso naranja arriba) |
 | Detector | `data/resultados/alertas.csv` (Gadiel + Guille), columnas de `app/linea_base.COLUMNAS` | **Vista previa** de `app/linea_base.py` |
-| Cifras | `resultados/numeros_oficiales.json` (fuente canónica) y `app/ejemplos/numeros_ejemplo.json` (vista plana de Leo) | `app/ejemplos/numeros_demo.json`, ficticio y marcado «Ejemplo» |
+| Cifras | `resultados/numeros_oficiales.json` (único archivo; la app calcula la vista plana en memoria) | Las mismas cifras oficiales del kit fijado, identificadas por separado de la telemetría de ejemplo |
 
-Con kit, la app lee la vista oficial plana de Leo y muestra `Pendiente de Gadiel/Misa/Guille` para las cifras sin medición o fuente. Sin kit, solo usa la telemetría y las cifras ficticias de demo, con un aviso visible. El generador del Contrato 4 está documentado en `resultados/README.md`.
+Con kit, la app lee las cifras oficiales y muestra `Pendiente de Gadiel/Misa/Guille` para las cifras sin medición o fuente. Sin kit, usa telemetría inventada para probar las gráficas y conserva las cifras oficiales por separado, con un aviso visible para no compararlas entre sí. El generador del Contrato 4 está documentado en `resultados/README.md`.
 
 Cada cifra lleva una etiqueta: **Observado**, **Medido**, **Estimado**, **Proyectado**, **Vista previa** o
 **Ejemplo**. La propuesta de forma del JSON está en `app/ejemplos/README.md`.
@@ -114,7 +114,7 @@ Streamlit 1.51 con `segmented_control`; esas pantallas se revisaron a mano en el
 | `linea_base.py` | **Vista previa** del detector: línea base por sitio, residuos, umbrales y las cuatro clases |
 | `cargar.py` | Junta telemetría, detector (del equipo o vista previa) y cifras (oficiales o de ejemplo) |
 | `calculos.py` | PUE, agua por kWh IT, eventos, evaluación, exceso, equilibrio y escenario (sin Streamlit) |
-| `ejemplos/` | JSON de cifras **ficticias** y la propuesta de forma del contrato 4 |
+| `ejemplos/` | Documentación de las claves planas que la app deriva del contrato 4 |
 | `grabar_demo.py` | Graba el video de respaldo (#20) recorriendo la demo en modo presentación; el video queda fuera del repo |
 | `componentes.py`, `graficas.py`, `estilo.css` | Paneles estilo Grafana, gráficas y estilos |
 | `textos.py` | Todos los textos: escenarios, técnicas ATT&CK, límites, acuífero y bono |

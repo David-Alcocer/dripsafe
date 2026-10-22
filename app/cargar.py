@@ -5,8 +5,8 @@ Fuentes, de la más oficial a la de respaldo:
   laptop (por ejemplo en el CI), se usan datos de ejemplo inventados con el mismo formato.
 - Detector: data/resultados/alertas.csv (Gadiel construye, Guille clasifica), con las columnas
   de app/linea_base.COLUMNAS. Mientras no exista, la vista previa de app/linea_base.py.
-- Cifras: app/ejemplos/numeros_ejemplo.json es la vista oficial plana generada
-  desde resultados/numeros_oficiales.json. Sin kit, numeros_demo.json es ficticio.
+- Cifras: resultados/numeros_oficiales.json es el único archivo de cifras;
+  la vista plana del dashboard se calcula en memoria, también sin el kit local.
 
 El dashboard no inventa cifras oficiales: solo las muestra y dice de dónde salió cada una.
 """
@@ -25,8 +25,6 @@ RUTAS = {
     "alertas": RAIZ / "data/resultados/alertas.csv",
     "consumo": RAIZ / "data/resultados/consumo_modelo.json",
     "numeros": RAIZ / "resultados/numeros_oficiales.json",
-    "leo": Path(__file__).resolve().parent / "ejemplos/numeros_ejemplo.json",
-    "ejemplo": Path(__file__).resolve().parent / "ejemplos/numeros_demo.json",
 }
 
 
@@ -39,10 +37,7 @@ class Datos:
     fuentes: dict = field(default_factory=dict)
     consumo: dict = field(default_factory=dict)   # contrato 3: consumo_modelo.json (CodeCarbon), si existe
     avisos: list = field(default_factory=list)    # problemas de formato que el dashboard debe mostrar
-
-    @property
-    def cifras_de_ejemplo(self) -> bool:
-        return self.fuentes.get("numeros") != "oficial"
+    kit_fijado: bool = False
 
 
 def _detector_oficial(avisos: list) -> pd.DataFrame | None:
@@ -80,8 +75,8 @@ def _kit_fijado(avisos: list) -> bool:
     esperado = json.loads(fijacion.read_text(encoding="utf-8"))["kit"]["csv_sha256"]
     actual = hashlib.sha256(ruta.read_bytes()).hexdigest()
     if actual != esperado:
-        avisos.append("El CSV local no coincide con el kit fijado en N2. Se muestran cifras de ejemplo "
-                      "hasta regenerar y revisar los JSON oficiales con este kit.")
+        avisos.append("El CSV local no coincide con el kit fijado en N2. Las gráficas de telemetría usan "
+                      "este CSV, pero las cifras oficiales corresponden al kit fijado; no se deben comparar.")
         return False
     return True
 
@@ -120,26 +115,21 @@ def cargar() -> Datos:
         detector, fuentes["detector"] = linea_base.detectar(datos), "vista_previa"
     tabla = unir(datos, detector)
 
-    if kit_fijado and RUTAS["leo"].exists() and RUTAS["numeros"].exists():
-        numeros = json.loads(RUTAS["leo"].read_text(encoding="utf-8"))
-        canonico = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
+    if RUTAS["numeros"].exists():
         from src.metricas.generar_numeros import plano
-        if numeros.get("_ejemplo") is not False or numeros != plano(canonico):
-            # El canónico manda. Si alguien regeneró solo uno de los dos, la demo no se cae: se usa la vista
-            # calculada del canónico y se avisa en pantalla para correr `python -m src.pipeline` otra vez.
-            numeros = plano(canonico)
-            avisos.append("app/ejemplos/numeros_ejemplo.json no coincide con resultados/numeros_oficiales.json: "
-                          "se muestran las cifras del canónico. Corre python -m src.pipeline para regenerar los dos.")
+        canonico = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
+        numeros = plano(canonico)
         fuentes["numeros"] = "oficial"
     else:
-        numeros, fuentes["numeros"] = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8")), "ejemplo"
+        numeros, fuentes["numeros"] = {}, "pendiente"
+        avisos.append("Falta resultados/numeros_oficiales.json; no hay cifras consolidadas para mostrar.")
 
     evaluacion = {"dripsafe": calculos.evaluacion(tabla, "alerta"),
                   "reglas": calculos.evaluacion(tabla, "alerta_reglas")}
     consumo = {}
     if RUTAS["consumo"].exists() and kit_fijado:
         consumo = json.loads(RUTAS["consumo"].read_text(encoding="utf-8"))
-    return Datos(tabla, calculos.eventos(tabla), evaluacion, numeros, fuentes, consumo, avisos)
+    return Datos(tabla, calculos.eventos(tabla), evaluacion, numeros, fuentes, consumo, avisos, kit_fijado)
 
 
 METODOS = {"dripsafe": "DripSafe", "reglas_kit": "Reglas del kit"}

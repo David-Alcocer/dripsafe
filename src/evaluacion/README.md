@@ -239,7 +239,7 @@ comprueba las unidades, atributos, banderas y latencias de cada inyección.
 Deja `data/resultados/n2_tabla_final.csv` con una fila por condición, semilla,
 sitio, inyección y método; y `data/resultados/n2_cierre.json` con agregados.
 Ambos permanecen fuera de Git. El generador copia **solo agregados** del cierre
-al Contrato 4 y a la vista plana de Leo, tras comparar los originales, la
+al Contrato 4, cuya vista plana se deriva en memoria, tras comparar los originales, la
 curva y el ruido con el bloque de U2. El pipeline oficial hace esta auditoría
 automáticamente; con `--ejemplo` conserva el flujo de datos ficticios.
 

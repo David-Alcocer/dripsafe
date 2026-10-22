@@ -54,19 +54,19 @@ def test_arranca_con_sello_y_aviso_de_datos_de_ejemplo(at):
     assert len(at.get("file_uploader")) == 0  # solo lee el CSV local, no recibe archivos
 
 
-def test_cifras_de_ejemplo_siempre_avisadas(at):
-    """Sin numeros_oficiales.json, cada cifra ficticia lleva la etiqueta «Ejemplo» y hay un aviso."""
+def test_cifras_oficiales_y_telemetria_de_ejemplo_se_distinguen(at):
+    """Sin kit local, las cifras oficiales conservan su origen y la telemetría lleva «Ejemplo»."""
     for pagina in ["resumen", "balance", "agua"]:
         ir(at, pagina=pagina)
         texto = html(at)
-        assert "Cifras de ejemplo." in texto, pagina
+        assert "numeros_oficiales.json" in texto, pagina
         assert ">Ejemplo<" in texto, pagina
 
 
 def test_procedencia_y_clases_visibles(at):
     texto = html(at)
     assert ">Ejemplo<" in texto
-    assert ">Observado<" not in texto
+    assert ">Observado<" in texto
     ir(at, pagina="ciber")
     texto = html(at)
     for nombre in ["Incidente OT con efecto", "Cambio no autorizado", "Escalón sin registro", "Intento de acceso"]:
@@ -76,7 +76,7 @@ def test_procedencia_y_clases_visibles(at):
 def test_evaluacion_muestra_curva_y_empate(at):
     ir(at, pagina="evaluacion")
     texto = html(at)
-    assert "Ejemplo ficticio." in texto
+    assert "Comparación oficial por episodio" in texto
     assert "Detalle de la curva" in texto
     assert len(at.get("plotly_chart")) >= 2
 

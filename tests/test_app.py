@@ -150,20 +150,21 @@ def test_escenario_anual_es_editable_y_no_negativo():
 
 # ------------------------------------------------------------ cifras y fuentes
 
-def test_ejemplo_de_numeros_es_ficticio_y_completo():
-    n = json.loads(cargar.RUTAS["ejemplo"].read_text(encoding="utf-8"))
-    assert n["_ejemplo"] is True
+def test_numeros_oficiales_se_proyectan_en_memoria():
+    from src.metricas.generar_numeros import plano
+    n = plano(json.loads(cargar.RUTAS["numeros"].read_text(encoding="utf-8")))
+    assert n["_ejemplo"] is False
     for clave, dato in n.items():
         if isinstance(dato, dict) and "tipo" in dato:
             assert dato["tipo"] in TIPOS_CIFRA, clave
-    assert cargar.tipo_cifra(n, "pue_antes", ejemplo=True) == "ejemplo"
     assert cargar.tipo_cifra(n, "pue_antes", ejemplo=False) == "observado"
 
 
-def test_cargar_sin_kit_usa_ejemplo_y_vista_previa(sin_kit):
+def test_cargar_sin_kit_usa_cifras_oficiales_y_vista_previa(sin_kit):
     d = cargar.cargar()
-    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "ejemplo"}
-    assert d.cifras_de_ejemplo and d.numeros["_ejemplo"] is True
+    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "oficial"}
+    assert d.numeros["_ejemplo"] is False
+    assert d.kit_fijado is False
     assert len(d.eventos) >= 3
 
 
@@ -195,19 +196,19 @@ def test_salidas_del_equipo_no_se_mezclan_con_datos_de_ejemplo(sin_kit, monkeypa
     monkeypatch.setitem(cargar.RUTAS, "alertas", alertas)
     monkeypatch.setitem(cargar.RUTAS, "consumo", consumo)
     d = cargar.cargar()
-    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "ejemplo"}
+    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "oficial"}
     assert d.consumo == {}
 
 
-def test_kit_distinto_no_recibe_cifras_n2_ni_alertas_del_kit_fijado(monkeypatch, tmp_path):
+def test_kit_distinto_no_recibe_alertas_y_avisa_que_cifras_no_corresponden(monkeypatch, tmp_path):
     ruta = tmp_path / "operaciones_simuladas.csv"
     ruta.write_text("contenido de otro kit", encoding="utf-8")
     monkeypatch.setattr(kit, "disponible", lambda: True)
     monkeypatch.setattr(kit, "ruta_csv", lambda: ruta)
     monkeypatch.setattr(kit, "leer", kit.ejemplo)
     d = cargar.cargar()
-    assert d.fuentes == {"telemetria": "kit", "detector": "vista_previa", "numeros": "ejemplo"}
-    assert d.numeros["_ejemplo"] is True
+    assert d.fuentes == {"telemetria": "kit", "detector": "vista_previa", "numeros": "oficial"}
+    assert d.numeros["_ejemplo"] is False and not d.kit_fijado
     assert any("no coincide con el kit fijado" in aviso for aviso in d.avisos)
 
 
@@ -294,17 +295,20 @@ def test_cifra_oficial_que_falta_se_marca_pendiente():
     assert cargar.mas_debil("medido", "pendiente") == "pendiente"
 
 
-def test_vista_plana_desfasada_avisa_y_no_tumba_la_app(monkeypatch, tmp_path):
-    """Si alguien regeneró solo uno de los dos JSON, la app usa el canónico y avisa; no se cae en la demo."""
+def test_app_proyecta_el_canonico_sin_vista_plana(monkeypatch, tmp_path):
+    """Un archivo viejo de vista plana no influye en las cifras cargadas."""
     from src.metricas.generar_numeros import plano
     monkeypatch.setattr(cargar.kit, "disponible", lambda: True)
     monkeypatch.setattr(cargar.kit, "leer", kit.ejemplo)
-    vieja = tmp_path / "numeros_ejemplo.json"
-    vieja.write_text(json.dumps({"_ejemplo": False, "desfasado": True}), encoding="utf-8")
-    monkeypatch.setitem(cargar.RUTAS, "leo", vieja)
     monkeypatch.setitem(cargar.RUTAS, "alertas", tmp_path / "no-existe.csv")
     monkeypatch.setitem(cargar.RUTAS, "consumo", tmp_path / "no-existe.json")
     d = cargar.cargar()
     assert d.fuentes["numeros"] == "oficial"
     assert d.numeros == plano(json.loads(cargar.RUTAS["numeros"].read_text(encoding="utf-8")))
-    assert any("no coincide" in a for a in d.avisos)
+
+
+def test_sin_archivo_oficial_no_inventa_cifras(sin_kit, monkeypatch, tmp_path):
+    monkeypatch.setitem(cargar.RUTAS, "numeros", tmp_path / "no-existe.json")
+    d = cargar.cargar()
+    assert d.fuentes["numeros"] == "pendiente" and d.numeros == {}
+    assert any("Falta resultados/numeros_oficiales.json" in a for a in d.avisos)
