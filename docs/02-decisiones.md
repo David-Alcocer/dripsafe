@@ -76,17 +76,17 @@ La propuesta inicial contemplaba un modelo de bosque de anomalías. El equipo lo
 
 **Decisión aprobada por el equipo:** Misa entrega el PUE inicial, la telemetría limpia y las energías total y de TI, con unidades y periodo. Conserva el cálculo base en `src/metricas/pue.py`, el repositorio y la integración.
 
-Nico calcula el ahorro energético, el PUE final proyectado y el impacto en agua y emisiones cuando los datos lo permitan. Misa + Nico calculan y validan juntos el balance neto final en `src/metricas/balance_neto.py` (pendiente de implementación). Nico es responsable del resto de `src/metricas/`, salvo el PUE inicial de Misa, y de consolidar `resultados/numeros_oficiales.json`. Gadiel aporta alertas, consumo esperado y mediciones de CodeCarbon; Leo integra las cifras en la demo y diseña las diapositivas.
+Nico calcula el ahorro energético, el PUE final proyectado y el impacto en agua y emisiones cuando los datos lo permitan. Misa + Nico calcularon y validaron juntos el balance neto final en `src/metricas/balance_neto.py`; el balance energético está firmado y CO₂/agua indirecta se publican como proyecciones con factores externos. Nico es responsable del resto de `src/metricas/`, salvo el PUE inicial de Misa, y de consolidar `resultados/numeros_oficiales.json`. Gadiel aporta alertas, consumo esperado y mediciones de CodeCarbon; Leo integra las cifras en la demo y diseña las diapositivas.
 
 Nico conserva el análisis del acuífero, la propuesta del bono y el contenido y modelo de negocio del pitch. Su entregable incluye un programa en Python, un ejemplo reproducible y resultados con fuentes y supuestos.
 
-**Tareas:** #2 sigue con Misa, #3 pasa a Nico y #14 queda compartida entre Misa + Nico (ajuste D11). Los cálculos siguen pendientes de implementación. El PUE final y los ahorros se presentan como proyecciones hasta tener evidencia medida; un balance positivo debe comprobarse.
+**Tareas:** #2 sigue con Misa, #3 pasa a Nico y #14 queda compartida entre Misa + Nico (ajuste D11). El balance energético ya está implementado y firmado; CO₂ y agua indirecta usan factores externos y siguen siendo proyecciones, no ahorros observados. El PUE final y los ahorros se presentan como proyecciones hasta tener evidencia medida.
 
 **Por qué:** deja claro quién entrega la referencia y quién transforma esa referencia en cifras de impacto. Este acuerdo actualiza los responsables descritos en D8 y D9; esas propuestas conservan su estado pendiente de aprobación.
 
 ## D11 · Balance neto final compartido entre Misa + Nico ✅
 
-**Decisión:** Misa + Nico calculan y validan juntos el balance neto final (#14), usando el ahorro estimado por Nico y el consumo del modelo medido por Gadiel. Comparten la responsabilidad del módulo previsto `src/metricas/balance_neto.py`.
+**Decisión:** Misa + Nico calculan y validan juntos el balance neto final (#14), usando el ahorro estimado por Nico y el consumo del modelo medido por Gadiel. Comparten la responsabilidad de `src/metricas/balance_neto.py`.
 
 **Por qué:** el balance final se construye entre ambos, con unidades, periodos y supuestos acordados. Misa conserva el PUE inicial; Nico conserva el ahorro, el PUE final proyectado, las estimaciones de agua y emisiones y la consolidación de resultados. Este ajuste actualiza D10.
 

@@ -252,8 +252,9 @@ def _balance(numeros: dict, consumo: dict | None, args) -> dict:
         actual["validado_por"] = ["Misa", "Nico"]
         actual["fecha_validacion"] = date.today().isoformat()
         actual["nota_validacion"] = (
-            "Misa y Nico validaron conjuntamente los cálculos, supuestos y límites del balance. "
-            "Las métricas sin evidencia conservan null y su motivo; la firma no acredita CO₂."
+            "Misa y Nico validaron conjuntamente los cálculos, supuestos y límites del balance "
+            "energético. CO₂ y agua indirecta son proyecciones con factores externos; la firma "
+            "no las convierte en ahorro observado ni sustituye la revisión de esos factores."
         )
 
     ms = _ms_mediana(consumo)
@@ -276,10 +277,37 @@ def _balance(numeros: dict, consumo: dict | None, args) -> dict:
               "La resolución de los datos es de una hora.") if umbral is not None else None,
         motivo="Sin mediana positiva de exceso no TI en horas de evaluación con alerta física." if umbral is None else None)
     actual["emisiones_detector_gco2e_anual"] = metrica(
-        None, "gCO2e/año", "estimado", "CodeCarbon × factor SEN", "Gadiel + Nico",
-        motivo="G3 aporta energía estimada por TDP; falta un factor SEN con fuente y periodo verificados. No se publica CO₂.")
+        round(balance_neto.emisiones_detector_gco2e_anual(costo_publicado), 8),
+        "gCO2e/año", "estimado",
+        "costo_detector_kwh_anual × FESEN 2024 aplicable a 2026", "Gadiel + Nico",
+        nota=("Producto del costo estimado por TDP, no de una medición de pared. "
+              "El factor es el 0.444 kgCO₂e/kWh del aviso oficial para la COA 2026."),
+        supuestos={"factor_emision_kg_kwh": balance_neto.FACTOR_EMISION_SEN_KG_KWH,
+                   "fesen": balance_neto.URL_FESEN_2024,
+                   "aviso_coa_2026": balance_neto.URL_AVISO_COA_2026})
     ahorro = numeros["balance_neto"]["ahorro_proyectado_kwh_anual"]["valor"]
     saldo = round(balance_neto.balance_energia_anual(ahorro, costo_publicado), 12) if ahorro is not None else None
+    if ahorro is not None:
+        actual["co2_evitado_kg_anual"] = metrica(
+            round(balance_neto.co2_evitado_kg_anual(ahorro), 4),
+            "kgCO2e/año", "proyectado",
+            "ahorro_proyectado_kwh_anual × FESEN 2024 aplicable a 2026", "Nico",
+            nota=("Producto de una proyección, no de un ahorro observado. "
+                  "El factor es el 0.444 kgCO₂e/kWh indicado por SEMARNAT para la COA 2026."),
+            supuestos={"factor_emision_kg_kwh": balance_neto.FACTOR_EMISION_SEN_KG_KWH,
+                       "fesen": balance_neto.URL_FESEN_2024,
+                       "aviso_coa_2026": balance_neto.URL_AVISO_COA_2026})
+        actual["agua_indirecta_evitada_l_anual"] = metrica(
+            round(balance_neto.agua_indirecta_evitada_l_anual(ahorro), 4),
+            "L/año", "proyectado",
+            "ahorro_proyectado_kwh_anual × estimación NREL 2012 × mezcla CNE 2024", "Nico",
+            nota=("Estimación, no factor oficial mexicano: factores medianos de NREL 2012 "
+                  "ponderados por la mezcla neta del SEN 2024. Incluye evaporación "
+                  "hidroeléctrica; no es agua potable ni captación in situ."),
+            supuestos={"intensidad_l_kwh": balance_neto.INTENSIDAD_HIDRICA_SEN_L_KWH,
+                       "mezcla": balance_neto.URL_MEZCLA_CNE_2024,
+                       "factores": balance_neto.URL_NREL_2012,
+                       "metodo": "suma(participación por tecnología × factor de consumo)"})
     actual["balance_energia_kwh_anual"] = metrica(
         saldo, "kWh/año", "proyectado", "ahorro_proyectado_kwh_anual publicado − costo_detector_kwh_anual publicado", "Misa + Nico",
         nota="Saldo calculado con los valores publicados y los supuestos del ahorro y de frecuencia_anualizacion; no es ahorro observado." if saldo is not None else None,
