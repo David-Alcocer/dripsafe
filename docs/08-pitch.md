@@ -36,9 +36,10 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 > Hoy se vigila con umbrales fijos: alertar si el PUE pasa de 1.6. Pero un sitio eficiente, con PUE de 1.2, puede subir su energía no TI hasta **158 %** sin cruzar esa línea. El umbral fijo deja ciegos justo a los sitios eficientes."
 
 ### 2 · La solución (50 s)
-> "DripSafe aprende, con 72 horas limpias de referencia (48 para ajustar y 24 para calibrar), cuánto **debería** gastar cada sitio según su carga y la temperatura exterior. Cada hora compara lo real contra lo esperado. Es la misma línea base que se usa para verificar ahorros de energía (ASHRAE Guideline 14), pero aplicada a detectar en tiempo real.
+> "DripSafe aprende, con 72 horas limpias de referencia (48 para ajustar y 24 para calibrar), cuánto **debería** gastar cada sitio según su carga y la temperatura exterior. Cada hora compara lo real contra lo esperado. Es la línea base de ASHRAE Guideline 14, usada para detectar en tiempo real.
 > Y cruza esos excesos con el registro OT. Así separa cuatro casos: un **incidente con efecto físico**, un **cambio no autorizado** que todavía no mueve la física, un **exceso sin registro** y un simple **intento de acceso**.
-> Dos reglas de oro: ningún exceso sin explicar va directo a mantenimiento, y ningún cambio no autorizado es «sin urgencia»."
+> Dos reglas de oro: ningún exceso sin explicar va directo a mantenimiento, y ningún cambio no autorizado es «sin urgencia».
+> El kit nos dio los datos simulados y unas reglas de ejemplo. Lo nuestro es la línea base por sitio, las cuatro clases OT y la prueba con fallas pequeñas."
 
 ### 3 · Demo (90 s) · dashboard en modo presentación
 1. **Resumen** (15 s): "Esto es el kit oficial, datos simulados. La línea punteada es lo esperado; el área naranja es el exceso."
@@ -48,13 +49,14 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 > Si la demo falla: pasar al video de respaldo sin comentarlo (#20).
 
 ### 4 · Los números (60 s)
-> "En los 3 episodios anómalos del kit, 21 horas en total, DripSafe y las reglas empatan: el kit los diseñó para que las reglas los vean, y lo decimos así.
+> "En los 3 episodios anómalos del kit, DripSafe y las reglas empatan: el kit los diseñó para que las reglas los vean.
 > El aporte está en las fallas más pequeñas. Inyectamos excesos de 10 a 80 % con una rejilla fija, escrita antes de medir. DripSafe detecta las 18 fallas de cada tamaño desde **+10 %**, en la misma hora; las reglas fijas no ven ninguna hasta **+80 %**, y ahí solo 6 de 18. Solo en las fallas de +20 %, las reglas dejan pasar **625 kWh**.
-> ¿Y lo que gasta DripSafe? Medimos [detector_cpu_ms] ms por corrida en una laptop. Eso es [detector_kwh_anual] kWh al año, estimado. Basta con detectar a tiempo **[equilibrio] de exceso al año** para pagar su propia energía. Ese es el balance neto: no depende de prometer ahorros."
+> Si cada alerta física se atiende a tiempo, el PUE de la semana evaluada pasaría de **1.278 a 1.268** y el WUE de **0.394 a 0.366 L/kWh**. Es una proyección sobre datos simulados, no un ahorro observado.
+> ¿Y lo que gasta DripSafe? Medimos **34 ms** por corrida en una laptop. Con una potencia supuesta del procesador, eso equivale a unos **0.000013 kWh al año**: es una estimación, no una lectura de un medidor. En la cuenta, **menos de un milisegundo** de exceso típico al año paga su propia energía. Ese es el balance neto, validado por Misa y Nico: no depende de prometer ahorros."
 
 ### 5 · Impacto y escala (60 s)
-> "En agua, el ahorro depende del tipo de enfriamiento: es grande en el evaporativo y casi nulo en el de aire. Lo decimos en lugar de prometer agua en todos lados.
-> Para el bono proponemos llegar a **cero agua potable** en obra nueva: enfriamiento líquido en circuito cerrado con enfriadores secos, y un chiller de respaldo en las [horas] más calientes del año. Cuesta un poco de PUE y lo reportamos. Microsoft anunció en 2024 un diseño así, sin evaporación; Google ya enfría un centro de datos con agua residual tratada, nuestro respaldo opcional.
+> "En agua, el ahorro depende del tipo de enfriamiento: es grande en el evaporativo y casi nulo en el de aire.
+> Para el bono proponemos llegar a **cero agua potable** en obra nueva: enfriamiento líquido en circuito cerrado con enfriadores secos, y un chiller de respaldo en las [horas] más calientes del año. Cuesta un poco de PUE y lo reportamos.
 > DripSafe corre en local, sin nube y sin GPU, con seis medidores que casi cualquier centro de datos ya tiene. Cuesta por kW, y con nuestro precio supuesto la cuota se paga sola con menos del 0.5 % del consumo auxiliar de un sitio de 1 MW.
 > Nuestros límites: datos simulados, una sola semana de clima y sin sensores de agua helada. La siguiente validación es con datos reales de una sala de cómputo en Yucatán.
 > DripSafe: que cada litro y cada kWh que sobra se note a tiempo."
@@ -64,7 +66,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 - [ ] **Innovación:** línea base física por sitio aplicada a detectar + fusión evento–efecto + prioridad por litros (diapositivas 3 y 4).
 - [ ] **Viabilidad técnica:** demo funcionando sobre el kit real, en una laptop, sin internet.
 - [ ] **Impacto en ciberseguridad:** cuatro clases, T0859 y T0836 observables, T0831 inyectada y el cambio sin registro (T0836 sin log o T1692.001, antes T0855); solo lectura (diapositiva 4). Cifras y frases en `docs/06` §6 y §10.
-- [ ] **Eficiencia Green AI:** PUE con sumas, exceso medido sobre la línea base y curva de sensibilidad (diapositiva 6).
+- [ ] **Eficiencia Green AI:** PUE y WUE con sumas (antes observado, después proyectado), exceso sobre la línea base y curva de sensibilidad (diapositiva 6).
 - [ ] **Balance neto y gobernanza:** umbral de equilibrio, acuífero y reporte para CONAGUA (diapositivas 7 y 8).
 - [ ] **Escalabilidad y negocio:** seis medidores, autocalibración y precio por kW (diapositiva 9).
 - [ ] **Presentación:** una idea por diapositiva y la demo en modo presentación.
@@ -77,7 +79,8 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 | ¿Cómo saben que es un ataque y no una falla? | No lo adivinamos. Si hay evento OT y luego un exceso, es incidente. Si hay exceso sin registro, no se puede saber con datos de proceso: por eso primero se revisa la configuración. |
 | ¿Por qué no un modelo más complejo? | El método más ligero que funciona es el argumento Green AI. La línea base explica cada alerta en una frase y pesa milisegundos. |
 | ¿Qué aporta si las reglas detectan los 3 episodios? | En el kit empatan, y lo decimos. El aporte se ve con fallas pequeñas: la curva de sensibilidad. |
-| ¿Cuánta energía consume? | [detector_cpu_ms] ms medidos por corrida; la energía se estima con supuestos editables. El umbral de equilibrio es [equilibrio]. |
+| ¿Cuánta energía consume? | 33.6 ms medidos por corrida (mediana de 10, desviación 0.56 ms). Los 0.000013 kWh/año salen de CodeCarbon con la potencia de diseño (TDP) del procesador como hipótesis, no de un medidor de pared. El umbral de equilibrio es 2.4×10⁻⁷ h/año (< 1 ms): es una cuenta algebraica, no una latencia demostrada, porque el kit tiene resolución de una hora. |
+| ¿Qué venía en el kit y qué hicieron ustedes? | El kit trae los datos simulados, el panel de ejemplo y reglas fijas. Nosotros hicimos la línea base por sitio, la clasificación OT en cuatro clases, la curva de sensibilidad y el balance neto. |
 | ¿Qué pasa en mayo, con 40 °C? | Una línea base por época, recalibrada cada semana. Fuera del clima aprendido, el margen se duplica y la alerta sale con «confianza baja», sin apagarse. |
 | ¿Qué pasa si el atacante conoce el modelo? | Tendría que mover la energía de forma coherente con la carga y el clima, y los medidores de energía suelen ser otro sistema. Además DripSafe no manda órdenes. |
 | ¿Funciona en otra instalación? | Necesita seis medidores comunes y 72 h limpias por época. No necesita etiquetas ni datos de ataques. |

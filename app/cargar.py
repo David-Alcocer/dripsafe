@@ -131,6 +131,8 @@ def cargar() -> Datos:
             avisos.append("app/ejemplos/numeros_ejemplo.json no coincide con resultados/numeros_oficiales.json: "
                           "se muestran las cifras del canónico. Corre python -m src.pipeline para regenerar los dos.")
         fuentes["numeros"] = "oficial"
+        # La vista plana no trae la firma: se lee del canónico (None mientras Misa y Nico no validen).
+        fuentes["firma_balance"] = (canonico.get("balance_neto") or {}).get("validado_por")
     else:
         numeros, fuentes["numeros"] = json.loads(RUTAS["ejemplo"].read_text(encoding="utf-8")), "ejemplo"
 
