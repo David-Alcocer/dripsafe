@@ -8,6 +8,8 @@ fijas del kit en la misma tabla:
 - ¿Cuántos kWh o litros inyectados pasaron antes de verlo? Es el exceso exacto
   que metimos, no una estimación.
 - ¿La clase OT fue la correcta? (solo DripSafe; las reglas no clasifican)
+- ¿El tipo sugerido (ineficiencia o posible ataque, src/modelo/explicar.py) fue el
+  correcto? (`clasificacion_correcta_pct`, el mismo criterio de src/ataques/evaluar.py)
 
 También mide, sobre la evaluación sin inyecciones, las falsas alarmas por día y
 las coincidencias al azar de la ventana de 24 h (docs/06 §4b).
@@ -36,9 +38,10 @@ import pandas as pd
 
 from src import contrato
 from src.ataques import rejilla
+from src.ataques.evaluar import TIPO_ESPERADO
 from src.evaluacion.episodios import episodios_desde_etiquetas, evaluar_episodios
 from src.evaluacion.reglas import reglas_fijas
-from src.modelo import detector
+from src.modelo import detector, explicar
 from src.ot import clases
 
 METODOS = ("dripsafe", "reglas_kit")
@@ -75,12 +78,13 @@ def _banderas(telemetria: pd.DataFrame) -> dict[str, pd.DataFrame]:
     """Para cada método: `anomalia` (cualquier alerta) y `fisica` (exceso de energía o agua)."""
     horas = contrato.intervalo_horas(telemetria[telemetria["site_id"] == telemetria["site_id"].iloc[0]])
     unidad = "kwh_intervalo" if np.isclose(horas, 1.0) else "kw_promedio"
-    salida = detector.detectar(telemetria)
+    salida = explicar.explicar(detector.detectar(telemetria))
     d = _con_clave(salida)
     dripsafe = pd.DataFrame({
         "anomalia": d["clase"] != "normal",
         "fisica": d["alerta_umbral"] | d["alerta_media_4h"],
         "clase": d["clase"],
+        "tipo_sugerido": d["tipo_sugerido"],
         "alerta_umbral": d["alerta_umbral"],
         "alerta_media_4h": d["alerta_media_4h"],
     })
@@ -152,6 +156,15 @@ def medir(ficha: dict, telemetria: pd.DataFrame, banderas: dict, episodios_kit: 
             else:
                 fila["clase_obtenida"] = "sin_efecto_visto"
                 fila["clase_correcta_pct"] = None
+            tipos_vistos = del_sitio["tipo_sugerido"][efecto][fisica_efecto.to_numpy()]
+            fila["tipo_esperado"] = TIPO_ESPERADO[ficha["tipo"]]
+            if len(tipos_vistos):
+                fila["tipo_obtenido"] = tipos_vistos.value_counts().idxmax()
+                fila["clasificacion_correcta_pct"] = round(
+                    100 * float((tipos_vistos == fila["tipo_esperado"]).mean()), 1)
+            else:
+                fila["tipo_obtenido"] = "sin_efecto_visto"
+                fila["clasificacion_correcta_pct"] = None
         filas.append(fila)
     return filas
 
@@ -248,10 +261,11 @@ def resumir(por_inyeccion: pd.DataFrame) -> pd.DataFrame:
     resumen["unidad"] = np.where(resumen["variable"] == "energia", "kWh", "L")
     resumen["pct_efectos_vistos"] = (100 * resumen["efectos_vistos"] / resumen["inyecciones"]).round(1)
     resumen["pct_no_visto"] = (100 * resumen["no_visto"] / resumen["inyectado"]).round(1)
-    if "clase_correcta_pct" in t:
-        correcta = (t[t["metodo"] == "dripsafe"].groupby(claves, sort=False)["clase_correcta_pct"]
-                    .mean().round(1).rename("clase_correcta_pct"))
-        resumen = resumen.merge(correcta.reset_index(), on=claves, how="left")
+    for columna in ("clase_correcta_pct", "clasificacion_correcta_pct"):
+        if columna in t:
+            correcta = (t[t["metodo"] == "dripsafe"].groupby(claves, sort=False)[columna]
+                        .mean().round(1).rename(columna))
+            resumen = resumen.merge(correcta.reset_index(), on=claves, how="left")
     return resumen
 
 
@@ -387,6 +401,9 @@ def main() -> None:
     if "clase_correcta_pct" in ds:
         print("\nClase OT correcta (DripSafe, % de horas con efecto visto):")
         print(ds["clase_correcta_pct"].to_string())
+    if "clasificacion_correcta_pct" in ds:
+        print("\nTipo sugerido correcto (DripSafe, % de horas con efecto visto):")
+        print(ds["clasificacion_correcta_pct"].to_string())
     print("\nEvaluación sin inyecciones:")
     print(limpia[limpia["condicion"] == "base"].drop(columns=["latencias_h", "horas_por_clase"]).to_string(index=False))
     total = coincidencias[(coincidencias["condicion"] == "base") & (coincidencias["site_id"] == "TOTAL")]
