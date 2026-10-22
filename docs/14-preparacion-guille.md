@@ -1,24 +1,35 @@
 # 14 · Guille en el pitch: ciberseguridad, cumplimiento y negocio
 
-> Preparación del 22 de octubre de 2026 sobre el **pitch de 4 minutos** (`Final/DripSafe_FINAL_Pitch.pdf`, 13 láminas). Guille presenta las láminas **7** (ciberseguridad), **11** (modelo de negocio) y **12** (escalabilidad), y contesta las preguntas de esos temas y de cumplimiento. No cambia código ni cifras. Todas las cifras salen de `numeros_oficiales.json` o de fuentes citadas en `docs/06`, `docs/13` y las referencias del PDF.
+> Preparación del 22 de octubre de 2026 sobre el **pitch de 4 minutos** (`Final/DripSafe_FINAL_Pitch.pdf`, 13 láminas). Guille presenta las láminas **1** (portada), **7** (ciberseguridad) y **12** (escalabilidad), y contesta las preguntas de ciberseguridad, cumplimiento y escalabilidad. La lámina 11 (modelo de negocio) la presenta otra persona; sus datos quedan en §3 como respaldo. No cambia código ni cifras. Todas las cifras salen de `numeros_oficiales.json` o de fuentes citadas en `docs/06`, `docs/13` y las referencias del PDF.
 
 ## 1. Qué decir, lámina por lámina
 
 Con 13 láminas en 4 minutos tocan unos 18 segundos por lámina. Cada guion cabe en unos 20 segundos; lo demás va a las preguntas (§3).
+
+**Lámina 1 · Portada (unos 15 s)**
+> «Buenas tardes. Somos DripSafe y participamos en el sub-reto 3: detección de anomalías en el enfriamiento. Hicimos un software que detecta a tiempo el agua y la energía que se desperdician al enfriar un centro de datos, y que avisa si alguien cambió algo que no debía. Todo lo que verán corre sobre los datos simulados del kit de CIFOX. [Nombre] les cuenta el problema.»
+
+Opcional, si hay tiempo: «Somos Leo, Misael, Gadiel, Nico y yo, Guillermo.»
 
 **Lámina 7 · Ciberseguridad (unos 25 s)**
 > «Un cambio en el control del enfriamiento puede pasar como una orden legítima. DripSafe cruza el registro de cambios con la física y separa cuatro casos: un intento de acceso, un cambio no autorizado, un exceso sin registro y un incidente que ya tuvo efecto, cada uno con qué revisar primero. Y solo lee: nunca da órdenes a los equipos, y vive en su propia zona de red, sin internet, como recomienda la norma industrial IEC 62443.»
 
 *Ojo:* la lámina dice «Ataque con efecto». Al hablar, di **«incidente con efecto»** o **«ataque con efecto, que se confirma en sitio»**. DripSafe nunca afirma que un exceso pruebe un ataque.
 
-**Lámina 11 · Modelo de negocio (unos 20 s)**
-> «Cobramos con un pago inicial, por instalar y auditar la línea base del centro, y una suscripción de 40 pesos por kilovatio de servidores al año, con el reentrenamiento por temporada incluido. Un centro de 1 megavatio paga 40 mil pesos al año y los recupera evitando 16 mil kilovatios hora: menos del medio por ciento de lo que gasta en enfriamiento y otros sistemas.»
-
 **Lámina 12 · Escalabilidad (unos 20 s)**
 > «Empezamos con pilotos en Mérida, con los centros de datos que ya operan aquí. El primer cliente de pago está en Querétaro, el estado con más centros de datos del país, que va a publicar su consumo de agua desde 2027. Y cuando llegue la nueva energía a Yucatán, los centros nuevos pueden llegar medidos desde el primer día. Usa seis medidores que ya existen y corre en local, así que sirve en cualquier región con agua bajo presión.»
 
-**Cumplimiento, en una frase** (si sobra tiempo en la lámina 10 o 12, o en preguntas):
-> «Y ayuda a cumplir: en México, quien saca agua de un pozo ya está obligado a medirla y a respetar su volumen concesionado. DripSafe usa ese medidor y deja el registro para compararlo con el permiso.»
+**Para no cruzarse con las láminas de los demás:**
+
+| En tu lámina | No menciones | Porque lo dice |
+|---|---|---|
+| 1 | 158 %, acuífero, cenotes | Lámina 2 (problema) |
+| 1 | Cero agua potable, circuito cerrado | Láminas 3 y 4 (bono) |
+| 7 | Resultados de la demo, «18 de 18», cifras | Láminas 6 y 8 |
+| 12 | 40 pesos por kW, 40 mil pesos, 16 mil kWh | Lámina 11 (negocio) |
+| 12 | «Registra para compararlo con el permiso» | Lámina 10 (gobernanza del agua) |
+
+El tema de cumplimiento no tiene lámina: queda para las preguntas (§3).
 
 ## 2. Lo que nunca hay que decir
 
