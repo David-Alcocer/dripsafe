@@ -1,6 +1,6 @@
 # 13 · Yucatán: a quién le vendemos, los cenotes y cómo crecemos
 
-> Revisión del 22 de octubre de 2026 (Guille), hecha durante la jornada presencial. Contrasta lo que ya dicen la propuesta y el guion con fuentes públicas sobre Yucatán. **No cambia código ni cifras oficiales.** Las frases propuestas para el guion (§5) las decide Leo. Las cifras de aquí son **externas y citadas** (§7); ninguna sale del kit ni de `numeros_oficiales.json`.
+> Revisión del 22 de octubre de 2026 (Guille), hecha durante la jornada presencial. Contrasta lo que ya dicen la propuesta y el guion con fuentes públicas sobre Yucatán. **No cambia código ni cifras oficiales.** Las frases propuestas para el guion (§5) las decide Leo. Las cifras de aquí son **externas y citadas** (§8); ninguna sale del kit ni de `numeros_oficiales.json`.
 
 ## 1. El problema que resolvemos, en corto
 
@@ -105,9 +105,39 @@ El umbral de menos de 1 ms y la explicación del TDP ya están en la tabla de pr
 | ¿Quién paga, si el beneficio es para la comunidad? | El operador. Ahorra energía: en un sitio de 1 MW, la licencia se paga con menos del 0.5 % del overhead. Y llega preparado a los reportes de agua que vienen, como el de Querétaro en 2027. |
 | ¿Sirve fuera de los centros de datos? | La física es la misma en cualquier edificio con chillers o torres, como hoteles, hospitales e industria. Es una hipótesis: no lo construimos ni lo probamos. |
 | ¿Por qué ahora? | Hay tres señales: Querétaro va a publicar el agua de los centros de datos desde 2027, Yucatán espera su nueva energía para fines de 2027 y esta semana se publicó otro estudio sobre los cenotes. |
+| ¿Qué norma de agua tiene que cumplir un centro de datos? | No hay límite legal de WUE ni de PUE. Si usa pozo: concesión, pago de derechos y medidor obligatorio. Si descarga o infiltra agua residual, como la purga de una torre: permiso de CONAGUA y la NOM-001. DripSafe ayuda a cumplir comparando lo usado contra lo concesionado; no sustituye el cumplimiento (§7). |
 | ¿Qué dijo Greenpeace exactamente? | 17 pozos y cenotes en siete localidades: 13 con coliformes fecales por encima de 1 800 NMP/100 ml y 2 con nitratos por encima de 50 mg/L, el valor guía de la OMS. El estudio no identifica la fuente. |
 
-## 7. Fuentes (consultadas el 22 de octubre de 2026)
+## 7. Normas de agua que una empresa debe cumplir en México
+
+No es asesoría legal: es el mapa para responder al jurado. **No existe un límite legal de WUE ni de PUE para centros de datos.** No encontramos ninguno. Las obligaciones dependen de **de dónde sale el agua y a dónde va la descarga**.
+
+| Situación | Qué exige | Fundamento |
+|---|---|---|
+| **Saca agua de un pozo propio** | Título de concesión de CONAGUA, con un volumen máximo. | Ley de Aguas Nacionales |
+| | Pagar derechos cada trimestre; la cuota depende de la zona de disponibilidad. | Ley Federal de Derechos; pago en Declar@gua |
+| | **Medidor obligatorio** instalado según la norma NMX-AA-179-SCFI-2018, exigible desde el 1 de julio de 2022 para los medidores en tubería. | Reglas generales sobre medición, art. 225 de la LFD (DOF 9 abr 2020) |
+| **Usa la red municipal** (JAPAY en Mérida) | Contrato y tarifas del organismo operador. | Reglas locales |
+| **Descarga al drenaje municipal** | Límites de contaminantes. | NOM-002-SEMARNAT-1996 |
+| **Descarga a un cuerpo de agua o infiltra al subsuelo** (lo común en Mérida, donde casi no hay drenaje) | **Permiso de descarga** de CONAGUA, también cuando la infiltración pueda contaminar el subsuelo o el acuífero. Descargar en contra de la ley es causa para revocar la concesión. | LAN, arts. 88, 88 bis y 29 bis 4 |
+| | Límites de contaminantes. | NOM-001-SEMARNAT-2021, vigente desde marzo de 2023 |
+
+**La Ley General de Aguas**, publicada en el DOF el 11 de diciembre de 2025, también reformó la Ley de Aguas Nacionales. Según los análisis de despachos:
+- prioriza el consumo humano y doméstico sobre los demás usos;
+- prohíbe transmitir concesiones entre particulares y cambiar el uso del título;
+- crea delitos por mal uso del agua, con multas de hasta 50 000 UMA;
+- da a los estados 180 días para armonizar sus leyes.
+
+**Hueco de reporte.** Un centro de datos cuenta como empresa de servicios, así que no reporta su agua como la industria manufacturera. Por eso Querétaro adapta la Cédula de Operación Anual para que la reporten desde 2027 (§3).
+
+**Lo local.** CONAGUA incluye el Anillo de Cenotes entre las zonas protegidas del acuífero 3105 y describe zonas de veda (`docs/07` §2).
+
+**Qué significa para DripSafe:**
+- **El medidor de agua no es un supuesto.** Si el sitio tiene pozo, la ley ya lo obliga a tenerlo, y es uno de los seis medidores que usa DripSafe.
+- **Ayuda a cumplir, no sustituye el cumplimiento.** El reporte de captación y excesos sirve para comparar el agua usada contra el volumen concesionado y para explicar cada exceso. Con la ley nueva, que prioriza el consumo humano, ese registro pesa más.
+- **La purga de una torre es agua residual**, con sales concentradas. En Mérida suele terminar en el subsuelo y exige permiso y cumplir la NOM-001. Vigilarla requiere un medidor de purga que el kit no trae (`docs/07` §3).
+
+## 8. Fuentes (consultadas el 22 de octubre de 2026)
 
 - KIO, ficha técnica de MER1: https://static.datacentermap.com/company/castle-access/datacenter9833/KIO%20MER1%20Spec%20Sheet.pdf
 - Ayuntamiento de Mérida, licitación de equipo para centro de datos municipal (2025): https://www.merida.gob.mx/municipio/sitiosphp/licitaciones/content/doc/proveeduria/2025/noviembre/LP-2025-ADQ-EQUIPAMIENTO-CENTRO-DATOS-01.pdf
@@ -119,3 +149,9 @@ El umbral de menos de 1 ms y la explicación del TDP ya están en la tabla de pr
 - Por Esto (30 mar 2026), 83 % de 60 cenotes monitoreados, fuentes de contaminación (Cinvestav-Mérida) y multas de Profepa: https://www.poresto.com/yucatan/2026/3/30/en-yucatan-el-83-de-los-cenotes-monitoreados-estan-contaminados-granjas-porcicolas-boom-inmobiliario-y-turismo-amenazan-al-acuifero.html
 - Diario de Yucatán (13 mar 2024), drenaje de Mérida: https://www.yucatan.com.mx/merida/2024/03/13/la-construccion-de-un-drenaje-urbano-en-merida-un-proyecto-lejos-de-concretarse.html
 - Por Esto (10 jul 2026), la SCJN atrae los casos de Homún (SEFA 223/2026 y 224/2026): https://www.poresto.com/yucatan/2026/7/10/scjn-sentara-precedente-en-yucatan-definira-si-los-cenotes-y-la-abeja-melipona-pueden-tener-derechos-propios.amp.html
+- DOF (11 dic 2025), decreto de la Ley General de Aguas y reformas a la Ley de Aguas Nacionales: https://dof.gob.mx/nota_detalle.php?codigo=5775799&fecha=11%2F12%2F2025
+- Holland & Knight (dic 2025), análisis de la Ley General de Aguas: https://www.hklaw.com/en/insights/publications/2025/12/mexico-aprueba-la-nueva-ley-general-de-aguas-y-reformas
+- Greenberg Traurig (dic 2025), análisis de la Ley General de Aguas: https://www.gtlaw.com/en/insights/2025/12/nueva-ley-general-de-aguas-y-reformas-a-la-ley-de-aguas-nacionales
+- CONAGUA, Reglas generales sobre medición de aguas nacionales (art. 225 de la LFD): https://www.gob.mx/cms/uploads/attachment/file/806968/0223_Reglas_generales_sobre_medici_n.pdf
+- Ley de Aguas Nacionales, texto vigente (Cámara de Diputados): http://www.diputados.gob.mx/LeyesBiblio/pdf/LAN.pdf · art. 88: https://mley.mx/LAN/articulo/88/ · art. 29 bis 4: https://mley.mx/LAN/articulo/29-bis%204/
+- Holland & Knight (mar 2022), NOM-001-SEMARNAT-2021: https://www.hklaw.com/es/insights/publications/2022/03/nom-001-semarnat-2021-limites-contaminantes-en-descargas
