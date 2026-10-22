@@ -7,8 +7,8 @@ parte de esta entrega.
 ## Cuenta anual auditada
 
 - `periodos_y_sitios.referencia.energia_no_ti_kwh` = **9501.1089 kWh** para
-  **los tres sitios juntos** durante 72 horas comunes. Los 216 h/sitio son
-  la suma de horas por sitio; no se multiplica la energía otra vez por tres.
+  **los tres sitios juntos** durante 72 horas comunes. Las 216 horas-sitio
+  suman 72 horas de cada sitio; no se multiplica la energía otra vez por tres.
 - Escenario editable: 6 fallas por sitio y año, 72 h sin alerta, 4 h hasta
   corregir y 20 % de exceso no TI. La cuenta usa la energía agregada sin
   redondear a la tasa horaria mostrada:
