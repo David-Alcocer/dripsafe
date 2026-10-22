@@ -122,6 +122,7 @@ dripsafe/
 | 08 | [Pitch](docs/08-pitch.md) | Guion, criterios y preguntas del jurado |
 | 11 | [Trabajo en paralelo](docs/11-trabajo-en-paralelo.md) | Contratos entre piezas |
 | 12 | [Trazabilidad](docs/12-trazabilidad.md) | Requisito → issue → evidencia |
+| 13 | [Yucatán: mercado y acuífero](docs/13-yucatan-mercado-y-acuifero.md) | A quién le vendemos, los cenotes y cómo crecemos |
 
 También: [equipo y roles](docs/03-equipo-y-roles.md), [plan de trabajo](docs/04-plan-de-trabajo.md), [recursos](docs/09-recursos.md), [preguntas frecuentes](docs/10-faq.md), [CONTRIBUTING](CONTRIBUTING.md) y [AGENTS](AGENTS.md) (contexto para asistentes de IA).
 
