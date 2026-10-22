@@ -282,6 +282,61 @@ Basadas en ISA/IEC 62443 (zonas y conductos) y en las mitigaciones de MITRE para
 | Una medición independiente para validar la principal. DripSafe usa los medidores de energía como testigo | T1692.002, T0832 | M0810 Out-of-Band Communications Channel |
 | Modo seguro manual y respaldo de la configuración | T0831, T0826 | M0953 Data Backup |
 
+## 9b. Qué puede pasar en las 24 h y qué opciones tiene el cliente
+
+**Las 24 h son una ventana de atribución, no la duración del daño.** Un cambio hecho de madrugada casi no se nota con el aire fresco y aparece en el pico de calor de la tarde. Si nadie lo corrige, se repite al día siguiente.
+
+### Qué impacto puede tener
+
+| Dirección del ataque | Qué pasa | Tamaño | ¿Lo ve DripSafe? |
+|---|---|---|---|
+| **A · Enfriar de más** (lo que simula el kit: T0831 → T0828) | Más energía, más agua si el enfriamiento es evaporativo, más CO₂ y desgaste de equipos | **Kit:** un cambio con efecto de +20 % durante 12 h mete unos 92 kWh (mediana de la rejilla), porque los sitios simulados tienen unos 165 kW de TI. **Sitio de 1 MW de TI con PUE 1.4 (supuesto):** +20 % del enfriamiento son 80 kW, que suman **1,920 kWh y unos $4,800 MXN al día**, a $2.5/kWh (`docs/00` §9), y unos 850 kg de CO₂. | Sí: es lo que mide la línea base. Las reglas del kit no ven el efecto (§6) |
+| **B · Enfriar de menos** (subir setpoints, apagar equipos) | El aire de entrada a los servidores pasa del rango recomendado por ASHRAE (18–27 °C). Los servidores bajan su rendimiento y, si sigue, se apagan solos: **caída del servicio** (T0879 si hay daño) | Sin cifra del kit. Caso real, sin ciberataque: el 19 de julio de 2022, con unos 40 °C en Londres, fallaron a la vez varios sistemas de enfriamiento redundantes y Google apagó parte de una zona de nube durante unas 4 h. Según Uptime Institute (2026), el 57 % de los operadores dice que su última caída importante costó más de **100 mil dólares**, y 1 de cada 5, más de **1 millón** | En parte: DripSafe alerta si la temperatura de entrada pasa de lo esperado. **No lo probamos en la rejilla** |
+| **C · Agua** (abrir la purga, sobrellenar la torre) | Más extracción del acuífero y más descarga con sales al subsuelo. En Mérida eso exige permiso de descarga y cumplir la NOM-001 (`docs/13` §7) | Con la proporción del sitio evaporativo del kit (0.85 L/kWh de TI), uno de 1 MW capta unos 20,500 L al día; **+50 % son unos 10,000 L más al día** (estimado) | Sí: excesos de agua desde +25 % en la rejilla |
+| **D · Quedarse dentro** | El exceso es el síntoma: alguien controla el enfriamiento y el siguiente paso puede ser B. En FrostyGoop (§2), restablecer la calefacción tomó dos días | — | Ve el síntoma, no la intrusión: la red la vigila un monitor OT |
+
+**La lectura honesta:** en un sitio de 1 MW, un día de «enfriar de más» cuesta poco dinero. El riesgo de verdad es otro:
+1. **Que nadie lo note.** Ese mismo +20 % durante 30 días suma unos 57,600 kWh, unos **$144,000 MXN**; en un año, unos **$1.75 millones de MXN**. Las reglas fijas no lo ven (§6).
+2. **Que sea el ensayo de B.** Un atacante que ya cambia setpoints puede dejar sin enfriamiento a los servidores.
+
+DripSafe acorta el tiempo hasta que una persona se entera: lo ve en la misma hora. Con las reglas del kit puede pasar sin verse.
+
+### Opciones para el cliente (DripSafe avisa; las ejecuta su equipo)
+
+**Durante las 24 h, según la clase:**
+
+| Clase | Primeras acciones |
+|---|---|
+| **Intento de acceso** (media) | Revisar la cuenta y el origen de los intentos; bloquear tras varios fallos; cambiar contraseñas de fábrica; confirmar que no hubo un acceso exitoso después. |
+| **Cambio no autorizado** (alta) | Comparar contra la configuración aprobada. Si difiere: **guardar evidencia** (registro del BMS y copia de la configuración actual) **antes** de restaurar; desactivar la cuenta usada y cortar el acceso remoto del proveedor; vigilar el siguiente pico de calor. |
+| **Incidente con efecto** (crítica) | Todo lo anterior, más:<br>• confirmar en sitio con un instrumento local, sin confiar solo en la pantalla (T0832);<br>• restaurar la configuración aprobada y pasar a **modo seguro manual**;<br>• aislar la red del enfriamiento de la de oficina;<br>• si la temperatura sube, arrancar los equipos de respaldo y reducir la carga de TI no crítica o apagarla de forma controlada antes de que se dañe;<br>• activar el plan de respuesta a incidentes. |
+| **Escalón sin registro** (alta) | Revisar la configuración **antes** que mantenimiento. Si es agua, inspección física en paralelo (posible fuga) y registrar los litros. |
+
+**Después:**
+- Buscar la causa y revisar otros sitios con el mismo proveedor o las mismas credenciales.
+- Actualizar la configuración aprobada y practicar el caso con un simulacro.
+
+**Para prevenir** están las recomendaciones de §9:
+- segmentar la red;
+- acceso remoto del proveedor con MFA y equipo de salto;
+- límites de setpoint dentro del controlador;
+- configuración aprobada con huella;
+- mensajes autenticados;
+- una medición independiente;
+- respaldo de la configuración.
+
+Una idea más: **una alarma de temperatura que no dependa del BMS**. Si el atacante controla el BMS, también controla sus alarmas (T0838); un medidor independiente es el mismo principio de testigo que DripSafe aplica a la energía (M0810).
+
+**Qué aporta DripSafe a esa decisión:**
+- **cuándo:** en la misma hora;
+- **qué es:** la clase y su acción;
+- **cuánto cuesta:** los kWh y litros de más;
+- **qué tan probable es la casualidad:** las horas entre el evento y el exceso (§4b).
+
+Nunca ejecuta nada: decide una persona.
+
+Fuentes de esta sección: Google Cloud, [informe del incidente de europe-west2 (19 jul 2022)](https://status.cloud.google.com/incidents/fmEL9i2fArADKawkZAa2); Data Center Dynamics, [causa del apagón de Google en Londres](https://www.datacenterdynamics.com/en/news/googles-london-data-center-outage-during-heatwave-caused-by-simultaneous-failure-of-multiple-redundant-cooling-systems); Uptime Institute, [análisis anual de caídas 2026](https://www.itweb.co.za/article/uptime-announces-annual-outage-analysis-report-2026/o1Jr5MxPNOwMKdWL) y [2025](https://www.datacenterknowledge.com/outages/data-center-outages-decline-for-fourth-straight-year-but-issues-persist). Las cifras del kit salen de la corrida base de la rejilla; las de 1 MW son una escala con supuestos de `docs/00` §9, no una medición.
+
 ## 10. Para el pitch
 
 **Diapositiva 1 · Del evento al efecto.** El diagrama de §2 y tres frases:
@@ -305,9 +360,66 @@ Basadas en ISA/IEC 62443 (zonas y conductos) y en las mitigaciones de MITRE para
 | ¿Qué técnicas de ATT&CK cubren? | Con el kit: T0859 y T0836 observables, T0831 inyectada. Con sensores de agua helada: T1692.002 y T0832. Usamos la versión 20 de la matriz. |
 | ¿Qué tan pequeño puede ser el cambio para que no lo vean? | Depende del ruido de cada sitio: sostenido, de 4 % en el de aire a 7.5 % en el líquido. Por debajo de eso no lo vemos y lo decimos (§6b). |
 | ¿Y si el atacante sube la energía poco a poco? | La línea base no se reentrena sola, así que la subida no se vuelve «normal». En el kit vimos todas las rampas lentas antes de que pasaran de 11 % (§6b; prueba exploratoria). |
+| ¿Qué impacto tiene un ataque en esas 24 h? | Depende de la dirección. Si fuerza el enfriamiento, en un sitio de 1 MW cuesta unos 1,920 kWh al día: poco dinero, pero sin detectar suma $1.75 millones de MXN al año. Si lo apaga, los servidores se calientan y se apagan: más de la mitad de las caídas importantes cuestan más de 100 mil dólares (Uptime 2026). Por eso importa verlo en la misma hora (§9b). |
+| ¿Qué le recomiendan al cliente? | Según la clase: guardar evidencia, comparar contra la configuración aprobada, restaurar y pasar a modo seguro manual, cortar el acceso usado y confirmar en sitio. Para prevenir: segmentar, MFA para el proveedor, límites de setpoint en el controlador y una alarma de temperatura independiente del BMS (§9 y §9b). |
 | ¿Y si ataca en una ola de calor? | Es nuestro punto débil: fuera del clima aprendido el umbral se duplica y un +10 % pasó sin verse en 8 de 11 tardes. Se cierra con líneas base por época, entrenadas con periodos verificados (§6b). |
 
+## 10b. Respuestas en lenguaje llano (pedido del mentor, 22 oct)
+
+El mentor de ciberseguridad pidió preparar estas respuestas **sin tecnicismos**, porque no sabemos qué tan técnico es el jurado. Los términos técnicos van entre paréntesis por si un juez los pide.
+
+**1. ¿Qué pasaría si DripSafe no existiera?**
+> «Imaginen que alguien entra al sistema que controla el aire acondicionado de un centro de datos y cambia la temperatura a la que debe enfriar, como quien mueve el termostato de una casa. Hoy, la pantalla del operador seguiría diciendo "normal", porque la orden parece legítima. Las alarmas actuales tampoco sonarían: solo se activan cuando el consumo pasa un límite fijo, que está muy por encima de lo que gasta un centro eficiente.
+> Si el cambio hace que el enfriamiento trabaje de más, el centro gasta energía y agua de sobra durante semanas, hasta que alguien revise el recibo. Si hace que enfríe de menos, los servidores se calientan, se apagan solos y se caen los servicios que dependen de ellos: un banco, un hospital, un trámite de gobierno.
+> Y cuando por fin alguien lo nota, lo manda a mantenimiento como si fuera una falla. Nadie revisa si fue una persona, y el intruso sigue adentro.»
+
+**Respaldo con datos, si lo piden:**
+- En el kit, las alarmas fijas no vieron ningún exceso de energía por debajo de +80 %.
+- En los cambios de configuración con efecto, vieron el aviso del registro, pero no el gasto: 1,710 kWh pasaron sin verse (§6).
+- En un sitio de 1 MW, un exceso de +20 % que nadie nota suma unos $1.75 millones de MXN al año (estimado, §9b).
+- Más de la mitad de las caídas importantes cuestan más de 100 mil dólares (Uptime Institute, 2026).
+
+**2. ¿Qué se modificaría?**
+> «El atacante no toca los servidores ni los datos: cambia los ajustes del enfriamiento. Por ejemplo:
+> - la temperatura a la que debe enfriar;
+> - la velocidad de ventiladores y bombas;
+> - cuándo se encienden los equipos de respaldo;
+> - cuánta agua se desecha en la torre de enfriamiento (la purga).
+>
+> También puede cambiar los límites de las alarmas para que no suenen, o lo que muestra la pantalla.»
+
+Técnicas: T0836 para el cambio de ajustes, T0838 para los límites de alarma y T0832 para la pantalla.
+
+**3. ¿Qué haría DripSafe para que no llegue a ser crítico?**
+> «DripSafe aprende cuánto debería gastar cada centro según su trabajo y el clima de ese momento. Cada hora compara lo real contra lo esperado, y si el gasto se sale, avisa en esa misma hora, no a fin de mes.
+> Además revisa el registro de cambios. Si unas horas antes alguien cambió la configuración sin autorización, junta las dos cosas, lo marca como crítico y le dice al operador qué hacer primero: volver a la configuración aprobada, pasar a control manual y confirmar en sitio.
+> Y algo importante: DripSafe solo observa, no puede mover el enfriamiento. Así no causa un daño por una falsa alarma, y si alguien lo hackeara, tampoco podría usarlo para controlar la planta.
+> No detiene el ataque: hace que una persona se entere en una hora y no en semanas.»
+
+**Límites, dichos en llano:**
+- Un cambio muy pequeño, de menos de 4 a 7.5 % sostenido según el sitio, no se ve.
+- En una ola de calor que no conoce, es más fácil que un ataque pase sin verse (§6b).
+
+**Analogía opcional:** «Es como un detector de humo: no apaga el fuego, pero avisa cuando todavía es una sartén y no la cocina entera.»
+
+**4. ¿Qué es FrostyGoop?**
+> «Es un programa malicioso hecho para dar órdenes a equipos industriales. En enero de 2024 lo usaron contra la empresa de calefacción de Lviv, en Ucrania: mandaron órdenes a los controladores de la calefacción, y más de 600 edificios de departamentos se quedaron sin calefacción casi dos días, en pleno invierno.
+> Lo que importa para nosotros: las órdenes iban en el "idioma" normal de esos equipos (Modbus), que no pide contraseña. Para la red parecían órdenes legítimas. Lo que sí cambió fue lo físico: la calefacción dejó de funcionar. Es climatización, como el enfriamiento de un centro de datos. Por eso DripSafe vigila la física.»
+
+**Datos verificados:**
+- Lo descubrió Dragos en abril de 2024 y lo reportó en julio de 2024.
+- Es el primer malware industrial que usa Modbus TCP para causar un efecto físico.
+- Los atacantes probablemente entraron por un router MikroTik expuesto a internet, por una vulnerabilidad no determinada. El router, los servidores de gestión y los controladores no estaban bien separados.
+- En MITRE es el software S1165, en la campaña C0041; la técnica principal es T0836 Modify Parameter.
+
+**Lo que no hay que decir:** que DripSafe habría detectado FrostyGoop. Era calefacción, no un centro de datos, y su efecto fue quitar el calor. Es el ejemplo de **por qué** mirar la física, no una prueba de que funcione en ese caso.
+
+Fuentes: [Dragos, informe de FrostyGoop (jul 2024)](https://hub.dragos.com/hubfs/Reports/Dragos-FrostyGoop-ICS-Malware-Intel-Brief-0724_.pdf); [MITRE ATT&CK, S1165](https://attack.mitre.org/software/S1165/).
+
 ## 11. Para revisar con el mentor (22 oct)
+
+**Sesión del 22 de octubre:** el mentor de ciberseguridad pidió preparar las respuestas de §10b en lenguaje llano: qué pasaría sin DripSafe, qué se modificaría, qué hace DripSafe para que no sea crítico y qué es FrostyGoop. Las preguntas técnicas de abajo siguen siendo la lista para validar con un operador real.
+
 
 1. ¿Una ventana de 24 h entre el evento y el efecto es razonable, o en la práctica se usan ventanas distintas según el tipo de cambio?
 2. ¿Tratar un login fallido seguido de un exceso como «incidente OT con efecto» es demasiado agresivo?
