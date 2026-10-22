@@ -52,7 +52,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 > "En los 3 episodios anómalos del kit, DripSafe y las reglas empatan: el kit los diseñó para que las reglas los vean.
 > El aporte está en las fallas más pequeñas. Inyectamos excesos de 10 a 80 % con una rejilla fija, escrita antes de medir. DripSafe detecta las 18 fallas de cada tamaño desde **+10 %**, en la misma hora; las reglas fijas no ven ninguna hasta **+80 %**, y ahí solo 6 de 18. Solo en las fallas de +20 %, las reglas dejan pasar **625 kWh**.
 > Si cada alerta física se atiende a tiempo, el PUE de la semana evaluada pasaría de **1.278 a 1.268** y el WUE de **0.394 a 0.366 L/kWh**. Es una proyección sobre datos simulados, no un ahorro observado.
-> ¿Y lo que gasta DripSafe? Medimos **34 ms** por corrida en una laptop. Con una potencia supuesta del procesador, eso equivale a unos **0.000013 kWh al año**: es una estimación, no una lectura de un medidor. En la cuenta, **menos de un milisegundo** de exceso típico al año paga su propia energía. En carbono, el detector emite unos **0.006 g de CO₂ al año** y el escenario proyectado evita unas **4.8 toneladas**. Ese es el balance neto, validado por Misa y Nico."
+> ¿Y lo que gasta DripSafe? Medimos **34 ms** por corrida en una laptop. Con una potencia supuesta del procesador, eso equivale a unos **0.000013 kWh al año**: es una estimación, no una lectura de un medidor. En la cuenta, **menos de un milisegundo** de exceso típico al año paga su propia energía. En carbono, el detector emite unos **0.006 g de CO₂ al año** y el escenario proyectado evita unas **4.8 toneladas**. Ese es el balance neto, validado y con cifras."
 
 ### 5 · Impacto y escala (60 s)
 > "En agua, el ahorro depende del tipo de enfriamiento: es grande en el evaporativo y casi nulo en el de aire.
@@ -85,7 +85,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 | ¿Qué pasa en mayo, con 40 °C? | Una línea base por época, recalibrada cada semana. Fuera del clima aprendido, el margen se duplica y la alerta sale con «confianza baja», sin apagarse. |
 | ¿Qué pasa si el atacante conoce el modelo? | Tendría que mover la energía de forma coherente con la carga y el clima, y los medidores de energía suelen ser otro sistema. Además DripSafe no manda órdenes. |
 | ¿Funciona en otra instalación? | Necesita seis medidores comunes y 72 h limpias por época. No necesita etiquetas ni datos de ataques. |
-| ¿De dónde salen las cifras del acuífero y del bono? | Fuentes citadas por Guille (acuífero) y Misael (bono); el kit no se usa como evidencia de que una tecnología sea mejor. |
+| ¿De dónde salen las cifras del acuífero y del bono? | CONAGUA 2024 para el acuífero 3105; ASHRAE, ERA5 y la ficha del chiller para el bono; el kit no se usa como evidencia de que una tecnología sea mejor. |
 
 ## Si el tiempo es menor
 - **3 minutos:** quitar la demo de SIM-A y resumir la parte 5 en dos frases (bono y límites).

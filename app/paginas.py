@@ -9,6 +9,7 @@ cifras oficiales vienen de resultados/numeros_oficiales.json; la app no las inve
 """
 
 import math
+import re
 from dataclasses import dataclass
 
 import pandas as pd
@@ -262,10 +263,10 @@ def resumen(d: Datos, v: Vista) -> None:
                 panel_grafica("curva-res", "Fallas detectadas según su tamaño",
                               graficas.curva(curva, "detectados", "Detectadas", alto=250, porcentaje=True),
                               f'<div class="tags">{c.procedencia(tipo_de(d, "curva_sensibilidad"))}'
-                              f'<span class="txt-d">Rejilla fija de inyecciones (Nico, N2). Detalle en Evaluación.</span></div>',
+                              f'<span class="txt-d">Rejilla fija de inyecciones, escrita antes de medir. Detalle en Evaluación.</span></div>',
                               "Porcentaje de fallas inyectadas que cada método detecta.")
             else:
-                st.html(c.panel("Fallas detectadas según su tamaño", '<p class="txt-d">Pendiente: curva de N2 (Nico).</p>'))
+                st.html(c.panel("Fallas detectadas según su tamaño", '<p class="txt-d">Pendiente: curva de sensibilidad.</p>'))
         with der:
             horas = cifra(d.numeros, "equilibrio_horas")
             pue_proj = cifra(d.numeros, "pue_sin_exceso") if evaluacion_completa(v) else ex["pue_sin_exceso"]
@@ -505,7 +506,7 @@ def evaluacion(d: Datos) -> None:
                   c.numero(f["kwh_no_vistos"])] for f in curva], numericas=(2, 3, 4)),
                 (d.numeros.get("curva_sensibilidad") or {}).get("nota", "")))
         else:
-            st.html(c.panel("Curva de sensibilidad", '<p class="txt-d">Pendiente: N2 (Nico) con la rejilla de U2 (Guille).</p>'))
+            st.html(c.panel("Curva de sensibilidad", '<p class="txt-d">Pendiente: curva de sensibilidad con la rejilla fija.</p>'))
 
     with fila("Comparación en las horas de evaluación", "comparacion"):
         filas = [
@@ -548,7 +549,7 @@ def ciberseguridad(d: Datos, v: Vista) -> None:
         st.html(c.panel("Tabla de decisión", c.tabla(
             ["Clase", "Severidad", "Cuándo", "Acción sugerida"],
             [[c.chip(k), sev, cuando, accion] for k, (_, sev, _, cuando, accion) in CLASES.items()]),
-            "La aplica src/ot/clases.py (Guille, U1). Ningún exceso sin explicar va directo a mantenimiento, "
+            "La aplica src/ot/clases.py. Ningún exceso sin explicar va directo a mantenimiento, "
             "y ningún cambio no autorizado es «sin urgencia»."))
 
     with fila("Registro de eventos OT", "ot"):
@@ -602,12 +603,12 @@ def balance(d: Datos, v: Vista) -> None:
     equilibrio = cifra(d.numeros, "equilibrio_horas")
     proy = cifra(d.numeros, "ahorro_proyectado_kwh_anual")
     co2 = cifra(d.numeros, "co2_proyectado_kg_anual")
-    etiqueta = "Ejemplo" if ejemplo else "Pendiente de Gadiel"
+    etiqueta = "Ejemplo" if ejemplo else "Pendiente"
     firmado = not ejemplo and bool(d.fuentes.get("firma_balance"))
     detalle_g3 = ("G3 aporta tiempo medido y energía estimada por CodeCarbon/TDP. "
                   if costo is not None and not ejemplo else
                   "Las cifras de ejemplo solo ilustran el flujo. ")
-    validacion = (f'Umbral y saldo validados por {" y ".join(d.fuentes["firma_balance"])}; '
+    validacion = ("Umbral y saldo validados; "
                   if firmado else "El umbral y el saldo requieren validación conjunta; ")
     emisiones = ("el CO₂ usa el factor oficial del SEN. " if co2 is not None
                  else "las emisiones requieren un factor verificable. ")
@@ -630,7 +631,7 @@ def balance(d: Datos, v: Vista) -> None:
                            else "falta factor SEN verificado", tipo_de(d, "co2_proyectado_kg_anual"))),
     ])
     if costo is None and not ejemplo:
-        st.html(c.aviso("<b>Balance neto pendiente de Gadiel.</b> Falta la medición repetida de tiempo y energía del "
+        st.html(c.aviso("<b>Balance neto pendiente.</b> Falta la medición repetida de tiempo y energía del "
                         "detector; por eso no se publica razón ahorro/costo ni umbral de equilibrio."))
 
     with fila("Escenario anual (proyectado, editable)", "escenario"):
@@ -655,18 +656,19 @@ def balance(d: Datos, v: Vista) -> None:
             st.html(c.aviso(f"Cifra oficial con los supuestos iniciales: {c.numero(proy)} kWh/año proyectados. "
                             "Al editar parámetros se recalcula la simulación local."))
         st.html(c.aviso("Proyección, no ahorro observado. " + (
-            f"El saldo energético oficial está validado por {' y '.join(d.fuentes['firma_balance'])} con los supuestos iniciales."
+            "El saldo energético oficial está validado con los supuestos iniciales."
             if firmado else "El saldo energético sigue pendiente de validación conjunta.")))
 
     with fila("De dónde sale cada número", "calculo"):
         filas = [[f'<span class="mono">{k}</span>',
                   (numero_corto(x["valor"]) + f' {x.get("unidad", "")}')
-                  if isinstance(x.get("valor"), (int, float)) else x.get("motivo_pendiente", "Pendiente"),
-                  x.get("responsable", "—"), c.procedencia(tipo_de(d, k))]
+                  if isinstance(x.get("valor"), (int, float))
+                  else re.sub(r"^Pendiente de [^:]+:\s*", "Pendiente: ", x.get("motivo_pendiente", "Pendiente")),
+                  c.procedencia(tipo_de(d, k))]
                  for k, x in d.numeros.items() if isinstance(x, dict) and "valor" in x]
-        st.html(c.panel("Cifras del contrato 4", c.tabla(["Cifra", "Valor o pendiente", "Responsable", "Tipo"],
+        st.html(c.panel("Cifras del contrato 4", c.tabla(["Cifra", "Valor o pendiente", "Tipo"],
                                                        filas, numericas=(1,)),
-                        "La vista de Leo se genera de resultados/numeros_oficiales.json."))
+                        "La vista del dashboard se genera de resultados/numeros_oficiales.json."))
     mostrar_aviso_ejemplo(d)
 
 
@@ -733,12 +735,12 @@ def agua(d: Datos, v: Vista) -> None:
                                  f'{c.numero(f["horas_anio"])} h') for f in horas])
                       + f'<div class="tags">{c.procedencia(tipo_de(d, "bono_horas_respaldo"))}'
                         '<span class="txt-d">Mérida, clase W40</span></div>') if horas else \
-                '<p class="txt-d">Pendiente: horas de respaldo por época (Misael, bono).</p>'
+                '<p class="txt-d">Pendiente: horas de respaldo por época.</p>'
             st.html(c.panel("Horas de respaldo · Ejemplo" if d.cifras_de_ejemplo else
                             "Horas cálidas por umbral · proxy ERA5", cuerpo,
                             "Valores ficticios para probar la interfaz." if d.cifras_de_ejemplo else
                             "Horas exteriores por encima del umbral ilustrativo en Mérida (2025). No son horas medidas "
-                            "de operación del chiller; Misa debe confirmar su curva de rendimiento."))
+                            "de operación del chiller; falta confirmar su curva de rendimiento con datos reales."))
     if not d.cifras_de_ejemplo:
         pue_bono = cifra(d.numeros, "pue_con_bono")
         rejilla([
@@ -746,7 +748,7 @@ def agua(d: Datos, v: Vista) -> None:
                    color="morado" if pue_bono is not None else "gris",
                    sub=con_tag("escenario con COP de referencia; no medido" if pue_bono is not None
                                else "requiere datos de respaldo", tipo_de(d, "pue_con_bono"))),
-            c.stat("Acuífero 3105", "Pendiente de Nico", color="gris",
+            c.stat("Acuífero 3105", "Pendiente", color="gris",
                    sub=con_tag("requiere integración al JSON oficial", "observado")),
         ])
     mostrar_aviso_ejemplo(d)
