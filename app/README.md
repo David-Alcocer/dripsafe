@@ -127,7 +127,7 @@ calor, falla brusca y cambio sin registro indistinguibles, una sola semana de cl
 
 ## Licencias
 
-- Código de DripSafe: del equipo.
-- Kit CIFOX (CSV, reglas didácticas, ejemplos de benchmark): MIT, © CIFOX. Se lee, no se redistribuye.
-- Inter y JetBrains Mono: SIL Open Font License (`static/fuentes/OFL-*.txt`).
-- Streamlit (Apache 2.0), pandas y numpy (BSD-3), plotly (MIT).
+- Material original de DripSafe: todos los derechos reservados; ver [`LICENSE.md`](../LICENSE.md).
+- Fuentes incluidas: Inter y JetBrains Mono bajo SIL Open Font License; ver [`THIRD_PARTY_LICENSES.md`](../THIRD_PARTY_LICENSES.md) y los avisos `static/fuentes/OFL-*.txt`.
+- Kit CIFOX: confidencial, se lee fuera del repo y no se redistribuye. Sus reglas didácticas usadas como referencia se atribuyen a CIFOX.
+- Dependencias Python: mantienen las licencias de sus propias distribuciones.
