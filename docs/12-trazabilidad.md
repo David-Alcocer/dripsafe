@@ -44,7 +44,7 @@ Creados en GitHub el 19 de octubre, cada uno con su etiqueta `rol:*` y sus etiqu
 | #5 | Gadiel | Modelo de consumo esperado del enfriamiento | `kw_esperado_enfriamiento` |
 | #6 | Gadiel | Detector por sitio: línea base, umbrales y media móvil (alcance D20) | Contrato 3 (`alertas.csv`) |
 | #7 | Gadiel | Medición con CodeCarbon | `consumo_modelo.json` |
-| #8 | Gadiel | Explicar cada alerta | `variable_principal` |
+| #8 | Gadiel | Explicar cada alerta | `variable_principal` + `tipo_sugerido` en `alertas.csv` (`src/modelo/explicar.py`, reglas en [`docs/05`](05-solucion-tecnica.md#cómo-se-explica-cada-alerta-8)); `clasificacion_correcta_pct` en `src/ataques/evaluar.py` y en la rejilla (`rejilla_por_inyeccion.csv`) |
 | #9 | Guille | Escenarios simulados de ataque y falla | Contrato 2 |
 | #10 | Guille | Evaluación de detección por escenario | `rejilla_por_inyeccion.csv` + bloque `deteccion` (lo cubren #30 y #32) |
 | #11 | Guille | Modelo de amenazas y tabla ATT&CK final | `docs/06` §2–§3 + `docs/img/modelo-amenazas-purdue.svg` |
