@@ -622,9 +622,10 @@ def balance(d: Datos, v: Vista) -> None:
                ("Ejemplo" if ejemplo else "Pendiente de revisión", ""), "gris" if equilibrio is None else "azul",
                sub=con_tag("costo ÷ exceso típico verificable", tipo_de(d, "equilibrio_horas"))),
         c.stat("CO₂ evitado", c.numero(co2, 1) if co2 is not None else
-               ("Ejemplo" if ejemplo else "Pendiente de factor SEN"),
+               ("Ejemplo" if ejemplo else "Pendiente"),
                "kgCO₂e/año" if co2 is not None else "", "gris",
-               sub=con_tag("proyección con factor externo verificado", tipo_de(d, "co2_proyectado_kg_anual"))),
+               sub=con_tag("proyección con factor externo verificado" if co2 is not None
+                           else "falta factor SEN verificado", tipo_de(d, "co2_proyectado_kg_anual"))),
     ])
     if costo is None and not ejemplo:
         st.html(c.aviso("<b>Balance neto pendiente de Gadiel.</b> Falta la medición repetida de tiempo y energía del "
