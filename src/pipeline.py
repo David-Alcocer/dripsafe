@@ -227,6 +227,7 @@ def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series, ar
 
     desglose = balance_neto.desglose_costo_anual(consumo, _frecuencia_args(args))
     costo = desglose["total_kwh_anual"]
+    costo_publicado = round(costo, 12)
     origen = _origen_consumo(consumo, desglose["modo"])
     frecuencia = desglose["supuestos"]
     nota_costo = (
@@ -235,7 +236,7 @@ def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series, ar
         f"{desglose['reentrenamientos_aplicados']:g} reentrenamiento(s)/año."
     )
     actual["costo_detector_kwh_anual"] = metrica(
-        round(costo, 12), "kWh/año",
+        costo_publicado, "kWh/año",
         "medido" if _es_medicion_hardware(consumo) else "estimado",
         origen, "Gadiel", nota=f"{nota_costo} {consumo.get('nota', '')}".strip())
     actual["costo_entrenamiento_kwh_anual"] = metrica(
@@ -278,11 +279,15 @@ def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series, ar
                   f"exceso típico {equilibrio['exceso_tipico_kwh_por_hora']:.4f} kWh/h "
                   "(mediana en horas con alerta física)."))
     ahorro = numeros["balance_neto"]["ahorro_proyectado_kwh_anual"]["valor"]
-    if ahorro is not None and costo > 0:
+    if ahorro is not None and costo_publicado > 0:
         actual["razon_ahorro_costo"] = metrica(
-            round(ahorro / costo, 1), "veces", "proyectado",
-            f"ahorro_proyectado_kwh_anual / costo · {origen}",
-            "Misa + Nico", nota="Usa los supuestos editables de ahorro_proyectado_kwh_anual; no es ahorro observado.")
+            round(ahorro / costo_publicado, 1), "veces", "proyectado",
+            f"ahorro_proyectado_kwh_anual / costo_detector_kwh_anual publicado · {origen}",
+            "Misa + Nico", nota="Se calcula con el costo publicado y el ahorro proyectado; no es ahorro observado.")
+    elif ahorro is not None and costo > 0:
+        actual["razon_ahorro_costo"] = metrica(
+            None, "veces", "proyectado", f"ahorro_proyectado_kwh_anual / costo · {origen}",
+            "Misa + Nico", motivo="El costo positivo se redondea a cero con la precisión publicada.")
     return actual
 
 

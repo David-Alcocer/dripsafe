@@ -33,7 +33,52 @@
       }
     },
     "unidad_energia_entrada": "kWh/intervalo",
-    "responsable": "Nico (N2/N3/N4)"
+    "responsable": "Nico (N2/N3/N4)",
+    "procedencia_g3": {
+      "kit": {
+        "csv_sha256": "a498db9c2251a8f9dc761ab08f30f59f3e8269ac5a71546219a2d1b5552e7088",
+        "csv_bytes": 59133,
+        "manifest_sha256": "10b0655610ddd7dc84617f66e24efac7f71363259f87ebcbf81f6181d920b19a"
+      },
+      "codigo": {
+        "commit": "1be27595338815293db65a1d14204eac9967037e",
+        "commit_corto": "1be2759",
+        "sucio": false,
+        "sha256_archivos": {
+          "src/modelo/detector.py": "aaa987be240d16742c266f0ed0677e6f0d2624b236264767e557fcb17610e2a9",
+          "src/modelo/medicion.py": "ec897e6688cdd4c6728353729d07b63190ca5412be0e9c6a733109229271faa7",
+          "src/ot/clases.py": "f43d58d4b4595208fb57c8e3eb4e911096d16158788e785900746dc2ec023242",
+          "src/datos/cargar.py": "5122f4ddad1067a5845668bb51ba28f5ff8912d85a4caed8242136cc80eb4476",
+          "src/contrato.py": "a566e9de372f88ff2f19f8572a3ade731b7ab731260014707330f03edd6b9692",
+          "src/procedencia.py": "d1d93d1dcadb8bbee5626b7ac656c1a2a15882bf6e0723f29693429c946796e6",
+          "src/metricas/balance_neto.py": "e906090f46fe0eff92b09c3a0e162b8c538987f150ea72f851f33035599cbc37",
+          "src/pipeline.py": "fe185e37e8232bfb7f97bdf7a14ea7c7a6aebc5a73d2a6193e9dde51cf901c4f",
+          "config/columnas.json": "88970896af064cb0650b498d19543f87d85a25890b6fd722afb243eb3fe746d4"
+        }
+      },
+      "equipo": {
+        "modelo": "Mac16,12",
+        "chip": "Apple M4",
+        "ram_gb": 17.2,
+        "so": "Darwin 27.0.1",
+        "python": "3.12.15",
+        "cpu_logicos": 10
+      },
+      "metodo": {
+        "herramienta": "codecarbon",
+        "version": "3.3.1",
+        "tracker": "OfflineEmissionsTracker",
+        "pais": "MEX",
+        "fuente_energia": "tdp_estimado",
+        "tipo": "estimado",
+        "descripcion": "CodeCarbon offline estima con el TDP del CPU; no hay sensor de pared.",
+        "tdp_w": 30.0
+      },
+      "generado_el": "2026-10-21",
+      "aviso": "Solo hashes y metadatos; no contiene filas del kit.",
+      "telemetria_archivo_sha256": "cd05780f0f44c403c93fb8884a5733f091722d45657a061bd359e826031a3e25",
+      "tabla_medida_sha256": "cd05780f0f44c403c93fb8884a5733f091722d45657a061bd359e826031a3e25"
+    }
   },
   "generado": {
     "fecha_corte_datos": "2026-10-18T23:00:00+00:00",
@@ -128,22 +173,22 @@
     "nota": "Agua in situ; solo horas con alerta física."
   },
   "detector_cpu_ms": {
-    "valor": null,
+    "valor": 33.641,
     "unidad": "ms",
     "tipo": "medido",
-    "origen": "benchmark del equipo",
+    "origen": "consumo_modelo.json v2 · CodeCarbon, 10 repeticiones, 2026-10-21 · kit a498db9c2251 · commit 1be2759 · energía tdp_estimado → src/pipeline.py → src/metricas/balance_neto.py · fases_separadas",
     "responsable": "Gadiel",
-    "estado": "pendiente",
-    "motivo_pendiente": "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
+    "estado": "disponible",
+    "nota": "Mediana de 10 corridas completas. Desviación 0.56 ms."
   },
   "detector_kwh_anual": {
-    "valor": null,
+    "valor": 1.2916184e-05,
     "unidad": "kWh/año",
     "tipo": "estimado",
-    "origen": "CodeCarbon (10 repeticiones) × frecuencia anual",
+    "origen": "consumo_modelo.json v2 · CodeCarbon, 10 repeticiones, 2026-10-21 · kit a498db9c2251 · commit 1be2759 · energía tdp_estimado → src/pipeline.py → src/metricas/balance_neto.py · fases_separadas",
     "responsable": "Gadiel",
-    "estado": "pendiente",
-    "motivo_pendiente": "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
+    "estado": "disponible",
+    "nota": "Inferencia por hora (lote medido de 168 h) × horas × lotes + entrenamiento × reentrenamientos. La corrida completa no se suma. Frecuencia: 8760 h/año × 1 lote(s)/h; 4 reentrenamiento(s)/año. Fases separadas: entrenamiento (72 h por sitio: ajuste + calibración), inferencia pura (parámetros congelados) y corrida completa (ajuste + inferencia). La anualización usa (inferencia / horas del lote) × frecuencia + entrenamiento × reentrenamientos; la corrida completa NO se suma para evitar doble conteo. CodeCarbon offline estima con el TDP del CPU: los kWh son estimación, no lectura de un sensor de pared. Alguna fase quedó por debajo de la resolución de CodeCarbon; se usó TDP de 30 W y se marca baja_resolucion."
   },
   "detector_gco2e_anual": {
     "valor": null,
@@ -152,7 +197,7 @@
     "origen": "CodeCarbon × factor SEN",
     "responsable": "Gadiel + Nico",
     "estado": "pendiente",
-    "motivo_pendiente": "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
+    "motivo_pendiente": "G3 aporta energía estimada por TDP; falta revisar la anualización y la atribución de emisiones antes de publicar esta cifra."
   },
   "equilibrio_horas": {
     "valor": null,
@@ -161,7 +206,7 @@
     "origen": "costo detector/exceso típico por hora",
     "responsable": "Misa + Nico",
     "estado": "pendiente",
-    "motivo_pendiente": "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
+    "motivo_pendiente": "G3 ya está disponible, pero el agregado versionado no conserva la mediana del exceso no TI por hora con alerta física necesaria para comprobar este umbral. Pendiente de revisión conjunta de Misa y Nico."
   },
   "ahorro_proyectado_kwh_anual": {
     "valor": 10767.9234,
