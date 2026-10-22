@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -33,6 +34,24 @@ from src.metricas.impacto import pue_wue_por_sitio
 from src.metricas.pue import unidad_y_horas
 
 RAIZ = Path(__file__).resolve().parents[2]
+
+
+def estimar_pue_respaldo_aire(pue_base: float, fraccion_respaldo: float,
+                             cop: float, carga_calor_ti: float = 1.0) -> float:
+    """PUE anual ilustrativo con electricidad adicional de un chiller por aire.
+
+    `fraccion_respaldo` debe ser la fracción de energía IT servida en respaldo.
+    Equipararla a horas requiere suponer carga IT constante. La estimación
+    suma electricidad del chiller sobre un PUE del kit: no modela sustitución
+    del enfriamiento existente, bombas ni rendimiento con clima real.
+    """
+    valores = (pue_base, fraccion_respaldo, cop, carga_calor_ti)
+    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v)
+           for v in valores):
+        raise ValueError("los supuestos del PUE deben ser números finitos")
+    if pue_base < 1 or not 0 <= fraccion_respaldo <= 1 or cop <= 0 or not 0 <= carga_calor_ti <= 1:
+        raise ValueError("PUE, fracción, COP o carga térmica fuera de rango")
+    return pue_base + fraccion_respaldo * carga_calor_ti / cop
 
 # Partición del contrato → nombre del kit que se muestra en los docs.
 PARTICIONES = {"entrenamiento": "referencia", "evaluacion": "evaluacion"}

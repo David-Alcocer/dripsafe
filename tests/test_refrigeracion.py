@@ -64,6 +64,21 @@ def test_rechaza_telemetria_sin_tipo_de_enfriamiento(telemetria):
         refrigeracion.comparar_por_enfriamiento(telemetria.drop(columns=["cooling_type"]))
 
 
+def test_pue_respaldo_aire_suma_energia_sobre_base_sin_contar_horas_dos_veces():
+    f = 2235 / 8760
+    resultado = refrigeracion.estimar_pue_respaldo_aire(1.198, f, 2.96)
+    assert resultado == pytest.approx(1.198 + f / 2.96)
+    assert round(resultado, 3) == 1.284
+    assert refrigeracion.estimar_pue_respaldo_aire(1.198, 0, 2.96) == 1.198
+
+
+@pytest.mark.parametrize("pue,f,cop,carga", [(0.99, .25, 2.96, 1), (1.2, 1.1, 2.96, 1),
+                                               (1.2, .25, 0, 1), (1.2, .25, 2.96, -1)])
+def test_pue_respaldo_aire_rechaza_supuestos_invalidos(pue, f, cop, carga):
+    with pytest.raises(ValueError):
+        refrigeracion.estimar_pue_respaldo_aire(pue, f, cop, carga)
+
+
 # ---------- WUE del híbrido ----------
 
 def _supuestos(**cambios):

@@ -130,27 +130,27 @@ TECNICAS = [
 ESTADO_TECNICA = {"kit": ("Observable en el kit", "ok"), "inyectada": ("Se inyecta", "est"),
                   "fuera": ("Fuera de alcance del kit", "sim")}
 
-# Fuente: docs/07-agua-y-acuifero.md (Nico cita las fuentes en #13, N4; ver ~/hackathon/Papers).
+# Fuente y límites: docs/07-agua-y-acuifero.md §§2–3 (CONAGUA 2024, acuífero 3105).
 HECHOS_ACUIFERO = [
     ("Suelo kárstico", "Roca caliza porosa y fracturada: el agua se infiltra rápido y corre por conductos y cenotes conectados."),
-    ("Nivel freático somero", "El agua subterránea está a pocos metros de la superficie, sobre todo en el norte del estado."),
-    ("Sin ríos superficiales", "El acuífero Península de Yucatán (CONAGUA 3105) es prácticamente la única fuente de agua."),
-    ("Muy vulnerable", "Lo que se vierte en la superficie llega rápido al agua subterránea: el riesgo principal es la calidad."),
-    ("Intrusión salina", "Cerca de la costa, extraer de más permite que entre agua de mar."),
-    ("Anillo de Cenotes", "Reserva geohidrológica clave para el abasto de agua de Mérida."),
+    ("Nivel freático variable", "CONAGUA registra agua somera en la costa y mayor profundidad en otras zonas; hay que evaluar el predio."),
+    ("Drenaje subterráneo", "El acuífero Península de Yucatán (CONAGUA 3105) tiene escaso drenaje superficial y numerosos cenotes."),
+    ("Riesgo de calidad", "La geología exige controlar las descargas; disponibilidad regional positiva no garantiza calidad local."),
+    ("Agua salobre", "CONAGUA registra variación de salinidad en sus puntos monitoreados; no representa todos los pozos."),
+    ("Anillo de Cenotes", "El estudio de CONAGUA incluye el Anillo de Cenotes entre las zonas protegidas."),
 ]
 
 IMPACTO_ACUIFERO = [
     ("Extracción", "¿Cuánta agua deja de extraerse?",
-     "Detecta fugas y excesos en sitios evaporativos. En sitios enfriados por aire el ahorro es de energía, no de agua."),
+     "Detecta captación en exceso; para atribuirla al acuífero hay que conocer la fuente del sitio."),
     ("Descargas", "¿Qué pasa con el agua de purga?",
-     "Purga = evaporación ÷ (ciclos − 1). Con 4 ciclos, cada litro captado de más evitado ahorra ¼ L de purga."),
+     "El kit no mide purga. Con 4 ciclos constantes, 3 L evaporados implican 1 L de purga; una fuga no sigue esa regla."),
     ("Contaminación", "¿Puede llegar a cenotes o al freático?",
-     "La purga del bono nunca se infiltra: regresa por drenaje a la planta de tratamiento."),
+     "El diseño debe verificar la ruta autorizada de cualquier descarga; el detector no la controla."),
     ("Gobernanza", "¿Quién regula y qué permisos aplican?",
-     "Reporte mensual verificable de consumo, litros evitados y purga, útil para la concesión de CONAGUA."),
+     "Comparar captación observada con la autorización del predio; medir la purga por separado."),
     ("Justicia ambiental", "¿A quién le quita agua el centro de datos?",
-     "La cola de alertas prioriza litros: lo evitado queda para las comunidades del mismo acuífero."),
+     "Priorizar excesos no demuestra beneficio comunitario hasta identificar la fuente y otros usuarios."),
 ]
 
 # Épocas del año en Yucatán para el enfriamiento (propuesta §3.4). Rangos por confirmar con SMN o ERA5.
@@ -167,10 +167,10 @@ EPOCAS = [
 BONO = [
     ("Base · circuito cerrado W40", "Enfriamiento líquido de agua tibia; el calor sale por enfriadores secos, sin evaporar agua.",
      "Para obra nueva o renovación con servidores de enfriamiento líquido.", True),
-    ("Respaldo B · chiller mecánico", "En picos de calor, un chiller de apoyo. Cero agua.",
-     "Sube el PUE en esas horas: se reporta el PUE anual con y sin bono.", True),
+    ("Respaldo B · chiller por aire", "En picos de calor, un chiller condensado por aire. Sin evaporación.",
+     "Consume más electricidad; el PUE anual sigue pendiente de curvas del equipo.", True),
     ("Respaldo A · adiabático con agua tratada", "Evapora agua residual tratada, nunca potable.",
-     "Depende de un convenio con JAPAY; mejora futura, no el plan.", False),
+     "Exige suministro, tratamiento y descarga verificados; mejora futura, no el plan.", False),
     ("Agua pluvial y condensado", "Complemento para el llenado y la reposición del circuito.",
      "Abril y mayo llegan antes de las lluvias: es parcial.", False),
 ]

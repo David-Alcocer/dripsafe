@@ -120,6 +120,8 @@ def cargar() -> Datos:
         canonico = json.loads(RUTAS["numeros"].read_text(encoding="utf-8"))
         numeros = plano(canonico)
         fuentes["numeros"] = "oficial"
+        # La vista plana no trae la firma: se lee del canónico (None mientras Misa y Nico no validen).
+        fuentes["firma_balance"] = (canonico.get("balance_neto") or {}).get("validado_por")
     else:
         numeros, fuentes["numeros"] = {}, "pendiente"
         avisos.append("Falta resultados/numeros_oficiales.json; no hay cifras consolidadas para mostrar.")

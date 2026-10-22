@@ -137,7 +137,7 @@ python -m src.modelo.medicion --kit "$KIT_CSV" \
 
 `resultados/numeros_oficiales.json` es **la única fuente** de las cifras que aparecen en el dashboard, las diapositivas y el pitch. Cada número dice de dónde salió:
 
-**Nico consolida** el JSON canónico; la app calcula en memoria la vista plana que consume Leo. Misa aporta y revisa el PUE; Gadiel entrega tiempo y energía medidos del detector; Guille confirma el dato del acuífero. Misa y Nico validan el balance neto cuando Gadiel entregue CodeCarbon.
+**Nico consolida** el JSON canónico; la app calcula en memoria la vista plana que consume Leo. Misa aporta y revisa el PUE; Gadiel entrega tiempo medido y energía estimada o medida del detector; Nico confirma el dato del acuífero 3105 (ajuste #13, commit `678b5ff`). Misa y Nico validan conjuntamente el balance neto.
 
 Cada cifra lleva `valor`, `unidad`, `tipo`, `origen`, `responsable`, `estado` y, si queda en `null`, `motivo_pendiente`. `tipo` distingue `observado` (kit simulado), `medido` (hardware con repeticiones), `estimado` (modelo) y `proyectado` (escenario). `_meta.periodos` fija referencia (216 horas-sitio) y evaluación (288 horas-sitio), con fechas inclusivas, sitios e intervalo de una hora. Las energías de entrada son kWh por intervalo, el agua es captación in situ en L; PUE es ratio y WUE L/kWh IT.
 
@@ -145,7 +145,44 @@ Cada cifra lleva `valor`, `unidad`, `tipo`, `origen`, `responsable`, `estado` y,
 
 Este archivo **sí** se sube al repo, porque solo contiene totales que de todos modos se van a mostrar en el pitch, nunca filas del kit. Así Git guarda el historial de cada cifra. Si un número aparece en una diapositiva y no está aquí, es un error.
 
-El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit conserva las cifras oficiales y rotula como **Ejemplo** la telemetría inventada y sus cálculos. El costo del detector, el balance que depende de él, el PUE con bono y el acuífero siguen pendientes hasta recibir evidencia.
+#### Preparación y firma del balance
+
+`src.pipeline` calcula el saldo y el umbral antes de la firma, para que ambos
+puedan revisar el resultado concreto. `estado: disponible` significa que hay
+un cálculo reproducible; la aprobación conjunta se consulta por separado en
+`balance_neto.validado_por`. Sin `--validacion-conjunta`, este campo es `null`,
+no hay `fecha_validacion` y la nota declara que falta la revisión conjunta.
+Con el indicador, se escriben ambos nombres y la fecha, y se reemplaza la
+nota de pendiente. Regenerar sin el indicador elimina cualquier firma previa.
+
+El campo existente `umbral_equilibrio.supuestos` conserva el agregado que
+justifica el denominador: `exceso_tipico_kwh_por_hora` (mediana redondeada a
+12 decimales), `horas_sitio_con_alerta_fisica`,
+`horas_sitio_con_exceso_positivo`, sitios, periodo de evaluación, intervalo,
+filtro, unidad y origen. Se seleccionan únicamente horas de evaluación con
+`alerta_umbral OR alerta_media_4h` y exceso no TI **positivo**. Cada muestra
+representa una hora de un sitio; no se incluyen alertas exclusivamente OT.
+No se agregan columnas al contrato de telemetría ni se publican filas.
+
+`umbral_equilibrio = costo_detector_kwh_anual publicado / mediana publicada`,
+redondeado a 12 decimales. Son horas de exceso típico en un sitio necesarias
+para compensar el costo anual de los tres sitios. Es un umbral algebraico,
+no una latencia subhoraria demostrada; el kit tiene resolución de una hora.
+Sin mediana positiva, el umbral permanece en `null` con su motivo.
+
+`balance_energia_kwh_anual = ahorro_proyectado_kwh_anual publicado −
+costo_detector_kwh_anual publicado`, redondeado a 12 decimales. La razón usa
+los mismos operandos publicados y se redondea a una décima. Las tres métricas
+son `proyectado`; los decimales permiten reproducir las operaciones y no
+representan precisión física de TDP.
+
+`python -m src.procedencia --validar-oficial resultados/numeros_oficiales.json`
+comprueba el contrato, las operaciones y el estado de firma. Añadir
+`--exigir-firma` hace fallar la comprobación si todavía falta la firma conjunta.
+La firma no completa CO₂, agua indirecta, PUE con bono ni acuífero: cada
+pendiente conserva su motivo y el archivo permanece `parcial`.
+
+El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit conserva las cifras oficiales y rotula como **Ejemplo** la telemetría inventada y sus cálculos. El pipeline incorpora G3 y calcula el saldo y el umbral; el PUE con bono, el acuífero y los factores externos conservan sus pendientes hasta recibir evidencia.
 
 ### Cambiar un contrato
 

@@ -4,7 +4,26 @@
 
 Las entradas por fila permanecen bajo `data/`, ignorado por Git: `data/procesado/telemetria.csv`, `data/resultados/alertas.csv`, `data/resultados/deteccion_para_numeros_oficiales.json` y `data/clima/merida_era5_2025.json`. El kit crudo se lee fuera del repo. El JSON versionado contiene exclusivamente agregados y rutas relativas de código, sin filas ni rutas locales de la laptop.
 
-Para regenerar, desde la raíz del repo, con el kit disponible:
+Para preparar las cifras con G3, desde la raíz del repo, con el kit disponible
+y los cambios de código guardados en un commit limpio:
+
+```bash
+.venv/bin/python -m src.pipeline --kit "$KIT_CSV" --sin-medir \
+  --consumo resultados/g3_consumo_modelo.json
+.venv/bin/python -m src.procedencia --validar-oficial resultados/numeros_oficiales.json
+```
+
+Esto calcula costo, saldo, razón y umbral con su agregado auditable y deja la
+firma conjunta pendiente. `--sin-medir` reutiliza G3; no vuelve a medir en el
+equipo de Nico. Después de revisar el resultado y aprobarlo Misa y Nico,
+se ejecuta el mismo pipeline añadiendo `--validacion-conjunta` y se valida
+añadiendo `--exigir-firma`. No se edita el JSON ni se cambian los tests para
+simular esa aprobación. El test del oficial acepta ambos estados coherentes.
+
+La guía de revisión, alcance y pendientes está en
+[`docs/n3-entrega-nico-para-misa.md`](../docs/n3-entrega-nico-para-misa.md).
+
+Para reconstruir únicamente las métricas base, sin incorporar G3:
 
 ```bash
 .venv/bin/python -m src.datos.cargar --kit "$KIT_CSV" --salida data/procesado/telemetria.csv
@@ -15,7 +34,7 @@ Para regenerar, desde la raíz del repo, con el kit disponible:
 .venv/bin/python -m src.metricas.generar_numeros --descargar-clima
 ```
 
-`--sin-medir` evita atribuir una medición de esta laptop a Gadiel. Sin la salida verificada de CodeCarbon de Gadiel, el costo del detector y el balance neto son `null` con `estado: pendiente`, responsable y motivo. Lo mismo ocurre con el PUE del bono sin rendimiento de chiller de Misa y el acuífero sin fuente confirmada por Guille.
+Sin la salida verificada de CodeCarbon de Gadiel, el costo del detector y el balance neto son `null` con `estado: pendiente`, responsable y motivo. El PUE del bono es ahora un **escenario proyectado** con EER de referencia aportado por Misa y proxy climático ERA5; no representa rendimiento de un chiller en Mérida. La cifra del acuífero sigue pendiente de integración por Nico (#13). El generador base por sí solo no conserva G3: para preparar o firmar el balance debe usarse el pipeline anterior.
 
 La medición G3 usa el formato 2 de `consumo_modelo.json`: sella hashes del kit y del código, equipo y método, y guarda el kWh de **cada** repetición en tres fases (`entrenamiento`, `inferencia`, `corrida_completa`). El balance anualiza `(inferencia / lote.horas) × horas × lotes + entrenamiento × reentrenamientos`; la corrida completa no se suma porque ya incluye el ajuste. Un archivo v1 se acepta como cota superior y no se le suma reentrenamiento. La frecuencia (8 760 h y 4 reentrenamientos) es un supuesto editable, no una medición; `--validacion-conjunta` deja constancia de que Misa y Nico revisaron el balance.
 `--descargar-clima` guarda las 8760 horas de ERA5 2025 bajo `data/` para reproducir los agregados climáticos; sin red también puede pasarse un archivo ya descargado con `--clima`.

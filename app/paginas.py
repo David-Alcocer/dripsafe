@@ -41,6 +41,7 @@ from app.textos import (
 # Umbrales de color: PUE como la regla del kit (rojo arriba de 1.6); agua por kWh IT (rojo arriba de 1.5).
 PASOS_PUE = [(None, "verde"), (1.4, "naranja"), (1.6, "rojo")]
 PASOS_WUE = [(None, "verde"), (1.0, "naranja"), (1.5, "rojo")]
+SUPERINDICES = str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹")
 ANOTACIONES = [("atk", "Incidente o cambio OT", ["", ""]), ("inef", "Escalón sin registro", ["", ""])]
 
 
@@ -101,10 +102,20 @@ def grande(texto: str, px: int = 24) -> str:
     return f'<span style="font-size: {px}px; white-space: normal; display: inline-block">{texto}</span>'
 
 
+def numero_corto(valor: float) -> str:
+    """Cifras muy pequeñas en notación científica: 0.0000129 → '1.3 × 10⁻⁵' (con 4 decimales saldría 0.0000)."""
+    if valor and abs(valor) < 0.001:
+        base, exponente = f"{valor:.1e}".split("e")
+        return f"{base} × 10{str(int(exponente)).translate(SUPERINDICES)}"
+    return c.numero(valor, 4 if abs(valor) < 1 else 2)
+
+
 def tiempo_corto(horas: float | None) -> tuple[str, str]:
-    """Horas → (valor, unidad) legible: segundos, minutos u horas."""
+    """Horas → (valor, unidad) legible: milisegundos, segundos, minutos u horas."""
     if horas is None:
         return "—", ""
+    if horas * 3600 < 1:
+        return c.numero(horas * 3_600_000, 2), "ms/año"
     if horas * 3600 < 60:
         return c.numero(horas * 3600, 2), "s/año"
     if horas < 1:
@@ -260,7 +271,8 @@ def resumen(d: Datos, v: Vista) -> None:
             rejilla([
                 c.stat("Umbral de equilibrio", *(tiempo_corto(horas) if horas is not None else
                        ("Pendiente de revisión", "")), "gris" if horas is None else "azul",
-                       sub=con_tag("falta exceso típico verificable", tipo_de(d, "equilibrio_horas"))),
+                       sub=con_tag("costo ÷ exceso típico" if horas is not None else "falta exceso típico verificable",
+                                   tipo_de(d, "equilibrio_horas"))),
                 c.stat("PUE si se corta el exceso", c.numero(pue_proj, 3), color="azul",
                        sub=con_tag(f'hoy {c.numero(ex["pue"], 3)} · contrafactual, no ahorro',
                                    tipo_de(d, "pue_sin_exceso") if usar_oficial else tipo_det)),
@@ -587,16 +599,18 @@ def balance(d: Datos, v: Vista) -> None:
     proy = cifra(d.numeros, "ahorro_proyectado_kwh_anual")
     co2 = cifra(d.numeros, "co2_proyectado_kg_anual")
     etiqueta = "Pendiente de Gadiel"
+    firmado = bool(d.fuentes.get("firma_balance"))
     detalle_g3 = ("G3 aporta tiempo medido y energía estimada por CodeCarbon/TDP. "
                   if costo is not None else "El costo del detector sigue pendiente. ")
-    st.html('<p class="lead"><b>Balance del detector.</b> ' + detalle_g3 +
-            'El umbral y el saldo requieren validación conjunta; las emisiones requieren '
-            'un factor verificable. El escenario anual no es ahorro observado.</p>')
+    validacion = (f'Umbral y saldo validados por {" y ".join(d.fuentes["firma_balance"])}; '
+                  if firmado else "El umbral y el saldo requieren validación conjunta; ")
+    st.html('<p class="lead"><b>Balance del detector.</b> ' + detalle_g3 + validacion +
+            'las emisiones requieren un factor verificable. El escenario anual no es ahorro observado.</p>')
     rejilla([
         c.stat("Tiempo del detector", c.numero(tiempo, 1) if tiempo is not None else etiqueta,
                "ms" if tiempo is not None else "", "gris",
                sub=con_tag("medición con repeticiones" if tiempo is not None else "falta medición", tipo_de(d, "detector_cpu_ms"))),
-        c.stat("Energía del detector", c.numero(costo, 4) if costo is not None else etiqueta,
+        c.stat("Energía del detector", numero_corto(costo) if costo is not None else etiqueta,
                "kWh/año" if costo is not None else "", "gris",
                sub=con_tag("CodeCarbon/TDP · estimación" if costo is not None else "falta medición", tipo_de(d, "detector_kwh_anual"))),
         c.stat("Umbral de equilibrio", *tiempo_corto(equilibrio) if equilibrio is not None else
@@ -632,11 +646,13 @@ def balance(d: Datos, v: Vista) -> None:
         if v.tabla_sitio["site_id"].nunique() == 3 and proy is not None:
             st.html(c.aviso(f"Cifra oficial con los supuestos iniciales: {c.numero(proy)} kWh/año proyectados. "
                             "Al editar parámetros se recalcula la simulación local."))
-        st.html(c.aviso("Proyección, no ahorro observado. El saldo energético sigue pendiente de validación conjunta."))
+        st.html(c.aviso("Proyección, no ahorro observado. " + (
+            f"El saldo energético oficial está validado por {' y '.join(d.fuentes['firma_balance'])} con los supuestos iniciales."
+            if firmado else "El saldo energético sigue pendiente de validación conjunta.")))
 
     with fila("De dónde sale cada número", "calculo"):
         filas = [[f'<span class="mono">{k}</span>',
-                  (c.numero(x["valor"], 4 if abs(x["valor"]) < 1 else 2) + f' {x.get("unidad", "")}')
+                  (numero_corto(x["valor"]) + f' {x.get("unidad", "")}')
                   if isinstance(x.get("valor"), (int, float)) else x.get("motivo_pendiente", "Pendiente"),
                   x.get("responsable", "—"), c.procedencia(tipo_de(d, k))]
                  for k, x in d.numeros.items() if isinstance(x, dict) and "valor" in x]
@@ -680,8 +696,10 @@ def agua(d: Datos, v: Vista) -> None:
                           "nulo en el de aire. Los sitios son simulados: la diferencia no prueba que una tecnología sea mejor.")))
 
     with fila("Acuífero de Yucatán", "acuifero"):
-        st.html(c.panel("Acuífero 3105", '<p class="txt-d">Pendiente de Nico: confirmar la fuente, '
-                        'el año y la disponibilidad del acuífero antes de publicar cifras o conclusiones.</p>'))
+        st.html(c.panel("Acuífero 3105", '<p class="txt-d">CONAGUA publicó una actualización en 2024. '
+                        'Su disponibilidad regional está pendiente de integración en las cifras oficiales; '
+                        'no describe el suministro de un predio.</p>',
+                        "Fuente: CONAGUA, actualización del acuífero 3105 (2024), §8.4."))
 
     with fila("Las épocas del año en Yucatán", "epocas"):
         st.html(c.panel("Por qué una sola semana no basta", c.tabla(
@@ -697,8 +715,8 @@ def agua(d: Datos, v: Vista) -> None:
             st.html(c.panel("Enfriamiento propuesto", c.tabla(
                 ["Pieza", "Qué es", "Costo o límite"], [[f"<b>{o}</b>", q, x] for o, q, x, _ in BONO],
                 resaltar=tuple(i for i, b in enumerate(BONO) if b[3]))
-                + c.aviso("La IA <b>recomienda</b> qué respaldo usar y el operador <b>confirma</b>. Una regla verifica "
-                          "que el medidor de agua potable del enfriamiento marque cero."),
+                + c.aviso("Propuesta futura: DripSafe <b>recomendaría</b> el respaldo y el operador lo confirmaría. "
+                          "Un medidor dedicado tendría que verificar la meta de cero agua potable."),
                 "Para obra nueva o renovación. Referencias: Microsoft 2024 (sin evaporación), Google Douglas County "
                 "(agua residual tratada), ASHRAE (clases W32/W40/W45)."))
         with der:
@@ -713,11 +731,14 @@ def agua(d: Datos, v: Vista) -> None:
                             "Horas exteriores por encima del umbral ilustrativo en Mérida (2025). No son horas medidas "
                             "de operación del chiller; Misa debe confirmar su curva de rendimiento."))
     if d.fuentes.get("numeros") == "oficial":
+        pue_bono = cifra(d.numeros, "pue_con_bono")
         rejilla([
-            c.stat("PUE con bono", "Pendiente de Misa", color="gris",
-                   sub=con_tag("requiere rendimiento del chiller", "proyectado")),
+            c.stat("PUE con bono", c.numero(pue_bono, 3) if pue_bono is not None else "Pendiente",
+                   color="morado" if pue_bono is not None else "gris",
+                   sub=con_tag("escenario con COP de referencia; no medido" if pue_bono is not None
+                               else "requiere datos de respaldo", tipo_de(d, "pue_con_bono"))),
             c.stat("Acuífero 3105", "Pendiente de Nico", color="gris",
-                   sub=con_tag("requiere fuente y año confirmados", "observado")),
+                   sub=con_tag("requiere integración al JSON oficial", "observado")),
         ])
     mostrar_aviso_cifras(d)
 

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from src import contrato
+from src import contrato, procedencia
 from src.metricas.generar_numeros import plano
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -93,12 +93,19 @@ def test_curva_y_falsas_alarmas_de_leo_usen_los_agregados_n2(cifras):
     assert leo["falsas_alarmas_ruido"]["unidad_conteo"] == "alarmas/día/sitio"
 
 
-def test_g3_versionado_y_pendientes_del_balance(cifras):
+def test_g3_y_balance_preparados_para_firma(cifras):
     c, leo = cifras
-    for clave, responsable in (("pue_con_bono", "Misa"), ("acuifero_3105", "Nico")):
-        x = leo[clave]
-        assert x["valor"] is None and x["estado"] == "pendiente"
-        assert responsable in x.get("motivo_pendiente", "")
+    bono = c["bono_zero_freshwater"]["pue_con_bono"]
+    assert bono == leo["pue_con_bono"]
+    assert bono["tipo"] == "proyectado" and bono["responsable"] == "Misa"
+    assert bono["valor"] == 1.2842
+    assert bono["supuestos"]["pue_base"] == 1.198
+    assert bono["supuestos"]["horas_respaldo_proxy"] == c["bono_zero_freshwater"][
+        "horas_respaldo_mérida_al_año"]["umbral_30c"]
+    assert bono["supuestos"]["cop"] == 2.96
+    x = leo["acuifero_3105"]
+    assert x["valor"] is None and x["estado"] == "pendiente"
+    assert "Nico" in x.get("motivo_pendiente", "")
     balance = c["balance_neto"]
     costo = balance["costo_detector_kwh_anual"]["valor"]
     assert costo == pytest.approx(1.2916184e-05)
@@ -109,15 +116,22 @@ def test_g3_versionado_y_pendientes_del_balance(cifras):
     assert leo["detector_kwh_anual"] == balance["costo_detector_kwh_anual"]
     assert leo["detector_cpu_ms"] == balance["tiempo_detector_ms"]
     assert balance["frecuencia_anualizacion"]["modo"] == "fases_separadas"
-    assert balance["validado_por"] is None and balance["nota_validacion"]
+    assert procedencia.validar_balance_oficial(c) == []
+    if balance["validado_por"] is None:
+        assert balance["nota_validacion"] and "fecha_validacion" not in balance
+    else:
+        assert procedencia.validar_balance_oficial(c, exigir_firma=True) == []
     assert c["_meta"]["procedencia_g3"]["metodo"]["fuente_energia"] == "tdp_estimado"
     assert balance["razon_ahorro_costo"]["valor"] == round(
         balance["ahorro_proyectado_kwh_anual"]["valor"] / costo, 1)
     assert "costo publicado" in balance["razon_ahorro_costo"]["nota"]
     assert balance["razon_ahorro_costo"]["tipo"] == "proyectado"
-    assert balance["umbral_equilibrio"]["valor"] is None
-    assert leo["equilibrio_horas"]["estado"] == "pendiente"
-    assert balance["balance_energia_kwh_anual"]["valor"] is None
+    umbral = balance["umbral_equilibrio"]
+    assert umbral["valor"] == round(costo / umbral["supuestos"]["exceso_tipico_kwh_por_hora"], 12)
+    assert umbral["supuestos"]["horas_sitio_con_alerta_fisica"] >= umbral["supuestos"]["horas_sitio_con_exceso_positivo"] > 0
+    assert leo["equilibrio_horas"] == umbral
+    assert balance["balance_energia_kwh_anual"]["valor"] == round(
+        balance["ahorro_proyectado_kwh_anual"]["valor"] - costo, 12)
     assert balance["balance_energia_kwh_anual"]["tipo"] == "proyectado"
     assert leo["balance_energia_kwh_anual"] == balance["balance_energia_kwh_anual"]
     assert "Nico" in leo["acuifero_3105"]["motivo_pendiente"]

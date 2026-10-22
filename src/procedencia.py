@@ -281,8 +281,8 @@ def validar_consumo(consumo: dict) -> list[str]:
     return problemas
 
 
-def validar_balance_oficial(numeros: dict) -> list[str]:
-    """Reglas de procedencia y validación conjunta del bloque balance_neto."""
+def validar_balance_oficial(numeros: dict, *, exigir_firma: bool = False) -> list[str]:
+    """Comprueba cálculos con agregados publicados y distingue preparación de firma."""
     problemas: list[str] = []
     balance = numeros.get("balance_neto", {})
     costo = balance.get("costo_detector_kwh_anual", {})
@@ -295,10 +295,65 @@ def validar_balance_oficial(numeros: dict) -> list[str]:
                 if not isinstance(procedencia.get(seccion), dict) or not procedencia[seccion]:
                     problemas.append(f"_meta.procedencia_g3.{seccion} ausente")
     validado = balance.get("validado_por")
-    if validado is not None and sorted(validado) != ["Misa", "Nico"]:
+    if validado is not None and validado not in (["Misa", "Nico"], ["Nico", "Misa"]):
         problemas.append("balance_neto.validado_por debe incluir a Misa y Nico")
+    fecha = balance.get("fecha_validacion")
+    if validado is not None:
+        try:
+            if not isinstance(fecha, str) or date.fromisoformat(fecha).isoformat() != fecha:
+                raise ValueError
+        except ValueError:
+            problemas.append("balance_neto.fecha_validacion debe ser una fecha ISO YYYY-MM-DD")
+        if costo.get("valor") is None:
+            problemas.append("balance firmado sin costo del detector")
+    elif fecha is not None:
+        problemas.append("fecha_validacion presente sin firma conjunta")
+    if exigir_firma and validado is None:
+        problemas.append("falta la validación conjunta de Misa y Nico")
     if costo.get("valor") is not None and validado is None and not balance.get("nota_validacion"):
         problemas.append("costo disponible sin validación conjunta ni nota de pendiente")
+
+    def finito(valor):
+        return isinstance(valor, (int, float)) and not isinstance(valor, bool) and math.isfinite(valor)
+
+    costo_valor = costo.get("valor")
+    metodo = numeros.get("_meta", {}).get("procedencia_g3", {}).get("metodo", {})
+    if costo.get("tipo") == "medido" and metodo.get("fuente_energia") != "sensor_hardware":
+        problemas.append("costo medido requiere sensor_hardware; TDP debe publicarse como estimado")
+    if balance.get("frecuencia_anualizacion", {}).get("modo") == "fases_separadas":
+        entrenamiento = balance.get("costo_entrenamiento_kwh_anual", {}).get("valor")
+        inferencia = balance.get("costo_inferencia_kwh_anual", {}).get("valor")
+        if (not all(finito(v) and v >= 0 for v in (costo_valor, entrenamiento, inferencia))
+                or not math.isclose(costo_valor, entrenamiento + inferencia, rel_tol=0, abs_tol=1.1e-12)):
+            problemas.append("costo anual no coincide con entrenamiento + inferencia publicados")
+    ahorro = balance.get("ahorro_proyectado_kwh_anual", {}).get("valor")
+    saldo = balance.get("balance_energia_kwh_anual", {})
+    razon = balance.get("razon_ahorro_costo", {})
+    umbral = balance.get("umbral_equilibrio", {})
+    for nombre, metrica in (("balance_energia_kwh_anual", saldo), ("razon_ahorro_costo", razon),
+                            ("umbral_equilibrio", umbral)):
+        if metrica.get("valor") is not None and metrica.get("tipo") != "proyectado":
+            problemas.append(f"balance_neto.{nombre} debe ser proyectado")
+    if finito(costo_valor) and finito(ahorro):
+        if saldo.get("valor") is not None and saldo["valor"] != round(ahorro - costo_valor, 12):
+            problemas.append("saldo energético no coincide con ahorro publicado menos costo publicado")
+        if razon.get("valor") is not None and (costo_valor <= 0 or razon["valor"] != round(ahorro / costo_valor, 1)):
+            problemas.append("razón ahorro/costo no coincide con los valores publicados")
+    elif saldo.get("valor") is not None or razon.get("valor") is not None:
+        problemas.append("saldo o razón publicados sin ahorro y costo finitos")
+    if umbral.get("valor") is not None:
+        agregado = umbral.get("supuestos", {})
+        tipico = agregado.get("exceso_tipico_kwh_por_hora")
+        positivas = agregado.get("horas_sitio_con_exceso_positivo")
+        alertadas = agregado.get("horas_sitio_con_alerta_fisica")
+        if (not finito(tipico) or tipico <= 0 or not finito(costo_valor)
+                or not isinstance(positivas, int) or isinstance(positivas, bool) or positivas <= 0
+                or not isinstance(alertadas, int) or isinstance(alertadas, bool) or alertadas < positivas
+                or agregado.get("periodo") != "evaluacion" or agregado.get("estadistico") != "mediana"
+                or agregado.get("intervalo_h") != 1 or not agregado.get("filtro") or not agregado.get("origen")):
+            problemas.append("umbral publicado sin mediana positiva y conteos verificables de evaluación")
+        elif umbral["valor"] != round(costo_valor / tipico, 12):
+            problemas.append("umbral no coincide con costo publicado / mediana publicada")
     return problemas
 
 
@@ -314,7 +369,11 @@ def main() -> None:
     parser.add_argument("--validar", type=Path, help="valida un consumo_modelo.json (contrato 3 v2)")
     parser.add_argument("--validar-oficial", type=Path,
                         help="valida procedencia y validación conjunta de numeros_oficiales.json")
+    parser.add_argument("--exigir-firma", action="store_true",
+                        help="junto a --validar-oficial, falla si Misa y Nico aún no han firmado")
     args = parser.parse_args()
+    if args.exigir_firma and not args.validar_oficial:
+        parser.error("--exigir-firma requiere --validar-oficial")
 
     if args.validar:
         consumo = json.loads(args.validar.read_text(encoding="utf-8"))
@@ -330,14 +389,18 @@ def main() -> None:
             print(f"OK: {args.validar} cumple el contrato 3 v2")
         return
     if args.validar_oficial:
+        from src import contrato
+
         numeros = json.loads(args.validar_oficial.read_text(encoding="utf-8"))
-        problemas = validar_balance_oficial(numeros)
+        problemas = contrato.validar_numeros_oficiales(numeros) + validar_balance_oficial(
+            numeros, exigir_firma=args.exigir_firma)
         if problemas:
             print("El balance NO cumple las reglas de procedencia:")
             for problema in problemas:
                 print(f"  - {problema}")
             raise SystemExit(1)
-        print(f"OK: {args.validar_oficial} cumple las reglas de procedencia y validación")
+        estado = "firma conjunta registrada" if numeros.get("balance_neto", {}).get("validado_por") else "firma conjunta pendiente"
+        print(f"OK: {args.validar_oficial} cumple contrato y cálculos; {estado}")
         return
 
     datos = construir(kit=args.kit, telemetria=args.entrada, sensor_hardware=args.sensor_hardware)

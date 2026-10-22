@@ -162,7 +162,9 @@ def test_numeros_oficiales_se_proyectan_en_memoria():
 
 def test_cargar_sin_kit_usa_cifras_oficiales_y_vista_previa(sin_kit):
     d = cargar.cargar()
-    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "oficial"}
+    assert {k: d.fuentes[k] for k in ("telemetria", "detector", "numeros")} == {
+        "telemetria": "ejemplo", "detector": "vista_previa", "numeros": "oficial"}
+    assert d.fuentes.get("firma_balance") == ["Misa", "Nico"]
     assert d.numeros["_ejemplo"] is False
     assert d.kit_fijado is False
     assert len(d.eventos) >= 3
@@ -196,7 +198,9 @@ def test_salidas_del_equipo_no_se_mezclan_con_datos_de_ejemplo(sin_kit, monkeypa
     monkeypatch.setitem(cargar.RUTAS, "alertas", alertas)
     monkeypatch.setitem(cargar.RUTAS, "consumo", consumo)
     d = cargar.cargar()
-    assert d.fuentes == {"telemetria": "ejemplo", "detector": "vista_previa", "numeros": "oficial"}
+    assert {k: d.fuentes[k] for k in ("telemetria", "detector", "numeros")} == {
+        "telemetria": "ejemplo", "detector": "vista_previa", "numeros": "oficial"}
+    assert d.fuentes.get("firma_balance") == ["Misa", "Nico"]
     assert d.consumo == {}
 
 
@@ -207,7 +211,9 @@ def test_kit_distinto_no_recibe_alertas_y_avisa_que_cifras_no_corresponden(monke
     monkeypatch.setattr(kit, "ruta_csv", lambda: ruta)
     monkeypatch.setattr(kit, "leer", kit.ejemplo)
     d = cargar.cargar()
-    assert d.fuentes == {"telemetria": "kit", "detector": "vista_previa", "numeros": "oficial"}
+    assert {k: d.fuentes[k] for k in ("telemetria", "detector", "numeros")} == {
+        "telemetria": "kit", "detector": "vista_previa", "numeros": "oficial"}
+    assert d.fuentes.get("firma_balance") == ["Misa", "Nico"]
     assert d.numeros["_ejemplo"] is False and not d.kit_fijado
     assert any("no coincide con el kit fijado" in aviso for aviso in d.avisos)
 

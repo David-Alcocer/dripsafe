@@ -10,8 +10,8 @@ Uso:
 
 El JSON lo arma `generar_numeros.construir()` de Nico: aquí solo se corren las
 piezas que necesita y se agrega lo que depende de la medición del detector
-(costo, tiempo y razón ahorro/costo). El umbral queda pendiente hasta que su
-denominador esté en un agregado versionado. Antes de escribir,
+(costo, tiempo, saldo y razón ahorro/costo). El umbral usa la mediana y los
+conteos agregados que conserva generar_numeros en el propio JSON. Antes de escribir,
 el JSON pasa `contrato.validar_numeros_oficiales()`.
 
 Las tablas por hora se quedan en data/resultados/ (fuera de Git). Al JSON
@@ -210,7 +210,13 @@ def _origen_consumo(consumo: dict, modo: str) -> str:
 def _balance(numeros: dict, consumo: dict | None, args) -> dict:
     """Copia del bloque balance_neto con lo que depende de la medición del detector."""
     actual = dict(numeros["balance_neto"])
+    # Cada regeneración exige una decisión explícita; nunca arrastra una firma.
+    actual["validado_por"] = None
+    actual.pop("fecha_validacion", None)
+    actual["nota_validacion"] = "Cálculos preparados para revisión; pendiente de validación conjunta de Misa y Nico."
     if consumo is None:
+        if args.validacion_conjunta:
+            raise ValueError("No se puede firmar el balance sin consumo del detector verificable.")
         return actual
 
     desglose = balance_neto.desglose_costo_anual(consumo, _frecuencia_args(args))
@@ -245,9 +251,10 @@ def _balance(numeros: dict, consumo: dict | None, args) -> dict:
     if args.validacion_conjunta:
         actual["validado_por"] = ["Misa", "Nico"]
         actual["fecha_validacion"] = date.today().isoformat()
-    else:
-        actual["validado_por"] = None
-        actual["nota_validacion"] = "Pendiente de validación conjunta de Misa y Nico."
+        actual["nota_validacion"] = (
+            "Misa y Nico validaron conjuntamente los cálculos, supuestos y límites del balance. "
+            "Las métricas sin evidencia conservan null y su motivo; la firma no acredita CO₂."
+        )
 
     ms = _ms_mediana(consumo)
     if ms is not None:
@@ -258,16 +265,25 @@ def _balance(numeros: dict, consumo: dict | None, args) -> dict:
         actual["tiempo_detector_ms"] = metrica(
             round(ms, 3), "ms", "medido", origen, "Gadiel", nota=nota_ms)
 
+    agregado = actual["umbral_equilibrio"].get("supuestos", {})
+    tipico = agregado.get("exceso_tipico_kwh_por_hora")
+    umbral = round(costo_publicado / tipico, 12) if tipico is not None and tipico > 0 else None
     actual["umbral_equilibrio"] = metrica(
-        None, "h/año", "proyectado", "costo detector/exceso típico por hora", "Misa + Nico",
-        motivo="El agregado versionado no conserva la mediana del exceso no TI por hora con alerta física necesaria para comprobar este umbral. Pendiente de revisión conjunta de Misa y Nico.")
+        umbral, "h/año", "proyectado", "costo detector publicado / mediana publicada en supuestos", "Misa + Nico",
+        supuestos=agregado,
+        nota=("Horas de exceso típico en un sitio que compensan el costo anual del detector para los tres sitios. "
+              "Umbral algebraico con el método energético declarado en costo_detector_kwh_anual; no es tiempo de detección ni de corrección. "
+              "La resolución de los datos es de una hora.") if umbral is not None else None,
+        motivo="Sin mediana positiva de exceso no TI en horas de evaluación con alerta física." if umbral is None else None)
     actual["emisiones_detector_gco2e_anual"] = metrica(
         None, "gCO2e/año", "estimado", "CodeCarbon × factor SEN", "Gadiel + Nico",
-        motivo="G3 aporta energía estimada por TDP; falta revisar la anualización y la atribución de emisiones antes de publicar esta cifra.")
-    actual["balance_energia_kwh_anual"] = metrica(
-        None, "kWh/año", "proyectado", "ahorro proyectado menos costo anual del detector", "Misa + Nico",
-        motivo="El saldo energético requiere validación conjunta de Misa y Nico antes de publicarse.")
+        motivo="G3 aporta energía estimada por TDP; falta un factor SEN con fuente y periodo verificados. No se publica CO₂.")
     ahorro = numeros["balance_neto"]["ahorro_proyectado_kwh_anual"]["valor"]
+    saldo = round(balance_neto.balance_energia_anual(ahorro, costo_publicado), 12) if ahorro is not None else None
+    actual["balance_energia_kwh_anual"] = metrica(
+        saldo, "kWh/año", "proyectado", "ahorro_proyectado_kwh_anual publicado − costo_detector_kwh_anual publicado", "Misa + Nico",
+        nota="Saldo calculado con los valores publicados y los supuestos del ahorro y de frecuencia_anualizacion; no es ahorro observado." if saldo is not None else None,
+        motivo="Falta el ahorro proyectado para calcular el saldo energético." if saldo is None else None)
     if ahorro is not None and costo_publicado > 0:
         actual["razon_ahorro_costo"] = metrica(
             round(ahorro / costo_publicado, 1), "veces", "proyectado",
