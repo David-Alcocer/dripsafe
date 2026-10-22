@@ -24,7 +24,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | Criterio | Responsable | Issues | Evidencia que lo demuestra | Estado |
 |---|---|---|---|---|
 | Innovación | Gadiel + Nico | #6, #8, #22 | Detector con línea base física por sitio y comparación por episodio frente a las reglas del kit | ⬜ |
-| Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números (`python -m src.pipeline`) | 🟨 faltan los supuestos de Nico para completar el JSON oficial |
+| Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números (`python -m src.pipeline`) | 🟨 balance y supuestos preparados para revisión; falta firma conjunta (#14) |
 | Impacto en ciberseguridad | Guille | #9–#12, #30, #32 | Tabla de decisión de las 4 clases (`src/ot/clases.py`), rejilla corrida sobre el kit (`src/ataques/correr_rejilla.py`, cifras en `numeros_oficiales.json`), pruebas exploratorias de piso, rampa y calor (`src/ataques/exploratorias.py`) y modelo de amenazas con tabla ATT&CK v20 (`docs/06`) | ✅ integrado (#38–#40). Falta la revisión con un mentor el 22 (#11) |
 | Eficiencia Green AI | Nico: impacto y costo del detector; Misa: PUE inicial; Gadiel: consumo esperado | #2, #3, #5, #22 | PUE inicial y final proyectado + tabla calidad frente a costo | ⬜ |
 | Balance neto y gobernanza hídrica | Misa + Nico: balance; Nico: acuífero | #13, #14 | Balance en kWh y litros + análisis del acuífero | ⬜ |

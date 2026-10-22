@@ -182,7 +182,7 @@ comprueba el contrato, las operaciones y el estado de firma. Añadir
 La firma no completa CO₂, agua indirecta, PUE con bono ni acuífero: cada
 pendiente conserva su motivo y el archivo permanece `parcial`.
 
-El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit usa `app/ejemplos/numeros_demo.json`, rotulada **Ejemplo**. El costo del detector, el balance que depende de él, el PUE con bono y el acuífero siguen pendientes hasta recibir evidencia.
+El generador `python -m src.metricas.generar_numeros` usa telemetría, alertas y resultados de la rejilla bajo `data/` (ignorado por Git), más la serie ERA5 de Mérida cuando está disponible. Versiona solo agregados; `src/contrato.py::validar_numeros_oficiales` comprueba metadatos, tipos y `null` justificados. La demo sin kit usa `app/ejemplos/numeros_demo.json`, rotulada **Ejemplo**. El pipeline incorpora G3 y calcula el saldo y el umbral para revisión conjunta. El PUE con bono, el acuífero y los factores externos conservan sus pendientes hasta recibir evidencia.
 
 ### Cambiar un contrato
 
