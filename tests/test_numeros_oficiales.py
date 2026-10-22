@@ -95,10 +95,16 @@ def test_curva_y_falsas_alarmas_de_leo_usen_los_agregados_n2(cifras):
 
 def test_g3_y_balance_preparados_para_firma(cifras):
     c, leo = cifras
-    for clave, responsable in (("pue_con_bono", "Misa"), ("acuifero_3105", "Nico")):
-        x = leo[clave]
-        assert x["valor"] is None and x["estado"] == "pendiente"
-        assert responsable in x.get("motivo_pendiente", "")
+    bono = c["bono_zero_freshwater"]["pue_con_bono"]
+    assert bono == leo["pue_con_bono"]
+    assert bono["tipo"] == "proyectado" and bono["responsable"] == "Misa"
+    assert bono["valor"] == pytest.approx(1.2842, abs=.0001)
+    assert bono["supuestos"]["horas_respaldo_proxy"] == c["bono_zero_freshwater"][
+        "horas_respaldo_mérida_al_año"]["umbral_30c"]
+    assert bono["supuestos"]["cop"] == 2.96
+    x = leo["acuifero_3105"]
+    assert x["valor"] is None and x["estado"] == "pendiente"
+    assert "Nico" in x.get("motivo_pendiente", "")
     balance = c["balance_neto"]
     costo = balance["costo_detector_kwh_anual"]["valor"]
     assert costo == pytest.approx(1.2916184e-05)

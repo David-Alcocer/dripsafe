@@ -164,7 +164,7 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
    - **Propuesta futura:** un medidor dedicado verifica la fuente y el volumen de agua potable del enfriamiento.
    - El operador confirma; la IA nunca manda órdenes.
 
-**Meta por verificar:** WUE potable de enfriamiento = 0 L/kWh durante operación si llenado y reposición usan fuente no potable; se necesitará un medidor dedicado. El kit no separa potable de no potable. El respaldo B requiere energía adicional, pero **el PUE anual del bono sigue pendiente** de las curvas del enfriador, chiller y bombas. No se toma el PUE de un sitio simulado como PUE de esta arquitectura. El respaldo A sigue siendo una alternativa futura condicionada a suministro y descarga.
+**Meta por verificar:** WUE potable de enfriamiento = 0 L/kWh durante operación si llenado y reposición usan fuente no potable; se necesitará un medidor dedicado. El kit no separa potable de no potable. Con un COP de referencia aportado por Misa y horas ERA5 por encima de 30 °C, el **PUE proyectado del escenario es aproximadamente 1.284**, bajo los supuestos de `docs/07` §5.4. No es el PUE físico de esta arquitectura: faltan curvas locales y energía de bombas. El respaldo A sigue siendo una alternativa futura condicionada a suministro y descarga.
 
 ## 8. Arquitectura segura
 

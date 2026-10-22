@@ -28,14 +28,14 @@ Entrega para Leo. Las afirmaciones de diseño son **propuesta**, los datos del k
 
 - El llenado y toda reposición deben proceder de una fuente no potable verificada. El enfriador seco y el chiller por aire no evaporan agua.
 - ERA5 de Mérida ofrece horas por encima de umbrales exteriores; son un **proxy climático**, no horas observadas del chiller.
-- El PUE anual del bono queda pendiente de carga y curvas de enfriador, chiller y bombas. Los tres sitios simulados ilustran el intercambio, pero no prueban el PUE de esta arquitectura.
+- **PUE proyectado ≈ 1.284:** escenario con PUE base 1.198 del kit, COP 2.96, carga térmica igual al 100 % de la energía de TI y 25.5 % del año sobre 30 °C en ERA5. No es un PUE medido de un equipo en Mérida.
 
-**Nota para exponer:** tomar cualquier conteo de horas exclusivamente del campo `bono_zero_freshwater.horas_respaldo_mérida_al_año` del JSON oficial y llamarlo «horas sobre umbral». No sustituir horas por la fracción de energía de TI. El respaldo con agua tratada es una opción futura, condicionada a disponibilidad, tratamiento y descarga autorizada. El detector solo recomienda en la arquitectura propuesta; no opera el chiller en la demo.
+**Nota para exponer:** tomar cifras exclusivamente de `bono_zero_freshwater` del JSON oficial. La conversión de horas a fracción de energía de TI requiere **suponer carga constante**. El COP tabulado es a condiciones estándar y se suma el chiller sobre un PUE simulado; faltan curvas reales, bombas y sustitución de la refrigeración previa. El respaldo con agua tratada es una opción futura condicionada a suministro y descarga. El detector no opera el chiller en la demo.
 
-**Fuentes al pie:** [ASHRAE, clases de enfriamiento líquido](https://www.ashrae.org/file%20library/technical%20resources/bookstore/emergence-and-expansion-of-liquid-cooling-in-mainstream-data-centers_wp.pdf); [Microsoft, diseño de cero evaporación y efecto en PUE (2024)](https://www.microsoft.com/en-us/microsoft-cloud/blog/2024/12/09/sustainable-by-design-next-generation-datacenters-consume-zero-water-for-cooling/); [Open-Meteo, API histórica ERA5](https://open-meteo.com/en/docs/historical-weather-api).
+**Fuentes al pie:** [ASHRAE, clases de enfriamiento líquido](https://www.ashrae.org/file%20library/technical%20resources/bookstore/emergence-and-expansion-of-liquid-cooling-in-mainstream-data-centers_wp.pdf); [WAC, EER de chiller por aire, tabla C403.3.2(3)](https://app.leg.wa.gov/WAC/default.aspx?cite=51-11C-403323&pdf=true); [Open-Meteo, API histórica ERA5](https://open-meteo.com/en/docs/historical-weather-api).
 
 ## Integración pendiente
 
 1. Nico incorpora al JSON oficial, mediante el flujo de firma del equipo, fuente, fecha y disponibilidad del acuífero 3105 tras confirmar el valor que se publicará. Este archivo no sirve como sustituto del JSON.
-2. Misa aporta especificaciones y despacho horario del enfriador seco, chiller y bombas para calcular el PUE anual del bono; sin ellas se conserva `pendiente`.
+2. Misa valida con fichas y despacho horario del enfriador seco, chiller y bombas el escenario PUE publicado; hasta entonces permanece `proyectado`.
 3. Leo incorpora las dos láminas al PDF del pitch, alinea el guion y comprueba cada cifra visible contra el JSON final. Misa revisa el bono y Nico el acuífero; Leo revisa los cambios de `app/`.

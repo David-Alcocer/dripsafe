@@ -124,7 +124,9 @@ En 2025, la serie horaria de temperatura a 2 m para Mérida, [ERA5 vía Open-Met
 
 La consulta reproducible está en `src/metricas/generar_numeros.py` (`URL_CLIMA`); el archivo horario queda en `data/clima/`, fuera de Git. Estos conteos son **temperatura exterior estimada**, no horas medidas de chiller. El umbral efectivo depende de temperatura de suministro admitida, aproximaciones térmicas del enfriador y del intercambiador, carga, control y rendimiento del equipo. El reparto horario tampoco equivale automáticamente a la fracción de **energía de TI** servida durante el respaldo.
 
-Para estimar el PUE anual de la propuesta hacen falta energía anual de TI, energía no TI de la base, potencia o curva de rendimiento del enfriador seco, chiller y bombas, y su despacho horario. El cálculo sería `PUE = (E_IT + E_otros + E_enfriador_seco + E_chiller + E_bombas) / E_IT`, con todas las energías en el mismo periodo. **El PUE del bono permanece pendiente** hasta que Misa aporte esos parámetros. Las cifras de PUE y WUE de los sitios simulados en §5.1 no se transfieren a este equipo.
+**Escenario proyectado de Misa:** el PUE base es **1.198**, del sitio líquido simulado SIM-C en referencia (§5.1). El respaldo usa un chiller por aire con **EER de plena carga 10.100 Btu/Wh**, valor mínimo Path A de [ASHRAE 90.1, tabla 6.8.1-3](https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20errata/standards/90.1-2013-ip-erratasheet-6-15-2023-.pdf#page=7), reproducido en la [tabla oficial WAC C403.3.2(3)](https://app.leg.wa.gov/WAC/default.aspx?cite=51-11C-403323&pdf=true). `COP = EER / 3.412 ≈ 2.96`. De ERA5 se toman **2 235 / 8 760 = 0.25514** horas con temperatura `>30 °C`. Con carga de TI **constante** (para usar horas como fracción de energía) y una carga térmica igual al **100 % de la energía de TI** en esas horas, la fórmula es `PUE escenario = 1.198 + (2235 / 8760) / 2.96 = 1.2842`, aproximadamente **1.284**.
+
+El chiller se suma a un PUE observado de otro sitio simulado; no se modela la sustitución del enfriamiento existente, bombas adicionales ni rendimiento en el calor real de Mérida. El EER tabulado corresponde a **condiciones estándar**, no a una ficha de equipo instalado. Por eso **1.2842 es un escenario, no un PUE físico verificado**. Como sensibilidad, [FEMP](https://www.energy.gov/cmei/femp/purchasing-energy-efficient-electric-chillers) recomienda EER **10.89** para un chiller por aire de menos de 150 t: COP ≈ **3.19** y el mismo cálculo daría PUE ≈ **1.278**. El JSON oficial publica solo el escenario base de Misa y conserva los supuestos y fuentes.
 
 ### 5.5 Evidencia técnica y alcance
 
@@ -134,7 +136,7 @@ Para estimar el PUE anual de la propuesta hacen falta energía anual de TI, ener
 
 ### 5.6 Validaciones necesarias antes de afirmar viabilidad local
 
-1. Confirmar compatibilidad W40 de los servidores, carga térmica, curvas de enfriador/chiller, energía de bombas y PUE anual resultante; comparar energía directa e impacto indirecto del SEN si existe un factor verificable.
+1. Confirmar compatibilidad W40 de los servidores, carga térmica, curvas de enfriador/chiller a temperaturas locales, energía de bombas y PUE anual real; comparar energía directa e impacto indirecto del SEN si existe un factor verificable.
 2. Confirmar origen, calidad y volumen de agua no potable para llenado y reposición, con contingencia que no recurra inadvertidamente a agua potable. Sin esto, `WUE potable = 0` es **meta de diseño**.
 3. Si se evalúa la alternativa adiabática, identificar planta, disponibilidad, tratamiento, costo y ruta autorizada de la purga; no asumir que existe conexión con JAPAY.
 4. Validar con datos físicos del sitio; el kit contiene tres escenarios ficticios y solo mide captación in situ, no potabilidad, purga ni agua de generación eléctrica.

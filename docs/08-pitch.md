@@ -54,7 +54,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 
 ### 5 · Impacto y escala (60 s)
 > "En agua, el ahorro depende del tipo de enfriamiento: es grande en el evaporativo y casi nulo en el de aire. Lo decimos en lugar de prometer agua en todos lados.
-> Para el bono proponemos llegar a **cero agua potable de enfriamiento** en obra nueva: circuito cerrado W40, enfriador seco y chiller condensado por aire. La serie ERA5 de Mérida cuenta horas por encima de varios umbrales, pero todavía no mide las horas del chiller. Microsoft describió en 2024 un diseño sin evaporación y reconoció su costo energético. Nuestro PUE del bono sigue pendiente de las curvas del equipo. El agua tratada para un respaldo adiabático sería una alternativa futura condicionada a suministro y descarga verificados.
+> Para el bono proponemos llegar a **cero agua potable de enfriamiento** en obra nueva: circuito cerrado W40, enfriador seco y chiller condensado por aire. La serie ERA5 de Mérida cuenta horas por encima de umbrales exteriores, no horas medidas del chiller. Con el COP de referencia aportado por Misa, carga TI constante y calor igual a la energía de TI, el **PUE proyectado es [pue_con_bono]**; el kit y un estándar de equipo sustentan un escenario, no un diseño térmico verificado en Mérida. El agua tratada para un respaldo adiabático sería una alternativa futura condicionada a suministro y descarga verificados.
 > DripSafe corre en local, sin nube y sin GPU, con seis medidores que casi cualquier centro de datos ya tiene. Cuesta por kW, y con nuestro precio supuesto la cuota se paga sola con menos del 0.5 % del consumo auxiliar de un sitio de 1 MW.
 > Nuestros límites: datos simulados, una sola semana de clima y sin sensores de agua helada. La siguiente validación es con datos reales de una sala de cómputo en Yucatán.
 > DripSafe: que cada litro y cada kWh que sobra se note a tiempo."
@@ -68,7 +68,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 - [ ] **Balance neto y gobernanza:** umbral de equilibrio, acuífero y reporte para CONAGUA (diapositivas 7 y 8).
 - [ ] **Escalabilidad y negocio:** seis medidores, autocalibración y precio por kW (diapositiva 9).
 - [ ] **Presentación:** una idea por diapositiva y la demo en modo presentación.
-- [ ] **Bono:** meta condicionada de cero agua potable con respaldo seco; declarar PUE pendiente (contenido para Leo en `docs/n4-entrega-para-leo.md`).
+- [ ] **Bono:** meta condicionada de cero agua potable con respaldo seco y PUE proyectado con supuestos visibles (contenido para Leo en `docs/n4-entrega-para-leo.md`).
 
 ## Preguntas probables y respuesta corta
 

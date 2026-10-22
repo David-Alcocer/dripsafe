@@ -22,11 +22,16 @@ from src import contrato
 from src.evaluacion import cerrar_n2
 from src.evaluacion.episodios import episodios_desde_etiquetas
 from src.metricas.impacto import exceso_no_ti, pue_wue_por_sitio
+from src.metricas.refrigeracion import estimar_pue_respaldo_aire
 
 RAIZ = Path(__file__).resolve().parents[2]
 URL_CLIMA = ("https://archive-api.open-meteo.com/v1/archive?latitude=20.9674&longitude=-89.5926"
              "&start_date=2025-01-01&end_date=2025-12-31&hourly=temperature_2m&models=era5"
              "&timezone=America%2FMexico_City")
+URL_EER = "https://app.leg.wa.gov/WAC/default.aspx?cite=51-11C-403323&pdf=true"
+EER_AIRE_PATH_A = 10.100  # WAC C403.3.2(3), <150 t, plena carga, condiciones estándar
+BTU_WH_POR_COP = 3.412
+HORAS_2025 = 8760
 
 
 def metrica(valor, unidad, tipo, origen, responsable, *, periodo=None, nota=None,
@@ -91,6 +96,33 @@ def _clima(ruta: Path | None) -> dict:
             "fuente": "Open-Meteo Historical Weather API, ERA5, temperatura_2m, Mérida 20.9674,-89.5926, America/Mexico_City",
             "url": URL_CLIMA,
             "nota": "Temperatura exterior estimada; umbrales ilustrativos, no horas reales de operación del chiller."}
+
+
+def _pue_con_bono(ref: dict, clima: dict) -> dict:
+    """Escenario de Misa: W40 + respaldo mecánico por aire a >30 °C."""
+    horas = clima["umbral_30c"]
+    if horas is None:
+        return metrica(None, "ratio", "proyectado", "modelo chiller por aire + ERA5", "Misa",
+                       motivo="Falta serie horaria ERA5 2025 verificable para el umbral >30 °C.")
+    pue_base = next(s["pue"] for s in ref["sitios"] if s["site_id"] == "SIM-C")
+    cop = round(EER_AIRE_PATH_A / BTU_WH_POR_COP, 2)
+    fraccion = horas / HORAS_2025
+    valor = estimar_pue_respaldo_aire(pue_base, fraccion, cop)
+    return metrica(
+        _r(valor), "ratio", "proyectado",
+        f"src/metricas/refrigeracion.py + kit simulado SIM-C + {URL_CLIMA} + {URL_EER}", "Misa",
+        periodo="escenario anual con clima ERA5 2025 y PUE base de referencia del kit",
+        nota=("Escenario ilustrativo, no PUE medido ni desempeño de un equipo en Mérida. "
+              "EER de plena carga en condiciones estándar; supone carga IT constante y suma "
+              "energía del chiller sobre el PUE base, sin modelar sustitución del enfriamiento "
+              "existente ni bombas adicionales."),
+        supuestos={"pue_base": pue_base, "sitio_base": "SIM-C", "eer_btu_wh": EER_AIRE_PATH_A,
+                   "cop": cop, "conversion_eer_a_cop": BTU_WH_POR_COP,
+                   "umbral_c": 30, "operador_umbral": ">", "horas_respaldo_proxy": horas,
+                   "horas_anio": HORAS_2025, "fraccion_respaldo": _r(fraccion, 6),
+                   "carga_calor_ti": 1.0, "carga_it_constante": True,
+                   "formula": "PUE base + fraccion respaldo × carga calor TI / COP",
+                   "fuente_eer": URL_EER, "fuente_clima": URL_CLIMA})
 
 
 def _agregado_equilibrio(residuos: pd.DataFrame) -> dict:
@@ -200,7 +232,7 @@ def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
     bloque["comparacion_contra_reglas_kit"]["origen"] = "src/ataques/correr_rejilla.py"
     origen = "src/metricas/generar_numeros.py + kit CIFOX (simulado)"
     pend_g = "Pendiente de Gadiel: medición del detector con repeticiones y CodeCarbon."
-    pend_m = "Pendiente de Misa: rendimiento y potencia del chiller de respaldo."
+    clima_bono = _clima(clima)
     return {
         "_meta": {"aviso": "DATOS SIMULADOS · cifras del kit, no de una instalación real",
                   "estado": "parcial", "fecha_corte_datos": _periodo(tabla, "evaluacion")["fin"],
@@ -254,8 +286,8 @@ def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
         "deteccion": bloque,
         "bono_zero_freshwater": {"wue_potable_meta": metrica(0, "L/kWh IT", "proyectado", "diseño de bono", "Misa",
                                                              nota="Objetivo de diseño; no observado: el kit no separa potable/no potable."),
-                                 "horas_respaldo_mérida_al_año": _clima(clima),
-                                 "pue_con_bono": metrica(None, "ratio", "proyectado", "modelo de chiller", "Misa", motivo=pend_m)},
+                                 "horas_respaldo_mérida_al_año": clima_bono,
+                                 "pue_con_bono": _pue_con_bono(ref, clima_bono)},
         "fuentes_externas": {
             "factor_emision_sen": metrica(None, "kgCO2e/kWh", "estimado", "SEMARNAT/CNE aviso vigente", "Nico",
                                            motivo="El aviso vigente aún no se ha extraído y comprobado."),

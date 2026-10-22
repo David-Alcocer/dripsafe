@@ -4,7 +4,7 @@
 
 Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 
-**Reparto aprobado en D10, ajustado en D11 y D13 (19 oct), con #13 reasignado a Nico en `678b5ff` (21 oct):** Nico lleva el acuífero (#13) y la evaluación justa del detector (#22), Misa el bono (#15) y Leo el guion (#16). Misa entrega el PUE inicial (#2); Nico calcula el PUE final proyectado y consolida resultados (#3); Misa + Nico calculan y validan juntos el balance neto final (#14). Gadiel proporciona las alertas, el consumo esperado y las mediciones del modelo. Los cálculos del balance están implementados; la firma conjunta sigue pendiente. Esta matriz registra el reparto acordado; los responsables y descripciones de los issues deben reflejarlo también en GitHub.
+**Reparto aprobado en D10, ajustado en D11 y D13 (19 oct), con #13 reasignado a Nico en `678b5ff` (21 oct):** Nico lleva el acuífero (#13) y la evaluación justa del detector (#22), Misa el bono (#15) y Leo el guion (#16). Misa entrega el PUE inicial (#2); Nico calcula el PUE final proyectado y consolida resultados (#3); Misa + Nico validaron el balance neto energético (#14) en el PR #55. Gadiel proporciona las alertas, el consumo esperado y las mediciones del modelo. Esta matriz registra el reparto acordado; los responsables y descripciones de los issues deben reflejarlo también en GitHub.
 
 ## Requisitos de la convocatoria
 
@@ -15,7 +15,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | 11 | **Impacto en el acuífero** de Yucatán | Nico (ajuste `678b5ff`) | #13 | Sección en `docs/07` con fuentes citadas | ⬜ |
 | 12 | Propuesta de solución sobre el kit | Todos | #4 | `main` corre de punta a punta con el kit | ⬜ |
 | 12 | Pitch final | Leo (guion y diapositivas) + Nico (cifras) | #16, #19 | Diapositivas en PDF + guion | ⬜ |
-| 14 | Bono de cero agua dulce | Misa (D13) | #15 | [`docs/07` §5](07-agua-y-acuifero.md#5-bono-zero-freshwater-footprint-5-a-15) (comparación de los 3 sitios, híbrido y WUE potable con supuestos) + `src/metricas/refrigeracion.py` | 🟨 falta *f* real de Mérida (N4) |
+| 14 | Bono de cero agua dulce | Misa (D13) | #15 | [`docs/07` §5](07-agua-y-acuifero.md#5-bono-zero-freshwater-footprint-5-a-15) (circuito cerrado, respaldo por aire y PUE proyectado con COP y proxy ERA5) + `src/metricas/refrigeracion.py` | 🟨 escenario calculado en N4; faltan curvas y agua no potable verificadas en sitio |
 | 17 | Kit confidencial | Todos | pruebas automáticas | Pruebas automáticas: ningún archivo de datos en el repo | ✅ |
 | 18 | Nada de ataques a sistemas reales | Guille | #9 | Los ataques solo existen como cambios en CSV (`src/ataques/`) | ✅ |
 

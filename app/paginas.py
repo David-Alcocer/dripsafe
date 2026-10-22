@@ -721,9 +721,12 @@ def agua(d: Datos, v: Vista) -> None:
                             "Horas exteriores por encima del umbral ilustrativo en Mérida (2025). No son horas medidas "
                             "de operación del chiller; Misa debe confirmar su curva de rendimiento."))
     if not d.cifras_de_ejemplo:
+        pue_bono = cifra(d.numeros, "pue_con_bono")
         rejilla([
-            c.stat("PUE con bono", "Pendiente de Misa", color="gris",
-                   sub=con_tag("requiere rendimiento del chiller", "proyectado")),
+            c.stat("PUE con bono", c.numero(pue_bono, 3) if pue_bono is not None else "Pendiente",
+                   color="morado" if pue_bono is not None else "gris",
+                   sub=con_tag("escenario con COP de referencia; no medido" if pue_bono is not None
+                               else "requiere datos de respaldo", tipo_de(d, "pue_con_bono"))),
             c.stat("Acuífero 3105", "Pendiente de Nico", color="gris",
                    sub=con_tag("requiere integración al JSON oficial", "observado")),
         ])
