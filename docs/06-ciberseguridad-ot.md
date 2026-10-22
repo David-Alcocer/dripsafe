@@ -267,6 +267,30 @@ Un detector conectado a la planta también puede ser atacado. Por eso:
 - **Se entrena solo con periodos verificados como limpios** y cada versión queda registrada. Así nadie le «enseña» a ver un ataque como normal (envenenamiento del modelo).
 - **Si el atacante conoce el modelo:** tendría que falsificar a la vez el registro del BMS y los medidores de energía, que suelen ser otro sistema (EPMS), de forma coherente con la carga y el clima. Con el kit no se puede probar; es una pregunta para el mentor.
 
+### 8b. ¿Y si alguien toma DripSafe?
+
+DripSafe también es software y puede ser atacado. No decimos que sea invulnerable: lo diseñamos para que, si lo toman, **el daño se quede en DripSafe y se note pronto**.
+
+**Lo que el atacante NO puede hacer: controlar la planta.** Los datos llegan a DripSafe en un solo sentido, por un diodo de datos o un puerto espejo, y no existe un camino de regreso hacia los controladores. El software del detector tampoco tiene código para mandar órdenes: solo lee archivos de datos. Tomar DripSafe no abre la puerta a la planta.
+
+**Condición:** esto vale si la instalación es de un solo sentido. Si alguien lo conectara al BMS con una conexión de ida y vuelta, perdería esa garantía. Por eso la instalación es parte del servicio (pago inicial) y se revisa en cada prueba de penetración.
+
+**Lo que SÍ podría hacer, y cómo se nota:**
+
+| Qué haría | Qué pasa con las detecciones | Cómo se nota o se frena | Estado |
+|---|---|---|---|
+| **Apagarlo o callarlo** | Desde ese momento no hay alertas nuevas | DripSafe manda una señal periódica de «sigo vivo» a otro sistema; **si se calla, eso mismo es una alarma** | Propuesto |
+| **Subir los umbrales o cambiar el modelo** para que un ataque no se vea (T0838) | El exceso deja de marcarse | Los parámetros aprendidos de cada sitio y el código del detector llevan **huella digital (SHA-256)**: si alguien los cambia, la huella no coincide | **Ya existe en el prototipo** (`resultados/n2_congelamiento.json`); falta comprobarla en automático en un sitio real |
+| **Borrar alertas** | Se pierde el historial local | Cada alerta sale en el momento hacia el operador o el SIEM del cliente; borrar la copia local no borra la que ya salió | Propuesto |
+| **Inventar alertas** para cansar al operador o forzar el modo manual | Ruido o una parada innecesaria | Toda alerta crítica pide **confirmar en sitio** antes de actuar; DripSafe no ejecuta nada | Diseñado (§4) |
+| **Envenenarlo**: que aprenda un ataque como normal | La línea base nueva esconde el exceso | Solo se reentrena con periodos verificados como limpios, y cada versión queda registrada con su huella | Diseñado (§8) |
+| **Leer sus datos** para planear un ataque, por ejemplo conocer el umbral y quedarse justo debajo | Un ataque más fino, bajo el piso de detección (§6b) | Propia zona de red, sin internet, acceso con MFA y mínimo privilegio, datos cifrados en el equipo | Propuesto |
+
+**En el peor caso**, el centro queda como está hoy, sin DripSafe, con las alarmas de su BMS y con la alarma de temperatura independiente que recomendamos (§9b). Se pierde una capa extra, no se gana un punto débil hacia la planta. El riesgo que queda es la confianza ciega: si el operador deja de vigilar porque «DripSafe no dijo nada», un DripSafe callado hace daño. Por eso la señal de «sigo vivo» es lo primero que se debe implementar.
+
+**Frase para el jurado (lenguaje llano):**
+> «DripSafe es como una cámara de seguridad, no una llave. Si alguien la toma, puede apagarla o hacerle trampa, pero no puede abrir la puerta: los datos le llegan en un solo sentido y no tiene por dónde mandar órdenes a la planta. En el peor caso, el centro queda como hoy, con sus alarmas de siempre. Y se nota: si DripSafe se calla, eso mismo es una alarma, y su modelo lleva una huella digital que delata si alguien lo cambió.»
+
 ## 9. Recomendaciones de defensa
 
 Basadas en ISA/IEC 62443 (zonas y conductos) y en las mitigaciones de MITRE para cada técnica.
