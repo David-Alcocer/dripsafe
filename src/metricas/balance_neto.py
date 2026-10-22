@@ -1,13 +1,8 @@
 """Balance neto de DripSafe (#14 · Misa + Nico).
 
-Compara lo que cuesta correr el detector un año (medido con CodeCarbon por
-Gadiel, G3) contra el exceso de energía no TI que el detector señala.
-
-Aquí NO se calcula un ahorro proyectado: eso necesita supuestos que Nico fija
-(horas de ineficiencia al año, tiempo hasta corregir). Solo se calcula el
-umbral de equilibrio: cuántas horas de ineficiencia típica al año pagan el
-costo del detector. Si basta con muy pocas, el balance es positivo aunque la
-proyección no sea exacta.
+Calcula el costo anual del detector a partir de G3, el umbral de equilibrio
+según el exceso no TI y el saldo entre ahorro proyectado y costo anual.
+La proyección del ahorro se calcula por separado con los supuestos de Nico.
 
 Regla contra el doble conteo
 ----------------------------
@@ -22,6 +17,7 @@ El formato 1 (``kwh_inferencia_anual``) ya incluía el ajuste en cada corrida:
 se trata como cota superior y se ignoran los reentrenamientos.
 """
 
+import math
 import statistics
 from collections.abc import Iterable
 
@@ -146,3 +142,21 @@ def horas_para_equilibrio(costo_kwh_anual: float, exceso_por_hora_alertada: Iter
         return {"exceso_tipico_kwh_por_hora": None, "horas_necesarias_al_año": None}
     tipico = statistics.median(positivos)
     return {"exceso_tipico_kwh_por_hora": tipico, "horas_necesarias_al_año": costo_kwh_anual / tipico}
+
+
+def balance_energia_anual(ahorro_proyectado_kwh_anual: float, costo_detector_kwh_anual: float) -> float:
+    """Ahorro proyectado menos costo del detector, en kWh por año."""
+    valores = (ahorro_proyectado_kwh_anual, costo_detector_kwh_anual)
+    nombres = ("ahorro proyectado", "costo del detector")
+    numeros = []
+    for nombre, valor in zip(nombres, valores):
+        if isinstance(valor, bool):
+            raise ValueError(f"el {nombre} debe ser un número finito no negativo")
+        try:
+            numero = float(valor)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"el {nombre} debe ser un número finito no negativo") from exc
+        if not math.isfinite(numero) or numero < 0:
+            raise ValueError(f"el {nombre} debe ser un número finito no negativo")
+        numeros.append(numero)
+    return numeros[0] - numeros[1]

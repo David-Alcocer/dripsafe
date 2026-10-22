@@ -23,6 +23,37 @@ RAIZ = Path(__file__).resolve().parents[1]
 
 # ---------- balance neto ----------
 
+@pytest.mark.parametrize(("ahorro", "costo", "saldo"), [
+    (10.0, 2.0, 8.0),
+    (2.0, 2.0, 0.0),
+    (2.0, 10.0, -8.0),
+    (10.0, 0.0, 10.0),
+])
+def test_balance_energia_anual_resta_ahorro_y_costo(ahorro, costo, saldo):
+    assert balance_neto.balance_energia_anual(ahorro, costo) == pytest.approx(saldo)
+
+
+@pytest.mark.parametrize("valor_invalido", [
+    pytest.param(-1.0, id="negativo"),
+    pytest.param(float("inf"), id="infinito"),
+    pytest.param(float("-inf"), id="infinito-negativo"),
+    pytest.param(float("nan"), id="nan"),
+    pytest.param(True, id="booleano-verdadero"),
+    pytest.param(False, id="booleano-falso"),
+])
+@pytest.mark.parametrize(("posicion", "nombre"), [
+    (0, "ahorro proyectado"),
+    (1, "costo del detector"),
+])
+def test_balance_energia_anual_rechaza_entradas_invalidas(
+    valor_invalido, posicion, nombre,
+):
+    argumentos = [10.0, 2.0]
+    argumentos[posicion] = valor_invalido
+    with pytest.raises(ValueError, match=nombre):
+        balance_neto.balance_energia_anual(*argumentos)
+
+
 def test_costo_anual_usa_la_inferencia_anual_medida():
     consumo = {"kwh_entrenamiento": 0.001, "kwh_inferencia_anual": 2.5}
     assert balance_neto.costo_anual_kwh(consumo) == pytest.approx(2.5)
@@ -293,7 +324,10 @@ def test_pipeline_usa_consumo_ya_medido(salida, tmp_path):
     assert balance["costo_detector_kwh_anual"]["valor"] == pytest.approx(0.02)
     assert balance["tiempo_detector_ms"]["valor"] == pytest.approx(12.5)
     assert balance["umbral_equilibrio"]["unidad"] == "h/año"
-    assert balance["umbral_equilibrio"]["valor"] > 0
+    assert balance["umbral_equilibrio"]["valor"] is None
+    assert "mediana" in balance["umbral_equilibrio"]["motivo_pendiente"]
+    assert balance["balance_energia_kwh_anual"]["valor"] is None
+    assert balance["balance_energia_kwh_anual"]["tipo"] == "proyectado"
     ahorro = balance["ahorro_proyectado_kwh_anual"]["valor"]
     assert balance["razon_ahorro_costo"]["valor"] == pytest.approx(ahorro / 0.02, rel=1e-3)
 
@@ -316,6 +350,12 @@ def test_pipeline_v2_anualiza_por_fases_y_deja_validacion_pendiente(salida, tmp_
     assert balance["frecuencia_anualizacion"]["horas_lote"] == 168
     assert balance["frecuencia_anualizacion"]["reentrenamientos_aplicados"] == 4
     assert balance["validado_por"] is None and balance["nota_validacion"]
+    assert balance["umbral_equilibrio"]["valor"] is None
+    assert balance["emisiones_detector_gco2e_anual"]["valor"] is None
+    assert balance["balance_energia_kwh_anual"]["valor"] is None
+    assert balance["razon_ahorro_costo"]["valor"] == round(
+        balance["ahorro_proyectado_kwh_anual"]["valor"] /
+        balance["costo_detector_kwh_anual"]["valor"], 1)
     assert numeros["_meta"]["procedencia_g3"]["kit"]["csv_sha256"] == "a" * 64
     assert procedencia.validar_balance_oficial(numeros) == []
 

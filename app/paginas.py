@@ -260,8 +260,8 @@ def resumen(d: Datos, v: Vista) -> None:
             pue_proj = cifra(d.numeros, "pue_sin_exceso") if evaluacion_completa(v) else ex["pue_sin_exceso"]
             rejilla([
                 c.stat("Umbral de equilibrio", *(tiempo_corto(horas) if horas is not None else
-                       ("Pendiente de Gadiel", "")), "gris" if horas is None else "azul",
-                       sub=con_tag("requiere energía medida del detector", tipo_de(d, "equilibrio_horas"))),
+                       ("Pendiente de revisión", "")), "gris" if horas is None else "azul",
+                       sub=con_tag("falta exceso típico verificable", tipo_de(d, "equilibrio_horas"))),
                 c.stat("PUE si se corta el exceso", c.numero(pue_proj, 3), color="azul",
                        sub=con_tag(f'hoy {c.numero(ex["pue"], 3)} · contrafactual, no ahorro',
                                    tipo_de(d, "pue_sin_exceso") if evaluacion_completa(v) else tipo_det)),
@@ -591,19 +591,22 @@ def balance(d: Datos, v: Vista) -> None:
     proy = cifra(d.numeros, "ahorro_proyectado_kwh_anual")
     co2 = cifra(d.numeros, "co2_proyectado_kg_anual")
     etiqueta = "Ejemplo" if ejemplo else "Pendiente de Gadiel"
-    st.html('<p class="lead"><b>Balance del detector.</b> La energía, el tiempo y las emisiones '
-            'medidas se incorporarán cuando Gadiel entregue sus corridas. El exceso del kit y '
-            'el escenario anual son estimaciones separadas, no ahorro observado.</p>')
+    detalle_g3 = ("G3 aporta tiempo medido y energía estimada por CodeCarbon/TDP. "
+                  if costo is not None and not ejemplo else
+                  "Las cifras de ejemplo solo ilustran el flujo. ")
+    st.html('<p class="lead"><b>Balance del detector.</b> ' + detalle_g3 +
+            'El umbral y el saldo requieren validación conjunta; las emisiones requieren '
+            'un factor verificable. El escenario anual no es ahorro observado.</p>')
     rejilla([
         c.stat("Tiempo del detector", c.numero(tiempo, 1) if tiempo is not None else etiqueta,
                "ms" if tiempo is not None else "", "gris",
                sub=con_tag("medición con repeticiones" if tiempo is not None else "falta medición", tipo_de(d, "detector_cpu_ms"))),
         c.stat("Energía del detector", c.numero(costo, 4) if costo is not None else etiqueta,
                "kWh/año" if costo is not None else "", "gris",
-               sub=con_tag("CodeCarbon" if costo is not None else "falta medición", tipo_de(d, "detector_kwh_anual"))),
+               sub=con_tag("CodeCarbon/TDP · estimación" if costo is not None else "falta medición", tipo_de(d, "detector_kwh_anual"))),
         c.stat("Umbral de equilibrio", *tiempo_corto(equilibrio) if equilibrio is not None else
-               (etiqueta, ""), "gris" if equilibrio is None else "azul",
-               sub=con_tag("costo ÷ exceso típico; requiere Gadiel", tipo_de(d, "equilibrio_horas"))),
+               ("Ejemplo" if ejemplo else "Pendiente de revisión", ""), "gris" if equilibrio is None else "azul",
+               sub=con_tag("costo ÷ exceso típico verificable", tipo_de(d, "equilibrio_horas"))),
         c.stat("CO₂ evitado", c.numero(co2, 1) if co2 is not None else
                ("Ejemplo" if ejemplo else "Pendiente de factor SEN"),
                "kgCO₂e/año" if co2 is not None else "", "gris",
@@ -634,7 +637,7 @@ def balance(d: Datos, v: Vista) -> None:
         if not ejemplo and v.tabla_sitio["site_id"].nunique() == 3 and proy is not None:
             st.html(c.aviso(f"Cifra oficial con los supuestos iniciales: {c.numero(proy)} kWh/año proyectados. "
                             "Al editar parámetros se recalcula la simulación local."))
-        st.html(c.aviso("Proyección, no ahorro observado. No se resta el costo del detector hasta recibir su medición."))
+        st.html(c.aviso("Proyección, no ahorro observado. El saldo energético sigue pendiente de validación conjunta."))
 
     with fila("De dónde sale cada número", "calculo"):
         filas = [[f'<span class="mono">{k}</span>',
@@ -681,7 +684,7 @@ def agua(d: Datos, v: Vista) -> None:
                           "nulo en el de aire. Los sitios son simulados: la diferencia no prueba que una tecnología sea mejor.")))
 
     with fila("Acuífero de Yucatán", "acuifero"):
-        st.html(c.panel("Acuífero 3105", '<p class="txt-d">Pendiente de Guille: confirmar la fuente, '
+        st.html(c.panel("Acuífero 3105", '<p class="txt-d">Pendiente de Nico: confirmar la fuente, '
                         'el año y la disponibilidad del acuífero antes de publicar cifras o conclusiones.</p>'))
 
     with fila("Las épocas del año en Yucatán", "epocas"):
@@ -719,7 +722,7 @@ def agua(d: Datos, v: Vista) -> None:
         rejilla([
             c.stat("PUE con bono", "Pendiente de Misa", color="gris",
                    sub=con_tag("requiere rendimiento del chiller", "proyectado")),
-            c.stat("Acuífero 3105", "Pendiente de Guille", color="gris",
+            c.stat("Acuífero 3105", "Pendiente de Nico", color="gris",
                    sub=con_tag("requiere fuente y año confirmados", "observado")),
         ])
     mostrar_aviso_ejemplo(d)

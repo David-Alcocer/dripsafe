@@ -93,17 +93,37 @@ def test_curva_y_falsas_alarmas_de_leo_usen_los_agregados_n2(cifras):
     assert leo["falsas_alarmas_ruido"]["unidad_conteo"] == "alarmas/día/sitio"
 
 
-def test_pendientes_no_se_convierten_en_balance(cifras):
+def test_g3_versionado_y_pendientes_del_balance(cifras):
     c, leo = cifras
-    for clave, responsable in (("detector_cpu_ms", "Gadiel"), ("detector_kwh_anual", "Gadiel"),
-                               ("equilibrio_horas", "Gadiel"), ("pue_con_bono", "Misa"),
-                               ("acuifero_3105", "Guille")):
+    for clave, responsable in (("pue_con_bono", "Misa"), ("acuifero_3105", "Nico")):
         x = leo[clave]
         assert x["valor"] is None and x["estado"] == "pendiente"
         assert responsable in x.get("motivo_pendiente", "")
-    assert c["balance_neto"]["razon_ahorro_costo"]["valor"] is None
-    assert c["balance_neto"]["ahorro_proyectado_kwh_anual"]["tipo"] == "proyectado"
-    assert "ahorro observado" in c["balance_neto"]["ahorro_proyectado_kwh_anual"]["nota"]
+    balance = c["balance_neto"]
+    costo = balance["costo_detector_kwh_anual"]["valor"]
+    assert costo == pytest.approx(1.2916184e-05)
+    assert costo == pytest.approx(balance["costo_entrenamiento_kwh_anual"]["valor"]
+                                 + balance["costo_inferencia_kwh_anual"]["valor"])
+    assert balance["costo_detector_kwh_anual"]["tipo"] == "estimado"
+    assert balance["tiempo_detector_ms"]["tipo"] == "medido"
+    assert leo["detector_kwh_anual"] == balance["costo_detector_kwh_anual"]
+    assert leo["detector_cpu_ms"] == balance["tiempo_detector_ms"]
+    assert balance["frecuencia_anualizacion"]["modo"] == "fases_separadas"
+    assert balance["validado_por"] is None and balance["nota_validacion"]
+    assert c["_meta"]["procedencia_g3"]["metodo"]["fuente_energia"] == "tdp_estimado"
+    assert balance["razon_ahorro_costo"]["valor"] == round(
+        balance["ahorro_proyectado_kwh_anual"]["valor"] / costo, 1)
+    assert "costo publicado" in balance["razon_ahorro_costo"]["nota"]
+    assert balance["razon_ahorro_costo"]["tipo"] == "proyectado"
+    assert balance["umbral_equilibrio"]["valor"] is None
+    assert leo["equilibrio_horas"]["estado"] == "pendiente"
+    assert balance["balance_energia_kwh_anual"]["valor"] is None
+    assert balance["balance_energia_kwh_anual"]["tipo"] == "proyectado"
+    assert leo["balance_energia_kwh_anual"] == balance["balance_energia_kwh_anual"]
+    assert "Nico" in leo["acuifero_3105"]["motivo_pendiente"]
+    assert c["_meta"]["generado_con_commit"] and "sucio" not in c["_meta"]["generado_con_commit"]
+    assert balance["ahorro_proyectado_kwh_anual"]["tipo"] == "proyectado"
+    assert "ahorro observado" in balance["ahorro_proyectado_kwh_anual"]["nota"]
 
 
 def test_json_versionado_solo_contiene_agregados(cifras):

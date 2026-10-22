@@ -10,7 +10,8 @@ Uso:
 
 El JSON lo arma `generar_numeros.construir()` de Nico: aquí solo se corren las
 piezas que necesita y se agrega lo que depende de la medición del detector
-(costo, tiempo, umbral de equilibrio y razón ahorro/costo). Antes de escribir,
+(costo, tiempo y razón ahorro/costo). El umbral queda pendiente hasta que su
+denominador esté en un agregado versionado. Antes de escribir,
 el JSON pasa `contrato.validar_numeros_oficiales()`.
 
 Las tablas por hora se quedan en data/resultados/ (fuera de Git). Al JSON
@@ -37,8 +38,6 @@ from src.evaluacion.comparar_originales import _validar_fijacion
 from src.datos.cargar import cargar
 from src.metricas import balance_neto, generar_numeros
 from src.metricas.generar_numeros import metrica
-from src.metricas.impacto import exceso_no_ti
-from src.metricas.pue import unidad_y_horas
 from src.modelo import detector, medicion
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -179,17 +178,6 @@ def _cierre_n2(args, telemetria: pd.DataFrame) -> dict | None:
     return cierre
 
 
-def _exceso_por_hora_alertada(telemetria: pd.DataFrame, alertas: pd.DataFrame) -> pd.Series:
-    """kWh de exceso no TI de cada hora con alerta FÍSICA (misma definición que generar_numeros)."""
-    unidad, horas = unidad_y_horas(telemetria)
-    fisicas = alertas.assign(anomalia=alertas["alerta_umbral"].astype(bool)
-                             | alertas["alerta_media_4h"].astype(bool))
-    exceso = exceso_no_ti(telemetria, fisicas, columna_esperado="esperado_energia_no_ti_kwh",
-                          columna_esperado_agua="esperado_agua_l", unidad_energia=unidad,
-                          horas_por_intervalo=horas)
-    return exceso.loc[exceso["coincide_alerta"], "exceso_no_ti_estimado_kwh"]
-
-
 def _es_medicion_hardware(consumo: dict) -> bool:
     metodo = (consumo.get("_meta") or {}).get("metodo") or {}
     return metodo.get("tipo") == "medido" and metodo.get("fuente_energia") == "sensor_hardware"
@@ -219,7 +207,7 @@ def _origen_consumo(consumo: dict, modo: str) -> str:
     return f"{' · '.join(piezas)} → {ORIGEN_BALANCE} · {modo}"
 
 
-def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series, args) -> dict:
+def _balance(numeros: dict, consumo: dict | None, args) -> dict:
     """Copia del bloque balance_neto con lo que depende de la medición del detector."""
     actual = dict(numeros["balance_neto"])
     if consumo is None:
@@ -227,6 +215,7 @@ def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series, ar
 
     desglose = balance_neto.desglose_costo_anual(consumo, _frecuencia_args(args))
     costo = desglose["total_kwh_anual"]
+    costo_publicado = round(costo, 12)
     origen = _origen_consumo(consumo, desglose["modo"])
     frecuencia = desglose["supuestos"]
     nota_costo = (
@@ -235,7 +224,7 @@ def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series, ar
         f"{desglose['reentrenamientos_aplicados']:g} reentrenamiento(s)/año."
     )
     actual["costo_detector_kwh_anual"] = metrica(
-        round(costo, 12), "kWh/año",
+        costo_publicado, "kWh/año",
         "medido" if _es_medicion_hardware(consumo) else "estimado",
         origen, "Gadiel", nota=f"{nota_costo} {consumo.get('nota', '')}".strip())
     actual["costo_entrenamiento_kwh_anual"] = metrica(
@@ -269,20 +258,25 @@ def _balance(numeros: dict, consumo: dict | None, exceso_alertado: pd.Series, ar
         actual["tiempo_detector_ms"] = metrica(
             round(ms, 3), "ms", "medido", origen, "Gadiel", nota=nota_ms)
 
-    equilibrio = balance_neto.horas_para_equilibrio(costo, exceso_alertado)
-    if equilibrio["horas_necesarias_al_año"] is not None:
-        actual["umbral_equilibrio"] = metrica(
-            round(equilibrio["horas_necesarias_al_año"], 12), "h/año", "proyectado",
-            f"{ORIGEN_BALANCE} · horas_para_equilibrio", "Misa + Nico",
-            nota=(f"Horas de ineficiencia típica al año que pagan el costo del detector; "
-                  f"exceso típico {equilibrio['exceso_tipico_kwh_por_hora']:.4f} kWh/h "
-                  "(mediana en horas con alerta física)."))
+    actual["umbral_equilibrio"] = metrica(
+        None, "h/año", "proyectado", "costo detector/exceso típico por hora", "Misa + Nico",
+        motivo="El agregado versionado no conserva la mediana del exceso no TI por hora con alerta física necesaria para comprobar este umbral. Pendiente de revisión conjunta de Misa y Nico.")
+    actual["emisiones_detector_gco2e_anual"] = metrica(
+        None, "gCO2e/año", "estimado", "CodeCarbon × factor SEN", "Gadiel + Nico",
+        motivo="G3 aporta energía estimada por TDP; falta revisar la anualización y la atribución de emisiones antes de publicar esta cifra.")
+    actual["balance_energia_kwh_anual"] = metrica(
+        None, "kWh/año", "proyectado", "ahorro proyectado menos costo anual del detector", "Misa + Nico",
+        motivo="El saldo energético requiere validación conjunta de Misa y Nico antes de publicarse.")
     ahorro = numeros["balance_neto"]["ahorro_proyectado_kwh_anual"]["valor"]
-    if ahorro is not None and costo > 0:
+    if ahorro is not None and costo_publicado > 0:
         actual["razon_ahorro_costo"] = metrica(
-            round(ahorro / costo, 1), "veces", "proyectado",
-            f"ahorro_proyectado_kwh_anual / costo · {origen}",
-            "Misa + Nico", nota="Usa los supuestos editables de ahorro_proyectado_kwh_anual; no es ahorro observado.")
+            round(ahorro / costo_publicado, 1), "veces", "proyectado",
+            f"ahorro_proyectado_kwh_anual / costo_detector_kwh_anual publicado · {origen}",
+            "Misa + Nico", nota="Se calcula con el costo publicado y el ahorro proyectado; no es ahorro observado.")
+    elif ahorro is not None and costo > 0:
+        actual["razon_ahorro_costo"] = metrica(
+            None, "veces", "proyectado", f"ahorro_proyectado_kwh_anual / costo · {origen}",
+            "Misa + Nico", motivo="El costo positivo se redondea a cero con la precisión publicada.")
     return actual
 
 
@@ -384,7 +378,7 @@ def main(argv: list[str] | None = None) -> None:
     cierre = _cierre_n2(args, telemetria)
     base = generar_numeros.construir(telemetria, alertas, deteccion, args.clima, cierre)
     numeros = {**base, "_meta": _meta(base, args, fuente, consumo),
-               "balance_neto": _balance(base, consumo, _exceso_por_hora_alertada(telemetria, alertas), args)}
+               "balance_neto": _balance(base, consumo, args)}
     _escribir(numeros, args.salida)
     print(f"5/5 Contrato 4: PUE referencia {numeros['pue']['referencia']['valor']} · "
           f"antes {numeros['pue']['antes']['valor']} · después proyectado "
