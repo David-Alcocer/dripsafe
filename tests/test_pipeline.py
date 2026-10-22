@@ -54,6 +54,23 @@ def test_balance_energia_anual_rechaza_entradas_invalidas(
         balance_neto.balance_energia_anual(*argumentos)
 
 
+def test_factores_externos_se_aplican_sin_inventar_unidades():
+    assert balance_neto.emisiones_detector_gco2e_anual(0.001) == pytest.approx(0.444)
+    assert balance_neto.co2_evitado_kg_anual(1000) == pytest.approx(444)
+    assert balance_neto.agua_indirecta_evitada_l_anual(1000) == pytest.approx(2063.2)
+
+
+@pytest.mark.parametrize("funcion", [
+    balance_neto.emisiones_detector_gco2e_anual,
+    balance_neto.co2_evitado_kg_anual,
+    balance_neto.agua_indirecta_evitada_l_anual,
+])
+@pytest.mark.parametrize("valor", [-1.0, float("nan"), float("inf"), True])
+def test_factores_externos_rechazan_kwh_invalidos(funcion, valor):
+    with pytest.raises(ValueError):
+        funcion(valor)
+
+
 def test_costo_anual_usa_la_inferencia_anual_medida():
     consumo = {"kwh_entrenamiento": 0.001, "kwh_inferencia_anual": 2.5}
     assert balance_neto.costo_anual_kwh(consumo) == pytest.approx(2.5)
@@ -364,7 +381,14 @@ def test_pipeline_v2_anualiza_y_solo_firma_si_se_pide(salida, tmp_path, firmar):
     assert balance["umbral_equilibrio"]["valor"] == round(
         balance["costo_detector_kwh_anual"]["valor"] /
         balance["umbral_equilibrio"]["supuestos"]["exceso_tipico_kwh_por_hora"], 12)
-    assert balance["emisiones_detector_gco2e_anual"]["valor"] is None
+    assert balance["emisiones_detector_gco2e_anual"]["valor"] == round(
+        balance["costo_detector_kwh_anual"]["valor"] * 0.444 * 1000, 8)
+    assert balance["co2_evitado_kg_anual"]["valor"] == round(
+        balance["ahorro_proyectado_kwh_anual"]["valor"] * 0.444, 4)
+    assert balance["agua_indirecta_evitada_l_anual"]["valor"] == round(
+        balance["ahorro_proyectado_kwh_anual"]["valor"] * 2.0632, 4)
+    assert numeros["fuentes_externas"]["factor_emision_sen"]["valor"] == 0.444
+    assert numeros["fuentes_externas"]["intensidad_hidrica_sen"]["valor"] == 2.0632
     assert balance["balance_energia_kwh_anual"]["valor"] == round(
         balance["ahorro_proyectado_kwh_anual"]["valor"] - balance["costo_detector_kwh_anual"]["valor"], 12)
     assert balance["razon_ahorro_costo"]["valor"] == round(

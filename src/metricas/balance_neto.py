@@ -23,6 +23,34 @@ from collections.abc import Iterable
 
 from src.procedencia import FRECUENCIA_POR_DEFECTO
 
+# Factores externos usados en #14. El factor de emisión es oficial; la
+# intensidad hídrica es una estimación trazable, no un factor oficial de México.
+FACTOR_EMISION_SEN_KG_KWH = 0.444
+URL_FESEN_2024 = "https://www.gob.mx/cms/uploads/attachment/file/981194/aviso_fesen_2024.pdf"
+URL_AVISO_COA_2026 = (
+    "https://www.gob.mx/cms/uploads/attachment/file/1081506/"
+    "aviso_factor_de_emision_electrico_coa_2026.pdf"
+)
+INTENSIDAD_HIDRICA_SEN_L_KWH = 2.0632
+URL_MEZCLA_CNE_2024 = (
+    "https://www.cne.gob.mx/Electricidad%20CNE/Codigo%20de%20red/"
+    "Anexo%20Acuerdo%20RCSEN2024%20R00.pdf"
+)
+URL_NREL_2012 = "https://openei.org/datasets/files/969/pub/1748-9326_7_4_045802.pdf"
+
+
+def _kwh_no_negativo(valor: float, nombre: str) -> float:
+    """Convierte a float y rechaza negativos, booleanos, NaN e infinitos."""
+    if isinstance(valor, bool):
+        raise ValueError(f"{nombre} debe ser un número finito no negativo")
+    try:
+        numero = float(valor)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"{nombre} debe ser un número finito no negativo") from exc
+    if not math.isfinite(numero) or numero < 0:
+        raise ValueError(f"{nombre} debe ser un número finito no negativo")
+    return numero
+
 
 def _frecuencia(frecuencia: dict | None) -> dict:
     """Completa y valida la frecuencia de anualización (supuestos explícitos)."""
@@ -146,17 +174,24 @@ def horas_para_equilibrio(costo_kwh_anual: float, exceso_por_hora_alertada: Iter
 
 def balance_energia_anual(ahorro_proyectado_kwh_anual: float, costo_detector_kwh_anual: float) -> float:
     """Ahorro proyectado menos costo del detector, en kWh por año."""
-    valores = (ahorro_proyectado_kwh_anual, costo_detector_kwh_anual)
-    nombres = ("ahorro proyectado", "costo del detector")
-    numeros = []
-    for nombre, valor in zip(nombres, valores):
-        if isinstance(valor, bool):
-            raise ValueError(f"el {nombre} debe ser un número finito no negativo")
-        try:
-            numero = float(valor)
-        except (TypeError, ValueError, OverflowError) as exc:
-            raise ValueError(f"el {nombre} debe ser un número finito no negativo") from exc
-        if not math.isfinite(numero) or numero < 0:
-            raise ValueError(f"el {nombre} debe ser un número finito no negativo")
-        numeros.append(numero)
-    return numeros[0] - numeros[1]
+    ahorro = _kwh_no_negativo(ahorro_proyectado_kwh_anual, "el ahorro proyectado")
+    costo = _kwh_no_negativo(costo_detector_kwh_anual, "el costo del detector")
+    return ahorro - costo
+
+
+def emisiones_detector_gco2e_anual(costo_detector_kwh_anual: float) -> float:
+    """Emisiones estimadas del detector: kWh/año × 0.444 kgCO₂e/kWh × 1000."""
+    costo = _kwh_no_negativo(costo_detector_kwh_anual, "el costo del detector")
+    return costo * FACTOR_EMISION_SEN_KG_KWH * 1000
+
+
+def co2_evitado_kg_anual(ahorro_proyectado_kwh_anual: float) -> float:
+    """CO₂e evitado proyectado con el FESEN oficial aplicable a 2026."""
+    ahorro = _kwh_no_negativo(ahorro_proyectado_kwh_anual, "el ahorro proyectado")
+    return ahorro * FACTOR_EMISION_SEN_KG_KWH
+
+
+def agua_indirecta_evitada_l_anual(ahorro_proyectado_kwh_anual: float) -> float:
+    """Agua de generación evitada, con la intensidad hídrica estimada para el SEN."""
+    ahorro = _kwh_no_negativo(ahorro_proyectado_kwh_anual, "el ahorro proyectado")
+    return ahorro * INTENSIDAD_HIDRICA_SEN_L_KWH

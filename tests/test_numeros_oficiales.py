@@ -108,6 +108,18 @@ def test_g3_y_balance_preparados_para_firma(cifras):
     assert "Nico" in x.get("motivo_pendiente", "")
     balance = c["balance_neto"]
     costo = balance["costo_detector_kwh_anual"]["valor"]
+    ahorro = balance["ahorro_proyectado_kwh_anual"]["valor"]
+    fuentes = c["fuentes_externas"]
+    assert fuentes["factor_emision_sen"]["valor"] == 0.444
+    assert fuentes["factor_emision_sen"]["estado"] == "disponible"
+    assert fuentes["intensidad_hidrica_sen"]["valor"] == 2.0632
+    assert fuentes["intensidad_hidrica_sen"]["estado"] == "disponible"
+    assert "estimación" in fuentes["intensidad_hidrica_sen"]["nota"].lower()
+    assert balance["emisiones_detector_gco2e_anual"]["valor"] == round(costo * 0.444 * 1000, 8)
+    assert balance["co2_evitado_kg_anual"]["valor"] == round(ahorro * 0.444, 4)
+    assert balance["agua_indirecta_evitada_l_anual"]["valor"] == round(ahorro * 2.0632, 4)
+    assert balance["co2_evitado_kg_anual"]["tipo"] == "proyectado"
+    assert balance["agua_indirecta_evitada_l_anual"]["tipo"] == "proyectado"
     assert costo == pytest.approx(1.2916184e-05)
     assert costo == pytest.approx(balance["costo_entrenamiento_kwh_anual"]["valor"]
                                  + balance["costo_inferencia_kwh_anual"]["valor"])
