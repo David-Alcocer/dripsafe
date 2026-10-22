@@ -12,7 +12,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 |---|---|---|---|---|---|
 | 10 | Sub-reto 3: reportar el impacto en **PUE** | Misa: inicial; Nico: final proyectado | #2, #3 | `numeros_oficiales.json` → `pue_antes`, `pue_despues` (proyectado) | ⬜ |
 | 11 | **Balance neto positivo**, con cifras | Misa + Nico: cálculo y validación; Gadiel: medición del modelo | #7, #14 | `consumo_modelo.json` v2 (kit, código, equipo, método y kWh por repetición) + `numeros_oficiales.json` → `balance_neto_*`, FESEN 0.444 kgCO₂e/kWh y agua indirecta 2.0632 L/kWh (estimación NREL/CNE), con frecuencia y sin doble conteo | ✅ balance firmado; CO₂ y agua indirecta son proyecciones con fuente |
-| 11 | **Impacto en el acuífero** de Yucatán | Nico (ajuste `678b5ff`) | #13 | Sección en `docs/07` con fuentes citadas | ⬜ |
+| 11 | **Impacto en el acuífero** de Yucatán | Nico (ajuste `678b5ff`) | #13 | [`docs/07` §§2–3](07-agua-y-acuifero.md#3-análisis-de-impacto-obligatorio): extracción, presión local, descargas, contaminación, gobernanza y límites; disponibilidad 3105 y exceso simulado en `resultados/numeros_oficiales.json`; contenido de lámina en `docs/n4-entrega-para-leo.md` | ✅ análisis y cifras trazables integrados; la lámina final corresponde al pitch #19 |
 | 12 | Propuesta de solución sobre el kit | Todos | #4 | `main` corre de punta a punta con el kit | ⬜ |
 | 12 | Pitch final | Leo (guion y diapositivas) + Nico (cifras) | #16, #19 | Diapositivas en PDF + guion | ⬜ |
 | 14 | Bono de cero agua dulce | Misa (D13) | #15 | [`docs/07` §5](07-agua-y-acuifero.md#5-bono-zero-freshwater-footprint-5-a-15) (circuito cerrado, respaldo por aire y PUE proyectado con COP y proxy ERA5) + `src/metricas/refrigeracion.py` | 🟨 escenario calculado en N4; faltan curvas y agua no potable verificadas en sitio |
@@ -27,7 +27,7 @@ Estado: ⬜ pendiente · 🟨 en curso · ✅ con evidencia en `main`
 | Viabilidad técnica | Misa | #1, #4 | Un solo comando reproduce todos los números (`python -m src.pipeline`) | 🟨 balance firmado; factores externos integrados y pendientes de revisión de Misa |
 | Impacto en ciberseguridad | Guille | #9–#12, #30, #32 | Tabla de decisión de las 4 clases (`src/ot/clases.py`), rejilla corrida sobre el kit (`src/ataques/correr_rejilla.py`, cifras en `numeros_oficiales.json`), pruebas exploratorias de piso, rampa y calor (`src/ataques/exploratorias.py`) y modelo de amenazas con tabla ATT&CK v20 (`docs/06`) | ✅ integrado (#38–#40). Falta la revisión con un mentor el 22 (#11) |
 | Eficiencia Green AI | Nico: impacto y costo del detector; Misa: PUE inicial; Gadiel: consumo esperado | #2, #3, #5, #22 | PUE inicial y final proyectado + tabla calidad frente a costo | ⬜ |
-| Balance neto y gobernanza hídrica | Misa + Nico: balance; Nico: acuífero | #13, #14 | Balance en kWh y litros + análisis del acuífero | ⬜ |
+| Balance neto y gobernanza hídrica | Misa + Nico: balance; Nico: acuífero | #13, #14 | Balance en kWh y litros + [`docs/07` §§2–3](07-agua-y-acuifero.md#3-análisis-de-impacto-obligatorio) + disponibilidad regional del JSON oficial | ✅ balance firmado y análisis hídrico con límites explícitos |
 | Escalabilidad y negocio | Leo + Nico | #16 | Diapositiva de modelo de negocio | ⬜ |
 | Presentación | Leo + Nico | #17 a #21 | Dos ensayos con cronómetro + video de respaldo | ⬜ |
 

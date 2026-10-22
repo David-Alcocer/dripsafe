@@ -682,6 +682,7 @@ def balance(d: Datos, v: Vista) -> None:
 def agua(d: Datos, v: Vista) -> None:
     m = calculos.metricas(v.tabla)
     ex = calculos.exceso(v.tabla)
+    acuifero = cifra(d.numeros, "acuifero_3105") if not d.cifras_de_ejemplo else None
     wue_proy = cifra(d.numeros, "wue_sin_exceso") if evaluacion_completa(v) else ex["wue_sin_exceso"]
     rejilla([
         c.stat("Agua por energía IT", c.numero(m["wue"], 2), "L/kWh", c.umbral(m["wue"], PASOS_WUE),
@@ -710,9 +711,15 @@ def agua(d: Datos, v: Vista) -> None:
                           "nulo en el de aire. Los sitios son simulados: la diferencia no prueba que una tecnología sea mejor.")))
 
     with fila("Acuífero de Yucatán", "acuifero"):
-        st.html(c.panel("Acuífero 3105", '<p class="txt-d">CONAGUA publicó una actualización en 2024. '
-                        'Su disponibilidad regional está pendiente de integración en las cifras oficiales; '
-                        'no describe el suministro de un predio.</p>',
+        descripcion_acuifero = (
+            f'<p class="txt-d">CONAGUA calcula {c.numero(acuifero, 3)} hm³/año de disponibilidad media anual '
+            'para todo el acuífero 3105 (estudio 2024; extracción registrada al 30 de diciembre de 2022). '
+            'Es una estimación regional: no acredita calidad, suministro ni autorización para un predio.</p>'
+            if acuifero is not None else
+            '<p class="txt-d">La disponibilidad regional del acuífero 3105 está pendiente en las cifras '
+            'oficiales del proyecto; no describe el suministro de un predio.</p>'
+        )
+        st.html(c.panel("Acuífero 3105", descripcion_acuifero,
                         "Fuente: CONAGUA, actualización del acuífero 3105 (2024), §8.4."))
 
     with fila("Las épocas del año en Yucatán", "epocas"):
@@ -753,8 +760,11 @@ def agua(d: Datos, v: Vista) -> None:
                    color="morado" if pue_bono is not None else "gris",
                    sub=con_tag("escenario con COP de referencia; no medido" if pue_bono is not None
                                else "requiere datos de respaldo", tipo_de(d, "pue_con_bono"))),
-            c.stat("Acuífero 3105", "Pendiente", color="gris",
-                   sub=con_tag("requiere integración al JSON oficial", "observado")),
+            c.stat("Acuífero 3105", c.numero(acuifero, 1) if acuifero is not None else "Pendiente",
+                   unidad="hm³/año" if acuifero is not None else "",
+                   color="azul" if acuifero is not None else "gris",
+                   sub=con_tag("disponibilidad regional calculada; no describe un predio" if acuifero is not None
+                               else "requiere integración al JSON oficial", tipo_de(d, "acuifero_3105"))),
         ])
     mostrar_aviso_ejemplo(d)
 

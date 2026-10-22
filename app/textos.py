@@ -149,8 +149,8 @@ IMPACTO_ACUIFERO = [
      "El diseño debe verificar la ruta autorizada de cualquier descarga; el detector no la controla."),
     ("Gobernanza", "¿Quién regula y qué permisos aplican?",
      "Comparar captación observada con la autorización del predio; medir la purga por separado."),
-    ("Justicia ambiental", "¿A quién le quita agua el centro de datos?",
-     "Priorizar excesos no demuestra beneficio comunitario hasta identificar la fuente y otros usuarios."),
+    ("Justicia ambiental", "¿Quién comparte la fuente de agua?",
+     "Mostrar excesos no demuestra beneficio comunitario hasta identificar la fuente y otros usuarios."),
 ]
 
 # Épocas del año en Yucatán para el enfriamiento (propuesta §3.4). Rangos por confirmar con SMN o ERA5.

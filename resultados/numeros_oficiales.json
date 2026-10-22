@@ -510,7 +510,7 @@
       "horas_lote": 168.0,
       "nota": "Inferencia por hora (lote medido de 168 h) × horas × lotes + entrenamiento × reentrenamientos. La corrida completa no se suma."
     },
-    "fecha_validacion": "2026-10-22"
+    "fecha_validacion": "2026-10-21"
   },
   "deteccion": {
     "comparacion_contra_reglas_kit": {
