@@ -103,6 +103,21 @@ Con eso se predice la **energía no TI** (`energy_total − energy_it`, ver D18)
 
 Cada alerta se explica en una frase: *"SIM-A gasta 31 % más energía no TI de lo esperado para su carga y clima."*
 
+### Cómo se explica cada alerta (#8)
+
+`src/modelo/explicar.py` agrega dos columnas a `alertas.csv` sin volver a detectar nada (`python -m src.modelo.explicar --alertas data/resultados/alertas.csv`; por omisión reescribe el mismo archivo):
+
+- **`variable_principal`** (`energia`, `agua`, `entrada` o vacío): entre las variables que el detector marcó (`exceso_*`), la de mayor residuo relativo. Energía y agua ya vienen en %; para comparar la entrada (°C), cada residuo se divide entre el umbral mínimo del detector (3 %, 3 % y 0.5 °C), así que **1 °C de entrada pesa lo mismo que 6 %**. En empate gana el orden energía, agua, entrada. Vacío si no hay alerta física (por ejemplo, un login fallido sin exceso).
+- **`tipo_sugerido`** sale solo de la clase OT:
+
+| Clase | `tipo_sugerido` | Por qué |
+|---|---|---|
+| Incidente OT, cambio no autorizado, intento de acceso | `posible_ataque` | Hay un evento OT de por medio. «Posible»: un login fallido no prueba una intrusión |
+| Escalón sin registro | `ineficiencia` | Exceso físico sin evento OT. La acción no cambia: revisar la configuración **antes** de mandar a mantenimiento (regla de oro 1) |
+| Normal | `normal` | Sin alerta |
+
+**Límite declarado:** un ataque que no deja registro OT (por ejemplo, el `cambio_sin_registro` de la rejilla) sale como `ineficiencia`, porque un exceso por sí solo no distingue falla de ataque (docs/06 §7.5). La rejilla lo mide en `clasificacion_correcta_pct` en lugar de esconderlo.
+
 ### 2. Detectores sobre los residuos (MVP)
 
 1. **Umbral por residuo** (energía, agua, entrada): alerta si el residuo supera el máximo observado en las 24 h de calibración más un **margen del 50 %**, fijado antes de ver la evaluación.
