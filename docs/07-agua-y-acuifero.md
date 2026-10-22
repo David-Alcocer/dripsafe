@@ -1,6 +1,6 @@
 # 07 · Agua, acuífero y bono de cero agua dulce
 
-> **Reparto D13 (19 oct):** el **acuífero y la gobernanza** (sección 3) los lleva **Guille**; la **comparación de refrigeración y el bono** (sección 5) los lleva **Misa**; el **balance neto** sigue con **Misa + Nico**. Incluye los requisitos de **balance neto** e **impacto en el acuífero** y la propuesta del **bono** de +5% a +15%.
+> **Reparto vigente:** Nico lleva el acuífero y la gobernanza (#13), Misa la comparación de refrigeración y el bono (#15), y Misa + Nico el balance neto. Este documento cubre el análisis hídrico obligatorio y la propuesta del bono de +5 % a +15 %.
 >
 > **Del kit:** `water_l` es **captación in situ** simulada. No es consumo neto, ni agua de la generación eléctrica, ni potabilidad. Las diferencias entre los sitios del kit no son un experimento controlado: toda recomendación del bono va **condicionada a sus supuestos**.
 
@@ -12,27 +12,27 @@ Un centro de datos usa agua de dos formas:
 
 El artículo *Making AI Less "Thirsty"* (ver [09-recursos.md](09-recursos.md)) es la referencia para entender esta división.
 
-## 2. El acuífero de Yucatán: por qué es especial
+## 2. El acuífero de Yucatán: fuente y escala del riesgo
 
-Datos generales que hay que **respaldar con fuentes** antes del pitch:
-- **Suelo kárstico:** roca caliza muy porosa y fracturada. El agua se infiltra rapidísimo y circula por conductos subterráneos y **cenotes conectados**.
-- **Nivel freático somero:** el agua subterránea está a pocos metros de la superficie, sobre todo en el norte del estado.
-- **Sin ríos superficiales:** el acuífero es prácticamente **la única fuente de agua** de la población.
-- **Muy vulnerable a la contaminación:** lo que se vierte en superficie llega rápido al agua subterránea. Granjas porcícolas, fosas sépticas y crecimiento urbano ya la afectan.
-- **Intrusión salina:** cerca de la costa, extraer demasiada agua dulce permite que entre agua de mar.
-- **Anillo de Cenotes:** zona de reserva geohidrológica considerada clave para el abasto de agua de Mérida.
+La [actualización de CONAGUA para el acuífero Península de Yucatán (3105), publicada en 2024](https://sigagis.conagua.gob.mx/gas1/Edos_Acuiferos_18/yucatan/DR_3105.pdf), describe calizas, drenaje principalmente subterráneo, cavernas y cenotes (§3.1, p. 8 impresa; §3.3, pp. 10–11). La infiltración y las conexiones del terreno hacen necesario controlar los vertidos: un excedente de agua captada no dice por sí solo dónde termina una descarga.
+
+CONAGUA reporta **2 059.634923 hm³/año de disponibilidad media anual** para todo el acuífero 3105 (§8.4, p. 36 impresa). Es una cifra regional calculada con extracción registrada al **30 de diciembre de 2022**; no mide la disponibilidad en un predio ni demuestra que su agua sea potable o que una nueva extracción esté autorizada. El mismo estudio muestra profundidades al nivel estático de **2–5 m en la costa**, pero también valores mucho mayores en otras zonas (§5.4.1, p. 22). Evitamos describir toda Mérida como si tuviera un freático uniforme de pocos metros.
+
+El estudio incluye al **Anillo de Cenotes** entre las zonas protegidas (§1.1, p. 6) y registra variación en salinidad y calidad de agua de los puntos monitoreados (§5.5, pp. 25–26). La disponibilidad volumétrica positiva no elimina riesgos de calidad, presión local ni permisos. La evaluación de un sitio concreto requiere ubicación, captación autorizada, calidad del agua y ruta de las descargas.
 
 ## 3. Análisis de impacto (obligatorio)
 
-Estructura sugerida para la propuesta:
+Efectos que DripSafe puede analizar y límites de atribución:
 
 | Aspecto | Pregunta a responder | Cómo ayuda DripSafe |
 |---|---|---|
-| **Extracción** | ¿Cuánta agua del acuífero deja de extraerse? | Menos energía desperdiciada y menos agua de reposición en torres |
-| **Descargas** | ¿Qué pasa con el agua de purga, con sales y químicos? | Detectar operación anómala reduce purgas innecesarias |
-| **Contaminación** | ¿Hay riesgo de que llegue a cenotes o al freático? | El enfriamiento en circuito cerrado casi elimina las descargas |
-| **Gobernanza** | ¿Quién regula y qué permisos aplican? | CONAGUA (concesiones de agua) y normas de descarga; zonas protegidas |
-| **Justicia ambiental** | ¿A quién le quita agua el centro de datos? | Comunidades que dependen del mismo acuífero |
+| **Extracción** | ¿Qué fuente usa el sitio? | Detecta captación in situ por encima de la línea base; solo se atribuye al acuífero si se conoce el origen del suministro. |
+| **Descargas** | ¿Cuánta purga y a dónde va? | El kit no mide purga. Se requiere caudal o balance de torre y registro del destino. |
+| **Contaminación** | ¿Puede llegar al subsuelo? | El diseño debe contener y conducir la descarga por una ruta autorizada; el detector no sustituye esa infraestructura. |
+| **Gobernanza** | ¿Qué autorizaciones aplican? | Revisar concesión o asignación, uso, ubicación y condiciones de descarga para el predio. CONAGUA describe zonas de veda y restricciones en §1.1, pp. 5–6. |
+| **Justicia ambiental** | ¿Quién comparte la fuente? | Comparar la extracción real con otros usos locales antes de afirmar un beneficio para comunidades. |
+
+**Purga, solo como escenario físico simplificado.** En una torre estable, sin arrastre, fugas ni rebose, reposición = evaporación + purga y ciclos = reposición / purga. Por tanto, `purga = evaporación / (ciclos − 1)`. Con **4 ciclos supuestos**, 3 L evaporados requieren 1 L de purga y 4 L de reposición. Si se evita 1 L de *reposición causada por evaporación* y los ciclos no cambian, se evita 0.25 L de purga. **Una fuga evitada no implica esa reducción.** La relación procede del [balance del Departamento de Energía de EE. UU., ecuaciones 1–7](https://www.energy.gov/sites/default/files/2013/10/f3/waterfs_coolingtowers.pdf) y se reproduce con `src.metricas.purga.balance_torre`; no se calcula a partir de `water_l` del kit.
 
 ## 4. Balance neto (obligatorio, cálculo conjunto de Misa + Nico)
 
@@ -42,7 +42,7 @@ Estructura sugerida para la propuesta:
 
 **Nico calcula:** ahorro energético y PUE final proyectado; estima agua y emisiones cuando haya datos suficientes. Identifica proyecciones, fuentes y supuestos, y consolida los resultados para Leo.
 
-**Misa + Nico calculan y validan juntos:** el balance neto final, descontando el consumo del modelo del ahorro estimado con unidades y periodos compatibles. El balance positivo se verifica con cifras; los cálculos siguen pendientes de implementación.
+**Misa + Nico calculan y validan juntos:** el balance neto final, descontando el consumo del modelo del ahorro estimado con unidades y periodos compatibles. La firma y las cifras vigentes están en `resultados/numeros_oficiales.json`; este análisis hídrico no modifica ese archivo.
 
 **A Nico le toca conseguir y citar:**
 - [ ] Factor de emisión del Sistema Eléctrico Nacional de México, en su valor oficial más reciente.
@@ -93,92 +93,70 @@ En el kit se ve el mismo patrón que describe la literatura:
 
 **Por qué importa:** bajar el agua en el sitio no siempre baja el agua total. Alston, Love y Haider (2026) modelaron un centro de 200 MW de TI. Cambiar de *chiller* enfriado por agua a *chiller* enfriado por aire redujo el agua directa un 97 %. A cambio, subió la electricidad un 32 %, y con ella un 32 % el agua que gastan las plantas que la generan (p. 6, §4.1; tabla 2, p. 7). Es decir, la huella hídrica se **mueve** del centro de datos a la red eléctrica. Su configuración híbrida tuvo la **menor demanda eléctrica** de las tres y un agua total 34 % menor que la de enfriamiento por agua (p. 6, §4.1).
 
-**Por qué importa en Yucatán:** en ese mismo estudio, el modo de enfriamiento gratuito solo se activa si el día promedio está a **≤ 27 °C y ≤ 70 % de humedad relativa** (§3.2, pp. 5–6). En un clima frío pero húmedo (Michigan, zona 5A), la humedad limitó ese modo al **25 % del año** (tabla 3 y §4.1, p. 7). El reporte de WRc (2026) también señala que, en los sistemas híbridos, el uso de agua depende de la temperatura ambiente y de los puntos de control (p. 96 impresa). **Inferencia nuestra, PENDIENTE de validar con datos climáticos:** Mérida es cálida y húmeda casi todo el año, así que el aire de enfriamiento gratuito estaría disponible todavía menos horas. Por eso descartamos el aire solo, que sube el PUE, y el evaporativo solo, que consume mucha agua del acuífero (§2).
+**Por qué importa en Yucatán:** la elección entre enfriamiento seco y evaporativo desplaza parte del impacto del agua en sitio hacia la electricidad. El estudio de Alston et al. usa un criterio de temperatura **y humedad** para otro sistema (§3.2); no se puede trasladar su porcentaje anual a Mérida ni usarlo como umbral de una clase W40. Para nuestra propuesta seca, la serie local de temperatura de §5.4 sirve como sensibilidad; el despacho del respaldo requiere además curvas de equipo y carga.
 
-### 5.3 Propuesta: híbrido de circuito cerrado + agua residual tratada
+### 5.3 Arquitectura elegida para el bono
 
-| Modo | Cuándo | Agua que usa |
+**Propuesta para obra nueva o renovación:** servidores compatibles con clase de agua W40, circuito líquido cerrado, enfriador seco para expulsar el calor al aire y **chiller mecánico condensado por aire** como respaldo en horas cálidas. El líquido de los servidores circula dentro del circuito; «líquido» no implica una torre evaporativa. La [guía técnica de ASHRAE sobre enfriamiento líquido](https://www.ashrae.org/file%20library/technical%20resources/bookstore/emergence-and-expansion-of-liquid-cooling-in-mainstream-data-centers_wp.pdf) identifica W40 entre las clases de temperatura de suministro.
+
+| Pieza | Función | Agua potable durante operación normal |
 |---|---|---|
-| **Base: enfriamiento líquido en circuito cerrado** | Casi todo el año | El circuito se llena una vez y solo se repone poco, **con agua tratada** (WRc, 2026: los operadores lo describen como *single fill*, con reposición mínima, p. 60 impresa) |
-| **Respaldo: enfriamiento evaporativo con agua residual tratada (no potable)** | Solo en picos de calor | Agua tratada de una planta cercana, no del acuífero potable |
+| Circuito cerrado W40 | Transporta calor de los servidores; requiere llenado inicial y reposición por mantenimiento o fugas. | Meta 0: el llenado y toda reposición deben usar fuente no potable compatible con el equipo. |
+| Enfriador seco | Rechaza calor al aire sin evaporación. | 0 por diseño. |
+| Chiller condensado por aire | Cubre la carga que no puede disipar el enfriador seco. | 0 por diseño; consume electricidad adicional. |
 
-**Por diseño, la propuesta usa 100 % agua no potable:** tanto la reposición del circuito cerrado como el respaldo usan agua residual tratada. El riesgo de que eso no se cumpla está en §5.6.
+La meta de **WUE potable de enfriamiento = 0** es condicional: se necesita verificar la fuente de llenado y reposición mediante medidor y registros de operación. No se afirma cero agua total del centro de datos ni cero agua indirecta de la electricidad. [Microsoft anunció en 2024](https://www.microsoft.com/en-us/microsoft-cloud/blog/2024/12/09/sustainable-by-design-next-generation-datacenters-consume-zero-water-for-cooling/) una arquitectura de refrigeración líquida cerrada sin evaporación durante la operación y advirtió que sustituir enfriamiento evaporativo por mecánico aumenta el PUE. Es evidencia de factibilidad del concepto, no prueba de desempeño de DripSafe en Mérida.
 
-- **DripSafe recomienda y el operador confirma (D4).** El detector ya aprende la línea base por sitio usando la temperatura exterior. **Propuesta, no implementada:** con esa misma base, DripSafe **recomendaría** activar el respaldo cuando el calor supere lo que el circuito cerrado puede disipar, y **el operador lo confirma**. La IA nunca manda órdenes al enfriamiento; ver «Cómo se instala DripSafe sin abrir una puerta nueva» en [06-ciberseguridad-ot.md](06-ciberseguridad-ot.md).
-- **Ojo con los nombres** (Alston et al., 2026, §2.1.4, p. 3): «líquido» describe cómo se saca el calor de los servidores, no cómo se expulsa del edificio. En la propuesta, el calor se expulsa con aire en la base y con evaporación de agua tratada en el respaldo.
+**Alternativa futura:** respaldo adiabático con agua residual tratada, sujeto a disponibilidad, calidad, tratamiento y conducción autorizada de la purga. No se incluye en el diseño principal ni en su PUE. El [DOE explica](https://www.energy.gov/cmei/femp/best-management-practice-10-cooling-tower-management) que una torre pierde agua por evaporación, purga y arrastre. No suponemos que una planta de tratamiento local suministre efluente o reciba purga sin comprobar convenio e infraestructura.
 
-### 5.4 WUE estimado de la propuesta (SUPUESTOS editables)
+DripSafe **detecta y presenta** anomalías de energía y agua con los sensores disponibles. La recomendación de modo de enfriamiento y la verificación de un medidor separado de agua potable son capacidades propuestas, no implementadas en el kit. La orden al chiller queda a cargo del operador.
 
-Se separan dos métricas:
-- **WUE total:** todo el agua captada por kWh de TI, potable o no.
-- **WUE de agua potable:** solo la parte potable. **Es lo que premia el bono y debe tender a 0.**
+### 5.4 Cuantificación pendiente del equipo real
 
-Fórmula (en `src/metricas/refrigeracion.py`, función `estimar_hibrido`), donde *f* es la **fracción de la energía de TI servida en modo respaldo**:
+En 2025, la serie horaria de temperatura a 2 m para Mérida, [ERA5 vía Open-Meteo](https://open-meteo.com/en/docs/historical-weather-api), tiene 8 760 horas completas en zona `America/Mexico_City`. Conteo estricto de `temperatura > umbral`:
 
-```text
-WUE total   = (1 − f) · WUE_base + f · WUE_respaldo
-WUE potable = (1 − f) · WUE_base · (1 − no_potable_base) + f · WUE_respaldo · (1 − no_potable_respaldo)
-PUE         = (1 − f) · PUE_base + f · PUE_respaldo
-```
+| Umbral ilustrativo | Horas de 2025 por encima |
+|---|---:|
+| 27 °C | 3 955 |
+| 30 °C | 2 235 |
+| 33 °C | 981 |
+| 35 °C | 390 |
 
-**Valores de entrada: coeficientes didácticos del kit, NO datos de fabricante.** La base toma el sitio **líquido** del kit en referencia (WUE 0.213 L/kWh TI, PUE 1.198). El respaldo toma el sitio **evaporativo** en referencia (WUE 0.854 L/kWh TI, PUE 1.237). Son cocientes de un escenario simulado: sirven para mostrar el método, no describen ningún equipo real ni su ficha técnica. Probablemente la base es **conservadora**: un circuito cerrado *single fill* (WRc, 2026, p. 60 impresa) repone mucho menos agua que el sitio líquido simulado.
+La consulta reproducible está en `src/metricas/generar_numeros.py` (`URL_CLIMA`); el archivo horario queda en `data/clima/`, fuera de Git. Estos conteos son **temperatura exterior estimada**, no horas medidas de chiller. El umbral efectivo depende de temperatura de suministro admitida, aproximaciones térmicas del enfriador y del intercambiador, carga, control y rendimiento del equipo. El reparto horario tampoco equivale automáticamente a la fracción de **energía de TI** servida durante el respaldo.
 
-En los tres escenarios el agua es **100 % tratada en ambos modos**, por diseño (§5.3). Lo único que cambia es *f*, que es un SUPUESTO:
+Para estimar el PUE anual de la propuesta hacen falta energía anual de TI, energía no TI de la base, potencia o curva de rendimiento del enfriador seco, chiller y bombas, y su despacho horario. El cálculo sería `PUE = (E_IT + E_otros + E_enfriador_seco + E_chiller + E_bombas) / E_IT`, con todas las energías en el mismo periodo. **El PUE del bono permanece pendiente** hasta que Misa aporte esos parámetros. Las cifras de PUE y WUE de los sitios simulados en §5.1 no se transfieren a este equipo.
 
-| Escenario | *f* (respaldo) · SUPUESTO | WUE total (L/kWh TI) | **WUE potable** (L/kWh TI) | PUE |
-|---|---|---|---|---|
-| Optimista | 10 % | 0.277 | **0.000** | 1.202 |
-| Central | 25 % | 0.373 | **0.000** | 1.207 |
-| Conservador | 50 % | 0.533 | **0.000** | 1.217 |
+### 5.5 Evidencia técnica y alcance
 
-**Lectura:**
-- **WUE potable = 0 en los tres escenarios.** Esa es la meta del bono, y se cumple porque ningún modo usa agua de la red.
-- El **WUE total** sí crece con *f*: más horas de respaldo evaporativo significan más agua tratada. Aun en el escenario conservador (0.533) queda por debajo del sitio evaporativo del kit (0.854). Esa agua no sale del acuífero potable, pero sigue siendo agua consumida, y el agua tratada es un recurso limitado (§5.6).
-- **El PUE no se dispara:** queda entre 1.202 y 1.217, por debajo del sitio de aire (1.368) y cerca del líquido (1.198). La suma por fracción de energía de TI es exacta si *f* se mide en energía de TI, no en horas.
-- **PENDIENTE:** el valor real de *f* para Mérida (horas de respaldo por umbral de temperatura) depende de N4 (normales del SMN o ERA5) y entra en `numeros_oficiales.json → bono_zero_freshwater`. Mientras tanto, los tres valores de *f* son solo para ver la sensibilidad.
-- Reproducir: `python -m src.metricas.refrigeracion --kit data/kit/operaciones_simuladas.csv` imprime la tabla de §5.1, estos tres escenarios y el caso de riesgo de §5.6.
+- [ASHRAE](https://www.ashrae.org/file%20library/technical%20resources/bookstore/emergence-and-expansion-of-liquid-cooling-in-mainstream-data-centers_wp.pdf) documenta la clase W40. La clase se aplica al suministro líquido de equipos compatibles; no fija por sí sola las horas de respaldo en Mérida.
+- [Microsoft (2024)](https://www.microsoft.com/en-us/microsoft-cloud/blog/2024/12/09/sustainable-by-design-next-generation-datacenters-consume-zero-water-for-cooling/) describe circuito cerrado sin evaporación para enfriamiento y reconoce el aumento energético del enfriamiento mecánico. Sus cifras corporativas no se usan como medición del proyecto.
+- La serie [ERA5 de Open-Meteo](https://open-meteo.com/en/docs/historical-weather-api) permite explorar umbrales climáticos. No sustituye un diseño térmico ni datos del sitio.
 
-### 5.5 Viabilidad técnica: referencias reales
+### 5.6 Validaciones necesarias antes de afirmar viabilidad local
 
-1. **Uso de agua reciclada para enfriar ya existe.** AWS reportó que 24 de sus centros de datos usaban agua reciclada para enfriamiento. El centro de CoreSite en Santa Clara usó unos 159 000 m³ de agua reciclada en 2021. Microsoft, en cambio, reporta que la disponibilidad limitada lo dificulta (WRc, 2026, §3.1.4, p. 40 impresa). Cambiar a agua residual no reduce el consumo total, pero **deja de tomarlo del ambiente**, y requiere tratamiento adicional (Pan et al., 2018, citado en WRc, 2026, p. 40 impresa).
-2. **La simbiosis centro de datos ↔ planta de tratamiento es escalable.** Wang et al. (2026) cruzaron más de 4 775 centros de datos con 57 547 plantas de tratamiento municipales en 98 países. Estiman que usar el efluente tratado para enfriar ahorraría unos **1 300 millones de m³ de agua dulce al año** a escala global (resumen, p. 1). El 87.8 % de las conexiones por tubería quedan a **menos de 40 km** de la planta, y recomiendan buscar oportunidades dentro de ese radio (p. 7).
-3. **El enfriamiento líquido ahorra agua y sirve para cargas de IA.** WRc (2026, §3.1.3, p. 39 impresa) reporta que el enfriamiento líquido puede usar **entre 31 % y 52 % menos agua**. Además, el circuito cerrado se considera *single fill*: por ejemplo, unos 24 m³ para un sitio de 1 MW, según un operador entrevistado (§4.2.1, p. 60 impresa).
-
-### 5.6 Límites y siguiente validación
-
-1. **Datos simulados.** Los 3 sitios del kit son escenarios ficticios. Las diferencias entre ellos **no** prueban qué tecnología es mejor en una planta real, y la base y el respaldo de §5.4 heredan esa limitación.
-2. **Sin costos.** No se estima la inversión (tubería, tratamiento terciario, intercambiadores) ni la operación (químicos, mantenimiento, bombeo). Por eso no hay costo por m³ evitado.
-3. **Depende de tener agua tratada cerca.** Si no hay una planta con efluente suficiente a una distancia razonable (Wang et al. 2026 sugieren menos de 40 km), el respaldo o la reposición caen a la red potable y el WUE potable deja de ser 0. Además, la calidad del agua importa: sin tratamiento se forman biopelículas e incrustaciones que corroen el equipo (WRc, 2026, §3.1.4, p. 39 impresa).
-
-**Riesgo: reposición del circuito cerrado con agua de la red.** Si la reposición de la base se hace con agua potable y no con agua tratada, el WUE potable ya no es 0. Por ejemplo, con *f* = 25 % y respaldo 100 % tratado queda en 0.75 × 0.213 ≈ **0.160 L/kWh TI**. El WUE total sigue en 0.373 y el PUE en 1.207, porque solo cambia la fuente del agua. Se calcula con `riesgo_reposicion_con_red` en `src/metricas/refrigeracion.py`.
-- **Condición de mitigación:** conectar la reposición al mismo suministro de agua tratada que el respaldo, con su tratamiento en sitio y un depósito que cubra la reposición mientras el suministro tratado no esté disponible. Mientras eso no esté garantizado por contrato, el bono se presenta como meta de diseño y no como resultado.
-
-**Siguiente validación necesaria:**
-- Calcular *f* con las horas reales de calor en Mérida (N4).
-- Identificar las plantas de tratamiento con efluente disponible cerca del sitio y su calidad, y confirmar la gobernanza de ese efluente con CONAGUA (§3).
-- Repetir §5.4 con el WUE de reposición de un circuito cerrado real en lugar del sitio líquido simulado.
-- Medir el agua indirecta de la electricidad con un factor del SEN (pendiente en §4), porque más PUE significa más agua en la generación (Alston et al., 2026).
+1. Confirmar compatibilidad W40 de los servidores, carga térmica, curvas de enfriador/chiller, energía de bombas y PUE anual resultante; comparar energía directa e impacto indirecto del SEN si existe un factor verificable.
+2. Confirmar origen, calidad y volumen de agua no potable para llenado y reposición, con contingencia que no recurra inadvertidamente a agua potable. Sin esto, `WUE potable = 0` es **meta de diseño**.
+3. Si se evalúa la alternativa adiabática, identificar planta, disponibilidad, tratamiento, costo y ruta autorizada de la purga; no asumir que existe conexión con JAPAY.
+4. Validar con datos físicos del sitio; el kit contiene tres escenarios ficticios y solo mide captación in situ, no potabilidad, purga ni agua de generación eléctrica.
 
 ### 5.7 Qué significa el agua del kit
 
 `water_l` es **captación in situ simulada**:
 - **No** es consumo neto: no descuenta lo que se devuelve o se purga.
 - **No** incluye el agua de la generación eléctrica (alcance 2 en Alston et al., 2026, §1).
-- **No** dice si el agua es potable o no. El kit no separa fuentes, así que el «WUE potable» de §5.4 sale **solo de los supuestos**, no del kit.
+- **No** dice si el agua es potable o no. El kit no separa fuentes; la meta de WUE potable del bono exige medidores y registros externos.
 
 **Referencias de esta sección**
 - Alston, G., Love, N. y Haider, R. (2026). *Data Center Cooling Choices Shift Water Impacts Across the Grid: An Integrated Water–Energy Model for Sustainable Data Center Development*. arXiv:2609.25437v1.
-- WRc (Dingle, H., Fairhurst, R., Cahill, J., Prin, L.) para MOSL (2026). *Water Efficient Data Centres*. Reporte final UC19447.03, febrero de 2026. Las páginas citadas son las impresas del documento.
-- Wang, A., Zhang, C., Xu, T., Savic, D., Jiang, J., Xiao, P., He, C., Tao, Y., Daigger, G. y Ren, N. (2026). *Global data–water symbiosis reduces AI infrastructure's carbon and water footprint*. doi:10.1016/j.ese.2026.100702.
 
 ## 6. Entregable de Nico
 
-**Pendiente de implementación y elaboración:**
+**Estado de las piezas de Nico:**
 
-- **Programa en Python** dentro de `src/metricas/`, usando el PUE inicial que entrega Misa desde `src/metricas/pue.py`. Nico calcula ahorro, PUE final proyectado y, cuando sea posible, impacto en agua y emisiones; incorpora el balance neto final desarrollado junto con Misa en `src/metricas/balance_neto.py`.
+- **Programa en Python** dentro de `src/metricas/`, usando el PUE inicial que entrega Misa desde `src/metricas/pue.py`. Nico calcula ahorro, PUE final proyectado y, cuando es posible, impacto en agua y emisiones; el balance neto está en `src/metricas/balance_neto.py`.
 - **Ejemplo reproducible con datos sintéticos**, con instrucciones y escenarios sin ahorro, con balance positivo y con ahorro menor que el costo del modelo.
 - **Resultados consolidados** en `resultados/numeros_oficiales.json`, con origen y responsable de cada cifra; documentación del periodo, unidades, fuentes y supuestos, distinguiendo mediciones de proyecciones.
-- **Análisis del acuífero y propuesta del bono**, con fuentes y condiciones de viabilidad.
+- **Análisis del acuífero y propuesta del bono**, con fuentes y condiciones de viabilidad, en las secciones 2, 3 y 5. Las validaciones locales de §5.6 siguen pendientes.
 - **Contenido y guion del pitch**, incluyendo el impacto local, las cifras del balance y la propuesta del bono. Leo diseña las diapositivas con esos resultados.
 
 ## Para leer más

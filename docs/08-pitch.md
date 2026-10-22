@@ -31,7 +31,7 @@ propuesta y se confirman con el JSON antes de congelar.
 Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json` (Nico). Si una cifra no está ahí, no se dice.
 
 ### 1 · El problema (40 s)
-> "En Yucatán no hay ríos. Casi toda el agua sale de un solo acuífero, con el agua a pocos metros de la superficie y conectado por cenotes. Cada centro de datos que enfría con torres evaporativas saca agua de ahí.
+> "Yucatán tiene un acuífero kárstico con poco drenaje superficial y numerosos cenotes. CONAGUA reporta disponibilidad regional positiva, pero eso no garantiza calidad ni agua disponible para un predio. Cuando un centro usa agua subterránea, importan tanto la captación como el destino de sus descargas.
 > Y el enfriamiento lo controlan PLCs: si alguien cambia un setpoint, el consumo se dispara sin que nadie lo note.
 > Hoy se vigila con umbrales fijos: alertar si el PUE pasa de 1.6. Pero un sitio eficiente, con PUE de 1.2, puede subir su energía no TI hasta **158 %** sin cruzar esa línea. El umbral fijo deja ciegos justo a los sitios eficientes."
 
@@ -54,7 +54,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 
 ### 5 · Impacto y escala (60 s)
 > "En agua, el ahorro depende del tipo de enfriamiento: es grande en el evaporativo y casi nulo en el de aire. Lo decimos en lugar de prometer agua en todos lados.
-> Para el bono proponemos llegar a **cero agua potable** en obra nueva: enfriamiento líquido en circuito cerrado con enfriadores secos, y un chiller de respaldo en las [horas] más calientes del año. Cuesta un poco de PUE y lo reportamos. Microsoft anunció en 2024 un diseño así, sin evaporación; Google ya enfría un centro de datos con agua residual tratada, nuestro respaldo opcional.
+> Para el bono proponemos llegar a **cero agua potable de enfriamiento** en obra nueva: circuito cerrado W40, enfriador seco y chiller condensado por aire. La serie ERA5 de Mérida cuenta horas por encima de varios umbrales, pero todavía no mide las horas del chiller. Microsoft describió en 2024 un diseño sin evaporación y reconoció su costo energético. Nuestro PUE del bono sigue pendiente de las curvas del equipo. El agua tratada para un respaldo adiabático sería una alternativa futura condicionada a suministro y descarga verificados.
 > DripSafe corre en local, sin nube y sin GPU, con seis medidores que casi cualquier centro de datos ya tiene. Cuesta por kW, y con nuestro precio supuesto la cuota se paga sola con menos del 0.5 % del consumo auxiliar de un sitio de 1 MW.
 > Nuestros límites: datos simulados, una sola semana de clima y sin sensores de agua helada. La siguiente validación es con datos reales de una sala de cómputo en Yucatán.
 > DripSafe: que cada litro y cada kWh que sobra se note a tiempo."
@@ -68,7 +68,7 @@ Las cifras entre corchetes salen **solo** de `resultados/numeros_oficiales.json`
 - [ ] **Balance neto y gobernanza:** umbral de equilibrio, acuífero y reporte para CONAGUA (diapositivas 7 y 8).
 - [ ] **Escalabilidad y negocio:** seis medidores, autocalibración y precio por kW (diapositiva 9).
 - [ ] **Presentación:** una idea por diapositiva y la demo en modo presentación.
-- [ ] **Bono:** cero agua potable con respaldo sin agua (diapositiva 8).
+- [ ] **Bono:** meta condicionada de cero agua potable con respaldo seco; declarar PUE pendiente (contenido para Leo en `docs/n4-entrega-para-leo.md`).
 
 ## Preguntas probables y respuesta corta
 

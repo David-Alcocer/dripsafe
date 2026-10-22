@@ -13,7 +13,7 @@ Hacer que la infraestructura de IA (centros de datos) sea más segura, eficiente
 - **Modelo:** línea base por sitio con mínimos cuadrados, umbrales de residuos y media móvil; reglas OT para clasificar. **Sin LLM** dentro de la solución.
 - **Doble uso:** el mismo modelo detecta ineficiencias (ahorro de energía y agua) y posibles manipulaciones de sensores o PLCs (ciberseguridad OT).
 - **Demo:** Streamlit.
-- **Bono:** enfriamiento híbrido (circuito cerrado + agua residual tratada) para lograr cero agua dulce potable.
+- **Bono propuesto para N4:** circuito cerrado W40 + enfriador seco + chiller condensado por aire; agua tratada para llenado y reposición, sujeta a verificación. El respaldo adiabático con agua residual tratada es alternativa futura.
 - **Git:** trunk-based, con ramas cortas.
 
 ## Requisitos obligatorios del hackatón
