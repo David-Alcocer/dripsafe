@@ -63,6 +63,9 @@ Los kWh del detector salen de CodeCarbon con la potencia de diseño del procesad
 
 Requisitos: **Python 3.12**. No necesita GPU, cuentas ni internet después de instalar.
 
+> [!TIP]
+> **En macOS, doble clic en [`DripSafe.command`](DripSafe.command)**: crea el entorno si falta, comprueba el kit, cierra cualquier dashboard viejo y abre la demo en el navegador. No toca las cifras oficiales.
+
 ```bash
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
