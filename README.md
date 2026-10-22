@@ -1,125 +1,142 @@
-# DripSafe 
+<p align="center">
+  <img src="app/assets/logo.png" alt="DripSafe" width="120">
+</p>
 
-> Proyecto del equipo para el **Hackatón CIFOX · AguaSegura AI** (Universidad Politécnica de Yucatán, 22 de octubre de 2026).
+<h1 align="center">DripSafe</h1>
 
-**DripSafe** es un detector de anomalías ligero, basado en IA, para los sistemas de enfriamiento de centros de datos. Con **un solo modelo** buscamos dos cosas:
+<p align="center">
+  <b>Que cada litro y cada kWh que sobra se note a tiempo.</b><br>
+  Detección de anomalías en el enfriamiento de centros de datos: eficiencia y ciberseguridad OT con un solo modelo.
+</p>
 
-1. **Eficiencia:** detectar consumo anormal de energía y agua en el enfriamiento para bajar el **PUE** (y, de paso, el WUE).
-2. **Ciberseguridad OT:** detectar lecturas o comandos que no cuadran con el comportamiento físico normal, una señal de manipulación de sensores o PLCs.
+<p align="center">
+  Hackatón CIFOX · AguaSegura AI · Sub-reto 3 · UPY, Mérida · 22 de octubre de 2026
+</p>
+
+> [!IMPORTANT]
+> **DATOS SIMULADOS.** Todas las cifras salen del kit CIFOX, que simula tres sitios ficticios durante 7 días. Cada cifra lleva su tipo: *observado*, *medido*, *estimado* o *proyectado*. Una proyección no es un ahorro observado.
 
 ---
 
-## Resumen 
+## Qué hace
 
-| Tema | Decisión |
+DripSafe aprende cuánto **debería** gastar cada sitio según su carga y la temperatura exterior, compara cada hora lo real contra lo esperado y cruza los excesos con el registro OT. Así separa cuatro casos:
+
+| Clase | Qué significa |
 |---|---|
-| Sub-reto | **3 · Detección de anomalías con IA** en enfriamiento y gestión hídrica |
-| Métrica principal | **PUE** (Power Usage Effectiveness) |
-| Modelo | Línea base por sitio + umbrales de residuos + media móvil de 4 h + clasificación OT (D20); balance neto por verificar |
-| Demo | **Streamlit** (Python) |
-| Bono extra | Ir por el **Zero Freshwater Footprint** (+5% a +15%) con enfriamiento híbrido |
-| Flujo de Git | **Trunk-based**, con ramas cortas; `git worktree` es opcional |
-| Fechas clave | 19 oct: llega el kit · 22 oct: jornada presencial y pitch |
+| **Incidente con efecto físico** | Evento OT seguido de un exceso de energía o agua |
+| **Cambio no autorizado** | Cambio de configuración que todavía no mueve la física |
+| **Escalón sin registro** | Exceso sin evento OT: falla o cambio que no dejó huella |
+| **Intento de acceso** | Logins fallidos sin efecto |
 
----
+Ningún exceso sin explicar va directo a mantenimiento, y DripSafe nunca manda órdenes: **solo avisa; decide una persona**.
 
-## Documentación
-
-Cada documento es independiente. Léanlo completo o pásenselo a su IA de confianza para hacerle preguntas.
-
-| # | Documento | Para quién | De qué trata |
-|---|---|---|---|
-| 01 | [Convocatoria](docs/01-convocatoria.md) | Todos | Reglas, sub-retos, entregables, criterios y bono |
-| 02 | [Decisiones](docs/02-decisiones.md) | Todos | Qué decidimos y por qué |
-| 03 | [Equipo y roles](docs/03-equipo-y-roles.md) | Todos | Quién hace qué |
-| 04 | [Plan de trabajo](docs/04-plan-de-trabajo.md) | Todos | Día por día, del 18 al 22 |
-| 05 | [Solución técnica](docs/05-solucion-tecnica.md) | Gadiel, Misa, Nico, Leo | Arquitectura, modelo, métricas y balance neto |
-| 06 | [Ciberseguridad OT](docs/06-ciberseguridad-ot.md) | Guille | Guía rápida de OT/ICS y MITRE ATT&CK for ICS |
-| 07 | [Agua y acuífero](docs/07-agua-y-acuifero.md) | Nico | Acuífero de Yucatán, balance neto y bono |
-| 08 | [Pitch](docs/08-pitch.md) | Nico, Leo | Estructura del pitch y modelo de negocio |
-| 09 | [Recursos](docs/09-recursos.md) | Todos | Enlaces en español e inglés por tema |
-| 10 | [Preguntas frecuentes](docs/10-faq.md) | Todos | Dudas que ya resolvimos |
-| — | [Contexto para NotebookLM](docs/notebooklm-contexto.md) | Investigación | Todo el contexto en un solo archivo, con preguntas y plantilla de apuntes |
-| 11 | [Trabajo en paralelo](docs/11-trabajo-en-paralelo.md) | Todos | Contratos entre piezas, dueños de carpetas y trazabilidad |
-| 12 | [Trazabilidad](docs/12-trazabilidad.md) | Todos | Requisito → responsable → issue → evidencia |
-| — | [CONTRIBUTING](CONTRIBUTING.md) | Todos | Cómo trabajamos con Git |
-| — | [AGENTS](AGENTS.md) | Su IA | Contexto del proyecto para asistentes de IA |
-
----
-
-## 👥 Equipo
-
-| Integrante | Rol |
-|---|---|
-| **Leo** (líder) | Demo en Streamlit, guion y diapositivas del pitch |
-| **Misa** (co-líder) | Datos limpios y contrato v2, PUE inicial, balance neto final con Nico, comparación de refrigeración y bono, repositorio e integración |
-| **Gadiel** | Construye el detector, consumo esperado y medición con CodeCarbon |
-| **Nico** | Evaluación justa y Green AI del detector, ahorro y PUE final proyectados, balance neto final con Misa, consolida las cifras |
-| **Guille** | Ciberseguridad OT (eventos del kit y ATT&CK for ICS), análisis del acuífero y gobernanza |
-
-Detalle en [docs/03-equipo-y-roles.md](docs/03-equipo-y-roles.md).
-
-**Reparto aprobado:** Misa entrega a Nico el PUE inicial y los datos que lo sustentan; Nico calcula el ahorro, el PUE final proyectado y el impacto en agua y emisiones cuando haya datos suficientes. **Misa + Nico calculan y validan juntos el balance neto final**, usando las mediciones del modelo de Gadiel. Nico consolida las cifras para Leo. **Ajuste D13 (19 oct):** Nico se suma al modelo como evaluador; el acuífero pasa a Guille, el bono a Misa y el guion a Leo. Los cálculos están pendientes de implementación; los ahorros y el PUE final serán proyecciones hasta contar con evidencia medida.
-
----
-
-## Cómo usar esta documentación con tu IA
-
-Copia el documento de tu rol, más `01-convocatoria.md` y `02-decisiones.md`, y pégalos en tu IA con un prompt como este:
-
-```text
-Soy estudiante de segundo año de Ingeniería de Software. Participo en un hackatón
-de IA, ciberseguridad y agua. Mi rol en el equipo es: [TU ROL].
-Te paso el contexto del proyecto. Explícame mi parte paso a paso, en lenguaje
-sencillo, y dime qué debo tener listo antes del 22 de octubre.
-
-[PEGA AQUÍ LOS DOCUMENTOS]
+```mermaid
+flowchart LR
+    A[Telemetría por hora<br>energía · agua · carga · clima] --> B[Línea base por sitio<br>mínimos cuadrados, 72 h limpias]
+    B --> C[Residuos y umbrales<br>+ media móvil de 4 h]
+    O[Registro OT] --> D
+    C --> D[Clasificación OT<br>4 clases]
+    D --> E[Dashboard Streamlit<br>alerta, motivo y acción]
 ```
 
-Si usan Claude Code u otro agente en la terminal, este repo trae [AGENTS.md](AGENTS.md) con el contexto resumido.
+Es la línea base de medición y verificación de ASHRAE Guideline 14, aplicada a detectar en tiempo real. Corre en CPU, sin nube, sin GPU y sin LLM.
 
----
+## Resultados
 
-## Reglas importantes
+Fuente única: [`resultados/numeros_oficiales.json`](resultados/numeros_oficiales.json), con el balance neto validado en conjunto.
 
-- **El kit de datos es confidencial.** La convocatoria prohíbe divulgarlo. **No lo suban a GitHub.** La carpeta `data/` está en `.gitignore`. Si el repo va a GitHub, que sea **privado** hasta después del hackatón.
-- **Prohibido atacar sistemas reales.** Todo se prueba sobre el kit de datos o en entornos simulados.
-- **El 22 no se construye nada nuevo.** La demo debe funcionar desde el miércoles 21 en la noche.
+| | Resultado | Tipo |
+|---|---|---|
+| **Episodios del kit** | 3 de 3 detectados, 0 falsas alarmas; empate con las reglas fijas del kit | Observado |
+| **Fallas pequeñas** | DripSafe detecta desde **+10 %** (18 de 18); las reglas fijas, desde +80 % y solo 6 de 18 | Observado sobre inyecciones |
+| **Punto ciego del umbral fijo** | Un sitio eficiente puede subir su energía no TI **158 %** sin cruzar PUE 1.6 | Estimado |
+| **PUE** | 1.278 → **1.268** si se atiende cada alerta física | Proyectado |
+| **WUE** | 0.394 → **0.366** L/kWh TI | Proyectado |
+| **Costo del detector** | **33.6 ms** por corrida · 1.3 × 10⁻⁵ kWh/año · 0.006 g CO₂e/año | Medido · estimado (TDP) |
+| **Ahorro del escenario** | **10,768 kWh/año** · **4,781 kg CO₂e/año** · 11,461 L/año in situ + 22,216 L/año en la generación eléctrica | Proyectado |
+| **Bono Zero Freshwater** | Circuito cerrado W40 + enfriador seco + chiller por aire: PUE **1.284** con cero agua potable de enfriamiento | Proyectado |
 
----
+Los kWh del detector salen de CodeCarbon con la potencia de diseño del procesador como hipótesis, no de un medidor de pared. El CO₂ usa el factor del SEN de SEMARNAT (0.444 kgCO₂e/kWh).
 
-## Estructura propuesta del repo
+## Cómo correrlo
+
+Requisitos: **Python 3.12**. No necesita GPU, cuentas ni internet después de instalar.
+
+```bash
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+```
+
+**Sin el kit** (datos sintéticos, para probar):
+
+```bash
+.venv/bin/python -m src.sinteticos --dias 14 --salida data/sinteticos/telemetria.csv
+.venv/bin/python -m pytest -q
+```
+
+**Con el kit** (confidencial, fuera del repo):
+
+```bash
+# Regenera alertas, evaluación y cifras oficiales
+.venv/bin/python -m src.pipeline --kit "/ruta/al/kit/data/operaciones_simuladas.csv"
+
+# Abre el dashboard en http://localhost:8501
+export DRIPSAFE_KIT="/ruta/al/kit"
+.venv/bin/python -m streamlit run app/main.py
+```
+
+Detalles del dashboard en [`app/README.md`](app/README.md) y de la regeneración de cifras en [`resultados/README.md`](resultados/README.md).
+
+## Estructura
 
 ```text
 dripsafe/
-├── README.md
-├── AGENTS.md
-├── CONTRIBUTING.md
-├── docs/          # Documentación del proyecto
-├── config/        # Traducción de nombres del kit al contrato (columnas.json)
-├── data/          # Kit de datos y todo lo derivado de él (NO se sube; está en .gitignore)
-├── notebooks/     # Exploración y experimentos (Jupyter)
-├── src/           # Código: contrato, datos, ataques, modelo y métricas
-├── resultados/    # numeros_oficiales.json: solo totales, la única fuente de cifras del pitch
-├── tests/         # Pruebas automáticas (solo datos sintéticos)
-├── .github/       # Plantillas de PR e issues, dueños y pruebas automáticas
-└── app/           # Demo en Streamlit
+├── app/           Dashboard en Streamlit (demo del pitch)
+├── src/
+│   ├── datos/       Carga y limpieza del kit al contrato de datos
+│   ├── modelo/      Detector: línea base, umbrales, explicación y medición
+│   ├── ot/          Tabla de decisión de las 4 clases OT
+│   ├── ataques/     Escenarios e inyecciones de la rejilla fija
+│   ├── evaluacion/  Métricas por episodio y comparación contra las reglas del kit
+│   └── metricas/    PUE, WUE, balance neto, refrigeración y bono
+├── resultados/    Cifras oficiales (solo agregados, sin filas del kit)
+├── config/        Traducción de columnas del kit al contrato
+├── tests/         Pruebas automáticas con datos sintéticos
+├── docs/          Documentación del proyecto
+└── data/          Kit y derivados: NO se sube (.gitignore)
 ```
 
-Para empezar sin esperar el kit:
+## Documentación
 
-```bash
-pip install -r requirements.txt
-python -m src.sinteticos --dias 14 --salida data/sinteticos/telemetria.csv
-pytest
-```
+| | Documento | De qué trata |
+|---|---|---|
+| 01 | [Convocatoria](docs/01-convocatoria.md) | Reglas, entregables, criterios y bono |
+| 02 | [Decisiones](docs/02-decisiones.md) | Qué decidimos y por qué |
+| 05 | [Solución técnica](docs/05-solucion-tecnica.md) | Arquitectura, modelo, métricas y balance neto |
+| 06 | [Ciberseguridad OT](docs/06-ciberseguridad-ot.md) | Modelo de amenazas Purdue y MITRE ATT&CK for ICS |
+| 07 | [Agua y acuífero](docs/07-agua-y-acuifero.md) | Acuífero 3105 de Yucatán, balance neto y bono |
+| 08 | [Pitch](docs/08-pitch.md) | Guion, criterios y preguntas del jurado |
+| 11 | [Trabajo en paralelo](docs/11-trabajo-en-paralelo.md) | Contratos entre piezas |
+| 12 | [Trazabilidad](docs/12-trazabilidad.md) | Requisito → issue → evidencia |
 
-Cómo se conectan las piezas: [docs/11-trabajo-en-paralelo.md](docs/11-trabajo-en-paralelo.md).
+También: [equipo y roles](docs/03-equipo-y-roles.md), [plan de trabajo](docs/04-plan-de-trabajo.md), [recursos](docs/09-recursos.md), [preguntas frecuentes](docs/10-faq.md), [CONTRIBUTING](CONTRIBUTING.md) y [AGENTS](AGENTS.md) (contexto para asistentes de IA).
 
----
+## Límites
 
-## Contacto CIFOX
+- Datos simulados de 3 sitios y 7 días: no valida eficacia en plantas reales.
+- Una sola semana de clima: hace falta una línea base por época (secas, lluvias y nortes).
+- Sin sensores de agua helada ni por equipo; un exceso sin registro OT no distingue falla de ataque.
 
-- gloria.vlencia@cifox.org
-- mariana.gomez@cifox.org
-- Convocatoria oficial: <https://vaporlatierra.com/2026/convocatoria-hackaton-cifox-aguasegura-ai/>
+La siguiente validación es con datos reales de una sala de cómputo en Yucatán.
+
+## Reglas
+
+- **El kit es confidencial:** nunca se sube ni se comparte. `data/` está en `.gitignore` y las pruebas usan solo datos sintéticos.
+- **Prohibido atacar sistemas reales:** todo se prueba sobre el kit o con datos simulados.
+
+## Equipo
+
+**Leo** (líder) · **Misael** · **Gadiel** · **Nico** · **Guillermo**, estudiantes de Ingeniería de Software. Roles en [docs/03](docs/03-equipo-y-roles.md).
+
+Contacto CIFOX: gloria.vlencia@cifox.org · mariana.gomez@cifox.org · [convocatoria oficial](https://vaporlatierra.com/2026/convocatoria-hackaton-cifox-aguasegura-ai/)
