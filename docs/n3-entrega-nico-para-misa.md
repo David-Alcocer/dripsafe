@@ -53,10 +53,10 @@ de los JSON de esta entrega incluye filas del kit.
    como validado el número enviado por Gadiel sin reproducirlo.
 3. Acordar la atribución y anualización de CO₂ antes de publicar emisiones.
    El campo anual de emisiones sigue en `null`.
-4. Tras la revisión conjunta, incorporar al contrato, al pipeline y a la
-   vista de Leo `balance_neto.balance_energia_kwh_anual` como ahorro
-   proyectado menos costo anual, en `kWh/año`, tipo `proyectado`, con fuentes
-   y supuestos. Mientras falte un insumo, publicar `null` con motivo.
+4. `balance_neto.balance_energia_kwh_anual` ya está en el JSON oficial y en
+   la vista de Leo como `null` con motivo. Tras la revisión conjunta,
+   calcularlo como ahorro proyectado menos costo anual, en `kWh/año`, tipo
+   `proyectado`, con fuentes y supuestos.
 5. Solo después de que ambos aprueben explícitamente el resultado, ejecutar
    la firma conjunta; `balance_neto.validado_por` sigue en `null`.
 

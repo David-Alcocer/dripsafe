@@ -117,6 +117,11 @@ def test_g3_versionado_y_pendientes_del_balance(cifras):
     assert balance["razon_ahorro_costo"]["tipo"] == "proyectado"
     assert balance["umbral_equilibrio"]["valor"] is None
     assert leo["equilibrio_horas"]["estado"] == "pendiente"
+    assert balance["balance_energia_kwh_anual"]["valor"] is None
+    assert balance["balance_energia_kwh_anual"]["tipo"] == "proyectado"
+    assert leo["balance_energia_kwh_anual"] == balance["balance_energia_kwh_anual"]
+    assert "Nico" in leo["acuifero_3105"]["motivo_pendiente"]
+    assert c["_meta"]["generado_con_commit"] and "sucio" not in c["_meta"]["generado_con_commit"]
     assert balance["ahorro_proyectado_kwh_anual"]["tipo"] == "proyectado"
     assert "ahorro observado" in balance["ahorro_proyectado_kwh_anual"]["nota"]
 
