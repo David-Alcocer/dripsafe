@@ -139,6 +139,10 @@ La siguiente validación es con datos reales de una sala de cómputo en Yucatán
 - **El kit es confidencial:** nunca se sube ni se comparte. `data/` está en `.gitignore` y las pruebas usan solo datos sintéticos.
 - **Prohibido atacar sistemas reales:** todo se prueba sobre el kit o con datos simulados.
 
+## Licencias
+
+El código, la documentación y los demás materiales originales de DripSafe tienen **todos los derechos reservados**. Consulta [LICENSE.md](LICENSE.md). Las fuentes incluidas y otros componentes de terceros mantienen sus propias condiciones; consulta [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). El kit CIFOX no se distribuye en este repositorio.
+
 ## Equipo
 
 **Leo** (líder) · **Misael** · **Gadiel** · **Nico** · **Guillermo**, estudiantes de Ingeniería de Software. Roles en [docs/03](docs/03-equipo-y-roles.md).
