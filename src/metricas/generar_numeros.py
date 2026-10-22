@@ -30,6 +30,7 @@ URL_CLIMA = ("https://archive-api.open-meteo.com/v1/archive?latitude=20.9674&lon
              "&start_date=2025-01-01&end_date=2025-12-31&hourly=temperature_2m&models=era5"
              "&timezone=America%2FMexico_City")
 URL_EER = "https://app.leg.wa.gov/WAC/default.aspx?cite=51-11C-403323&pdf=true"
+URL_ACUIFERO_3105 = "https://sigagis.conagua.gob.mx/gas1/Edos_Acuiferos_18/yucatan/DR_3105.pdf"
 EER_AIRE_PATH_A = 10.100  # WAC C403.3.2(3), <150 t, plena carga, condiciones estándar
 BTU_WH_POR_COP = 3.412
 HORAS_2025 = 8760
@@ -329,8 +330,13 @@ def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
                            "factores": balance_neto.URL_NREL_2012,
                            "metodo": "suma(participación por tecnología × factor de consumo)",
                            "advertencia": "No sustituye un factor hídrico oficial de México."}),
-            "disponibilidad_acuifero_3105": metrica(None, "hm³/año", "observado", "DOF/CONAGUA", "Nico",
-                                                      motivo="Pendiente de Nico: fuente y año del dato del acuífero."),
+            "disponibilidad_acuifero_3105": metrica(
+                2059.634923, "hm³/año", "estimado",
+                f"CONAGUA, estudio técnico del acuífero Península de Yucatán (3105), 2024, "
+                f"§8.4; volumen de extracción al 2022-12-30 · {URL_ACUIFERO_3105}", "Nico",
+                periodo="estudio 2024; volumen de extracción al 2022-12-30",
+                nota=("Disponibilidad regional calculada para todo el acuífero 3105; "
+                      "no acredita calidad, suministro ni autorización para un predio.")),
         },
         "limites_declarados": ["Kit simulado de 3 sitios y 7 días; no valida eficacia en plantas reales.",
                               "El exceso detectado no es ahorro observado; el después es contrafactual.",

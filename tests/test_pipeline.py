@@ -270,6 +270,10 @@ def salida(tmp_path_factory):
 def test_pipeline_cumple_el_contrato_4(salida):
     _, numeros = salida
     assert contrato.validar_numeros_oficiales(numeros) == []
+    acuifero = numeros["fuentes_externas"]["disponibilidad_acuifero_3105"]
+    assert acuifero["valor"] == 2059.634923
+    assert acuifero["unidad"] == "hm³/año" and acuifero["estado"] == "disponible"
+    assert "regional calculada" in acuifero["nota"]
 
 
 def test_pipeline_escribe_meta_con_commit_y_aviso_de_ejemplo(salida):

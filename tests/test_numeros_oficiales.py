@@ -104,8 +104,14 @@ def test_g3_y_balance_preparados_para_firma(cifras):
         "horas_respaldo_mérida_al_año"]["umbral_30c"]
     assert bono["supuestos"]["cop"] == 2.96
     x = leo["acuifero_3105"]
-    assert x["valor"] is None and x["estado"] == "pendiente"
-    assert "Nico" in x.get("motivo_pendiente", "")
+    assert x == c["fuentes_externas"]["disponibilidad_acuifero_3105"]
+    assert x["valor"] == 2059.634923
+    assert x["unidad"] == "hm³/año" and x["estado"] == "disponible"
+    assert x["tipo"] == "estimado"
+    assert "2024" in x["origen"] and "2022-12-30" in x["origen"]
+    assert "https://sigagis.conagua.gob.mx/gas1/Edos_Acuiferos_18/yucatan/DR_3105.pdf" in x["origen"]
+    assert "regional calculada" in x["nota"]
+    assert all(limite in x["nota"] for limite in ("calidad", "suministro", "autorización", "predio"))
     balance = c["balance_neto"]
     costo = balance["costo_detector_kwh_anual"]["valor"]
     ahorro = balance["ahorro_proyectado_kwh_anual"]["valor"]
@@ -146,7 +152,6 @@ def test_g3_y_balance_preparados_para_firma(cifras):
         balance["ahorro_proyectado_kwh_anual"]["valor"] - costo, 12)
     assert balance["balance_energia_kwh_anual"]["tipo"] == "proyectado"
     assert leo["balance_energia_kwh_anual"] == balance["balance_energia_kwh_anual"]
-    assert "Nico" in leo["acuifero_3105"]["motivo_pendiente"]
     assert c["_meta"]["generado_con_commit"] and "sucio" not in c["_meta"]["generado_con_commit"]
     assert balance["ahorro_proyectado_kwh_anual"]["tipo"] == "proyectado"
     assert "ahorro observado" in balance["ahorro_proyectado_kwh_anual"]["nota"]
