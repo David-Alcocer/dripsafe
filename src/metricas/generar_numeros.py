@@ -93,6 +93,29 @@ def _clima(ruta: Path | None) -> dict:
             "nota": "Temperatura exterior estimada; umbrales ilustrativos, no horas reales de operación del chiller."}
 
 
+def _agregado_equilibrio(residuos: pd.DataFrame) -> dict:
+    """Denominador auditable: solo evaluación, alerta física y exceso positivo.
+
+    Cada fila representa una hora de un sitio. Se versionan la mediana y
+    los conteos, nunca los residuos por fila ni sus fechas.
+    """
+    alertadas = residuos.loc[residuos["coincide_alerta"]]
+    positivas = alertadas.loc[alertadas["exceso_no_ti_estimado_kwh"] > 0,
+                              "exceso_no_ti_estimado_kwh"]
+    return {
+        "exceso_tipico_kwh_por_hora": _r(positivas.median(), 12) if len(positivas) else None,
+        "estadistico": "mediana",
+        "horas_sitio_con_alerta_fisica": len(alertadas),
+        "horas_sitio_con_exceso_positivo": len(positivas),
+        "periodo": "evaluacion",
+        "intervalo_h": 1,
+        "unidad_exceso_tipico": "kWh/h por sitio",
+        "sitios": sorted(residuos["site_id"].unique().tolist()),
+        "filtro": "(alerta_umbral OR alerta_media_4h) AND exceso_no_ti_estimado_kwh > 0",
+        "origen": "src/metricas/generar_numeros.py::_agregado_equilibrio + src/metricas/impacto.py::exceso_no_ti",
+    }
+
+
 def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
              clima: Path | None = None, cierre_n2: dict | None = None) -> dict:
     problemas = contrato.validar(tabla)
@@ -224,7 +247,8 @@ def construir(tabla: pd.DataFrame, alertas: pd.DataFrame, deteccion: dict,
             "agua_indirecta_evitada_l_anual": metrica(None, "L/año", "proyectado", "ahorro × intensidad hídrica SEN", "Nico",
                                                        motivo="Falta mezcla SEN verificable para combinar intensidades NREL."),
             "razon_ahorro_costo": metrica(None, "veces", "proyectado", "ahorro/costo detector", "Misa + Nico", motivo=pend_g),
-            "umbral_equilibrio": metrica(None, "h/año", "proyectado", "costo detector/exceso típico por hora", "Misa + Nico", motivo=pend_g),
+            "umbral_equilibrio": metrica(None, "h/año", "proyectado", "costo detector/exceso típico por hora", "Misa + Nico",
+                                         motivo=pend_g, supuestos=_agregado_equilibrio(residuos)),
             "balance_energia_kwh_anual": metrica(None, "kWh/año", "proyectado", "ahorro proyectado menos costo anual del detector", "Misa + Nico", motivo=pend_g),
         },
         "deteccion": bloque,

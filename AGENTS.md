@@ -42,15 +42,15 @@ Python 3.11+, pandas, numpy, scipy, codecarbon, streamlit, plotly y jupyter.
 - Mostrar siempre "DATOS SIMULADOS". Energía y emisiones son estimaciones con supuestos. Nada de litros por consulta ni de ahorros hipotéticos presentados como observados.
 - Enfoque vigente (D20): línea base por sitio, umbrales, media móvil y clasificación OT; comparación por episodio con las reglas del kit.
 
-## Reparto vigente (D13, 19 oct)
+## Reparto vigente (D13, 19 oct; ajuste #13 en `678b5ff`, 21 oct)
 - Gadiel construye el detector; Nico lo evalúa (calidad frente a costo), calcula el ahorro y el PUE final proyectados y consolida `numeros_oficiales.json`.
-- Misa: datos, contrato v2, PUE inicial, integración, comparación de refrigeración y bono. Guille: ciberseguridad OT, acuífero y gobernanza. Leo: dashboard, guion y diapositivas.
+- Misa: datos, contrato v2, PUE inicial, integración, comparación de refrigeración y bono. Guille: ciberseguridad OT. Nico también lleva acuífero y gobernanza (#13, ajuste `678b5ff`). Leo: dashboard, guion y diapositivas.
 
 ## Reparto de métricas aprobado (D10 y ajuste D11)
 - Misa calcula el PUE inicial en `src/metricas/pue.py` y entrega los datos limpios, energía total y de TI, unidades y periodo; conserva la integración.
 - Nico calcula ahorro y PUE final proyectado, estima agua y emisiones cuando hay datos suficientes y consolida `resultados/numeros_oficiales.json`.
 - Misa + Nico calculan y validan juntos el balance neto final; comparten la responsabilidad de `src/metricas/balance_neto.py` (pendiente de implementación). El resto de `src/metricas/`, salvo el PUE inicial de Misa, corresponde a Nico.
-- Gadiel entrega alertas, consumo esperado del enfriamiento y mediciones de CodeCarbon; Leo usa los resultados en el dashboard y diseña las diapositivas. (D13: el guion pasa a Leo, el acuífero a Guille y el bono a Misa).
+- Gadiel entrega alertas, consumo esperado del enfriamiento y mediciones de CodeCarbon; Leo usa los resultados en el dashboard y diseña las diapositivas. El bono corresponde a Misa; el acuífero queda a cargo de Nico tras el ajuste de #13 en `678b5ff`.
 - Los cálculos siguen pendientes de implementación. Identifica proyecciones y supuestos; el balance positivo se verifica con resultados y las métricas sin datos suficientes quedan pendientes.
 
 ## Mapa de la documentación

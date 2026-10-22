@@ -2,7 +2,7 @@
 
 > Somos 5 estudiantes de segundo año de Ingeniería de Software. Todos venimos de **C++**, así que la primera tarea común es **instalar Python 3.12 y aprender lo básico de pandas y numpy**. A programadores competitivos esto les toma una tarde.
 >
-> **Reparto vigente: D13 (19 oct).** Ver [02-decisiones.md](02-decisiones.md).
+> **Reparto vigente: D13 (19 oct), con el ajuste de #13 a Nico en `678b5ff` (21 oct).** Ver [02-decisiones.md](02-decisiones.md).
 
 ## Perfiles
 
@@ -45,14 +45,14 @@
 - **Ahorro y PUE final proyectado** (#3), con el PUE inicial de Misa y el consumo esperado de Gadiel.
 - **Balance neto final junto con Misa** (#14), con análisis de sensibilidad a los supuestos (watts y gCO₂e/kWh).
 - Consolidar `resultados/numeros_oficiales.json`.
+- **Análisis del acuífero de Yucatán y gobernanza** (#13, obligatorio), incluida la fuente y el año del dato del acuífero 3105 (ajuste `678b5ff`).
 - **Por qué él:** fuerte en algoritmos, y el balance neto depende directamente del modelo.
 - **Lee:** [05-solucion-tecnica.md](05-solucion-tecnica.md) y [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
 
-### Guille · Ciberseguridad OT, acuífero y gobernanza
+### Guille · Ciberseguridad OT
 - Interpretar los **eventos OT del kit** (login fallido, cambio de configuración no autorizado) y mapearlos a ATT&CK for ICS, sin exagerar: un login fallido **no prueba** un ataque (#11).
 - Escenarios simulados (#9) y evaluación por escenario (#10). Sobre el kit, solo los escenarios cuyas columnas existan (ver D14).
 - Cómo se instalaría el detector sin abrir una puerta nueva (#12).
-- **Análisis del acuífero de Yucatán y gobernanza** (#13, obligatorio). Su inglés alto le sirve para los papers.
 - **Por qué él:** base en Linux y seguridad, y la parte OT del kit resultó más ligera de lo esperado.
 - **Lee:** [06-ciberseguridad-ot.md](06-ciberseguridad-ot.md) y [07-agua-y-acuifero.md](07-agua-y-acuifero.md).
 

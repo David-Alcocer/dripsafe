@@ -324,15 +324,17 @@ def test_pipeline_usa_consumo_ya_medido(salida, tmp_path):
     assert balance["costo_detector_kwh_anual"]["valor"] == pytest.approx(0.02)
     assert balance["tiempo_detector_ms"]["valor"] == pytest.approx(12.5)
     assert balance["umbral_equilibrio"]["unidad"] == "h/año"
-    assert balance["umbral_equilibrio"]["valor"] is None
-    assert "mediana" in balance["umbral_equilibrio"]["motivo_pendiente"]
-    assert balance["balance_energia_kwh_anual"]["valor"] is None
+    tipico = balance["umbral_equilibrio"]["supuestos"]["exceso_tipico_kwh_por_hora"]
+    assert balance["umbral_equilibrio"]["valor"] == round(0.02 / tipico, 12)
+    assert balance["balance_energia_kwh_anual"]["valor"] == round(
+        balance["ahorro_proyectado_kwh_anual"]["valor"] - 0.02, 12)
     assert balance["balance_energia_kwh_anual"]["tipo"] == "proyectado"
     ahorro = balance["ahorro_proyectado_kwh_anual"]["valor"]
     assert balance["razon_ahorro_costo"]["valor"] == pytest.approx(ahorro / 0.02, rel=1e-3)
 
 
-def test_pipeline_v2_anualiza_por_fases_y_deja_validacion_pendiente(salida, tmp_path):
+@pytest.mark.parametrize("firmar", [False, True])
+def test_pipeline_v2_anualiza_y_solo_firma_si_se_pide(salida, tmp_path, firmar):
     carpeta, _ = salida
     consumo = tmp_path / "consumo_v2.json"
     consumo.write_text(json.dumps(_consumo_v2()), encoding="utf-8")
@@ -341,6 +343,7 @@ def test_pipeline_v2_anualiza_por_fases_y_deja_validacion_pendiente(salida, tmp_
         "--ejemplo", "--sin-medir", "--sin-rejilla", "--consumo", str(consumo),
         "--resultados", str(carpeta / "resultados"), "--clima", str(tmp_path / "sin_clima.json"),
         "--salida", str(destino),
+        *(["--validacion-conjunta"] if firmar else []),
     ])
     numeros = json.loads(destino.read_text(encoding="utf-8"))
     balance = numeros["balance_neto"]
@@ -349,10 +352,21 @@ def test_pipeline_v2_anualiza_por_fases_y_deja_validacion_pendiente(salida, tmp_
     assert balance["frecuencia_anualizacion"]["modo"] == "fases_separadas"
     assert balance["frecuencia_anualizacion"]["horas_lote"] == 168
     assert balance["frecuencia_anualizacion"]["reentrenamientos_aplicados"] == 4
-    assert balance["validado_por"] is None and balance["nota_validacion"]
-    assert balance["umbral_equilibrio"]["valor"] is None
+    if firmar:
+        assert balance["validado_por"] == ["Misa", "Nico"]
+        assert balance["fecha_validacion"]
+        assert "pendiente" not in balance["nota_validacion"].lower()
+        assert procedencia.validar_balance_oficial(numeros, exigir_firma=True) == []
+    else:
+        assert balance["validado_por"] is None and balance["nota_validacion"]
+        assert "fecha_validacion" not in balance
+        assert procedencia.validar_balance_oficial(numeros, exigir_firma=True)
+    assert balance["umbral_equilibrio"]["valor"] == round(
+        balance["costo_detector_kwh_anual"]["valor"] /
+        balance["umbral_equilibrio"]["supuestos"]["exceso_tipico_kwh_por_hora"], 12)
     assert balance["emisiones_detector_gco2e_anual"]["valor"] is None
-    assert balance["balance_energia_kwh_anual"]["valor"] is None
+    assert balance["balance_energia_kwh_anual"]["valor"] == round(
+        balance["ahorro_proyectado_kwh_anual"]["valor"] - balance["costo_detector_kwh_anual"]["valor"], 12)
     assert balance["razon_ahorro_costo"]["valor"] == round(
         balance["ahorro_proyectado_kwh_anual"]["valor"] /
         balance["costo_detector_kwh_anual"]["valor"], 1)
