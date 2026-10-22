@@ -92,6 +92,8 @@ Esta versión no trae cifras nuevas. Las cifras del estudio quedan para las preg
 
 El umbral de menos de 1 ms y la explicación del TDP ya están en la tabla de preguntas de `docs/08`.
 
+**D · Parte 4, precisión.** El guion dice que DripSafe detecta las fallas «desde +10 %, en la misma hora». A +10 %, 12 de 18 se ven en la misma hora, 4 tardan una hora y 2 tardan dos (promedio de 0.4 h, `docs/06` §6). Propuesta: «desde +10 %, casi siempre en la misma hora».
+
 **Además (sin costo de tiempo):** decir «corre en local, solo lee, sin nube y sin GPU». Hoy el guion hablado no dice «solo lee», y es la primera duda de un jurado de ciberseguridad.
 
 ## 6. Preguntas nuevas del jurado y respuesta corta
