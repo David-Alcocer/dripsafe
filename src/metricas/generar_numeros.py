@@ -104,7 +104,9 @@ def _pue_con_bono(ref: dict, clima: dict) -> dict:
     if horas is None:
         return metrica(None, "ratio", "proyectado", "modelo chiller por aire + ERA5", "Misa",
                        motivo="Falta serie horaria ERA5 2025 verificable para el umbral >30 °C.")
-    pue_base = next(s["pue"] for s in ref["sitios"] if s["site_id"] == "SIM-C")
+    # Misa fijó 1.198 (tres decimales) como insumo; el cociente no redondeado
+    # del sitio en el kit es 1.1975 y produciría otro resultado.
+    pue_base = round(next(s["pue"] for s in ref["sitios"] if s["site_id"] == "SIM-C"), 3)
     cop = round(EER_AIRE_PATH_A / BTU_WH_POR_COP, 2)
     fraccion = horas / HORAS_2025
     valor = estimar_pue_respaldo_aire(pue_base, fraccion, cop)
@@ -113,6 +115,7 @@ def _pue_con_bono(ref: dict, clima: dict) -> dict:
         f"src/metricas/refrigeracion.py + kit simulado SIM-C + {URL_CLIMA} + {URL_EER}", "Misa",
         periodo="escenario anual con clima ERA5 2025 y PUE base de referencia del kit",
         nota=("Escenario ilustrativo, no PUE medido ni desempeño de un equipo en Mérida. "
+              "PUE base de SIM-C redondeado a tres decimales según insumo de Misa. "
               "EER de plena carga en condiciones estándar; supone carga IT constante y suma "
               "energía del chiller sobre el PUE base, sin modelar sustitución del enfriamiento "
               "existente ni bombas adicionales."),

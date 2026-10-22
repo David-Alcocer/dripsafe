@@ -98,7 +98,8 @@ def test_g3_y_balance_preparados_para_firma(cifras):
     bono = c["bono_zero_freshwater"]["pue_con_bono"]
     assert bono == leo["pue_con_bono"]
     assert bono["tipo"] == "proyectado" and bono["responsable"] == "Misa"
-    assert bono["valor"] == pytest.approx(1.2842, abs=.0001)
+    assert bono["valor"] == 1.2842
+    assert bono["supuestos"]["pue_base"] == 1.198
     assert bono["supuestos"]["horas_respaldo_proxy"] == c["bono_zero_freshwater"][
         "horas_respaldo_mérida_al_año"]["umbral_30c"]
     assert bono["supuestos"]["cop"] == 2.96
