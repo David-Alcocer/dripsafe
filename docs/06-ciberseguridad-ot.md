@@ -364,7 +364,62 @@ Fuentes de esta sección: Google Cloud, [informe del incidente de europe-west2 (
 | ¿Qué le recomiendan al cliente? | Según la clase: guardar evidencia, comparar contra la configuración aprobada, restaurar y pasar a modo seguro manual, cortar el acceso usado y confirmar en sitio. Para prevenir: segmentar, MFA para el proveedor, límites de setpoint en el controlador y una alarma de temperatura independiente del BMS (§9 y §9b). |
 | ¿Y si ataca en una ola de calor? | Es nuestro punto débil: fuera del clima aprendido el umbral se duplica y un +10 % pasó sin verse en 8 de 11 tardes. Se cierra con líneas base por época, entrenadas con periodos verificados (§6b). |
 
+## 10b. Respuestas en lenguaje llano (pedido del mentor, 22 oct)
+
+El mentor de ciberseguridad pidió preparar estas respuestas **sin tecnicismos**, porque no sabemos qué tan técnico es el jurado. Los términos técnicos van entre paréntesis por si un juez los pide.
+
+**1. ¿Qué pasaría si DripSafe no existiera?**
+> «Imaginen que alguien entra al sistema que controla el aire acondicionado de un centro de datos y cambia la temperatura a la que debe enfriar, como quien mueve el termostato de una casa. Hoy, la pantalla del operador seguiría diciendo "normal", porque la orden parece legítima. Las alarmas actuales tampoco sonarían: solo se activan cuando el consumo pasa un límite fijo, que está muy por encima de lo que gasta un centro eficiente.
+> Si el cambio hace que el enfriamiento trabaje de más, el centro gasta energía y agua de sobra durante semanas, hasta que alguien revise el recibo. Si hace que enfríe de menos, los servidores se calientan, se apagan solos y se caen los servicios que dependen de ellos: un banco, un hospital, un trámite de gobierno.
+> Y cuando por fin alguien lo nota, lo manda a mantenimiento como si fuera una falla. Nadie revisa si fue una persona, y el intruso sigue adentro.»
+
+**Respaldo con datos, si lo piden:**
+- En el kit, las alarmas fijas no vieron ningún exceso de energía por debajo de +80 %.
+- En los cambios de configuración con efecto, vieron el aviso del registro, pero no el gasto: 1,710 kWh pasaron sin verse (§6).
+- En un sitio de 1 MW, un exceso de +20 % que nadie nota suma unos $1.75 millones de MXN al año (estimado, §9b).
+- Más de la mitad de las caídas importantes cuestan más de 100 mil dólares (Uptime Institute, 2026).
+
+**2. ¿Qué se modificaría?**
+> «El atacante no toca los servidores ni los datos: cambia los ajustes del enfriamiento. Por ejemplo:
+> - la temperatura a la que debe enfriar;
+> - la velocidad de ventiladores y bombas;
+> - cuándo se encienden los equipos de respaldo;
+> - cuánta agua se desecha en la torre de enfriamiento (la purga).
+>
+> También puede cambiar los límites de las alarmas para que no suenen, o lo que muestra la pantalla.»
+
+Técnicas: T0836 para el cambio de ajustes, T0838 para los límites de alarma y T0832 para la pantalla.
+
+**3. ¿Qué haría DripSafe para que no llegue a ser crítico?**
+> «DripSafe aprende cuánto debería gastar cada centro según su trabajo y el clima de ese momento. Cada hora compara lo real contra lo esperado, y si el gasto se sale, avisa en esa misma hora, no a fin de mes.
+> Además revisa el registro de cambios. Si unas horas antes alguien cambió la configuración sin autorización, junta las dos cosas, lo marca como crítico y le dice al operador qué hacer primero: volver a la configuración aprobada, pasar a control manual y confirmar en sitio.
+> Y algo importante: DripSafe solo observa, no puede mover el enfriamiento. Así no causa un daño por una falsa alarma, y si alguien lo hackeara, tampoco podría usarlo para controlar la planta.
+> No detiene el ataque: hace que una persona se entere en una hora y no en semanas.»
+
+**Límites, dichos en llano:**
+- Un cambio muy pequeño, de menos de 4 a 7.5 % sostenido según el sitio, no se ve.
+- En una ola de calor que no conoce, es más fácil que un ataque pase sin verse (§6b).
+
+**Analogía opcional:** «Es como un detector de humo: no apaga el fuego, pero avisa cuando todavía es una sartén y no la cocina entera.»
+
+**4. ¿Qué es FrostyGoop?**
+> «Es un programa malicioso hecho para dar órdenes a equipos industriales. En enero de 2024 lo usaron contra la empresa de calefacción de Lviv, en Ucrania: mandaron órdenes a los controladores de la calefacción, y más de 600 edificios de departamentos se quedaron sin calefacción casi dos días, en pleno invierno.
+> Lo que importa para nosotros: las órdenes iban en el "idioma" normal de esos equipos (Modbus), que no pide contraseña. Para la red parecían órdenes legítimas. Lo que sí cambió fue lo físico: la calefacción dejó de funcionar. Es climatización, como el enfriamiento de un centro de datos. Por eso DripSafe vigila la física.»
+
+**Datos verificados:**
+- Lo descubrió Dragos en abril de 2024 y lo reportó en julio de 2024.
+- Es el primer malware industrial que usa Modbus TCP para causar un efecto físico.
+- Los atacantes probablemente entraron por un router MikroTik expuesto a internet, por una vulnerabilidad no determinada. El router, los servidores de gestión y los controladores no estaban bien separados.
+- En MITRE es el software S1165, en la campaña C0041; la técnica principal es T0836 Modify Parameter.
+
+**Lo que no hay que decir:** que DripSafe habría detectado FrostyGoop. Era calefacción, no un centro de datos, y su efecto fue quitar el calor. Es el ejemplo de **por qué** mirar la física, no una prueba de que funcione en ese caso.
+
+Fuentes: [Dragos, informe de FrostyGoop (jul 2024)](https://hub.dragos.com/hubfs/Reports/Dragos-FrostyGoop-ICS-Malware-Intel-Brief-0724_.pdf); [MITRE ATT&CK, S1165](https://attack.mitre.org/software/S1165/).
+
 ## 11. Para revisar con el mentor (22 oct)
+
+**Sesión del 22 de octubre:** el mentor de ciberseguridad pidió preparar las respuestas de §10b en lenguaje llano: qué pasaría sin DripSafe, qué se modificaría, qué hace DripSafe para que no sea crítico y qué es FrostyGoop. Las preguntas técnicas de abajo siguen siendo la lista para validar con un operador real.
+
 
 1. ¿Una ventana de 24 h entre el evento y el efecto es razonable, o en la práctica se usan ventanas distintas según el tipo de cambio?
 2. ¿Tratar un login fallido seguido de un exceso como «incidente OT con efecto» es demasiado agresivo?
