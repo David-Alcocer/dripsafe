@@ -58,15 +58,19 @@ La propuesta inicial contemplaba un modelo de bosque de anomalías. El equipo lo
 
 **DripSafe**: juega con "goteo" (agua) y "seguro" (ciberseguridad).
 
-## D8 · Piezas conectadas por contratos de datos (propuesta de Guille, por aprobar)
+## D8 · Piezas conectadas por contratos de datos (propuesta de Guille) ✅ adoptada en la práctica
 
 **Decisión:** cada quien es dueño de una carpeta y las piezas se comunican solo por archivos con columnas fijas. Mientras el kit no esté limpio, todos trabajan con datos sintéticos del mismo formato. Ver [11-trabajo-en-paralelo.md](11-trabajo-en-paralelo.md).
 
+**Estado (21 oct):** en uso. Los cuatro contratos están en `docs/11` y `src/contrato.py` valida la telemetría; el dashboard comprueba las columnas de `alertas.csv` antes de usarlo.
+
 **Por qué:** en 3 días nadie puede esperar a nadie. Si el formato está fijo desde hoy, el modelo, los ataques simulados, las métricas y el dashboard avanzan al mismo tiempo y se unen el martes sin sorpresas.
 
-## D9 · Una sola fuente para las cifras del pitch (propuesta de Guille, por aprobar)
+## D9 · Una sola fuente para las cifras del pitch (propuesta de Guille) ✅ adoptada en la práctica
 
 **Decisión:** `resultados/numeros_oficiales.json` es la única fuente de las cifras del dashboard, las diapositivas y el pitch. Se sube al repo porque solo trae totales, nunca filas del kit.
+
+**Estado (21 oct):** en uso. El README cita el JSON como fuente única, el dashboard lo lee y avisa si su vista plana no coincide, y el CI rechaza cualquier archivo de datos (`*.csv`, `*.xlsx`, `*.parquet`, `data/`).
 
 **Por qué:** si el dashboard dice un PUE y la diapositiva otro, el jurado deja de creer todos los números. Además, Git guarda el historial de cada cifra.
 
@@ -104,6 +108,8 @@ El kit contiene tres sitios simulados con 168 horas por sitio, datos de energía
 - **Leo** conserva dashboard, diapositivas y video (#17–#20) y **toma el guion del pitch** (#16). Nico le aporta las cifras.
 
 **Por qué:** Nico es fuerte en algoritmos y el balance neto depende directamente del modelo. El kit resultó pequeño (504 filas, sin sensores por equipo), así que la parte de datos de Misa y la de OT de Guille son más ligeras de lo previsto y pueden absorber el bono y el acuífero.
+
+**Ajuste (21 oct, `678b5ff`):** el acuífero y la gobernanza (#13) pasan a **Nico** (N4). Guille queda solo con ciberseguridad.
 
 **Para no pisarse en el modelo:** Gadiel **construye** el detector; Nico lo **mide y lo pone a prueba**. La interfaz entre ambos es el Contrato 3 (`alertas.csv` + `consumo_modelo.json`).
 

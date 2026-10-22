@@ -213,6 +213,11 @@ def conteo_clases(eventos: pd.DataFrame) -> dict:
     return pd.Series([k for clases in eventos["clases"] for k in clases], dtype=object).value_counts().to_dict()
 
 
+def eventos_u(n: int) -> str:
+    """Unidad de los conteos por clase: son eventos, no horas (numeros_oficiales.json cuenta horas)."""
+    return "evento" if n == 1 else "eventos"
+
+
 # ------------------------------------------------------------ resumen
 
 def resumen(d: Datos, v: Vista) -> None:
@@ -226,12 +231,12 @@ def resumen(d: Datos, v: Vista) -> None:
     rejilla([
         c.gauge("PUE", m["pue"], 1.0, 2.0, PASOS_PUE, 3, sub=con_tag("Σ total ÷ Σ IT del periodo", telemetria_tipo(d)),
                 descripcion="Suma de energía total entre suma de energía IT del periodo. La regla fija del kit alerta arriba de 1.6."),
-        c.stat("Incidentes y cambios OT", str(ot), color="rojo" if ot else "verde", fondo=bool(ot),
+        c.stat("Incidentes y cambios OT", str(ot), eventos_u(ot), color="rojo" if ot else "verde", fondo=bool(ot),
                sub=f'{n.get("incidente_ot", 0)} con efecto físico · {n.get("cambio_no_autorizado", 0)} sin efecto aún'),
-        c.stat("Escalones sin registro", str(n.get("escalon_sin_registro", 0)),
+        c.stat("Escalones sin registro", str(n.get("escalon_sin_registro", 0)), eventos_u(n.get("escalon_sin_registro", 0)),
                color="naranja" if n.get("escalon_sin_registro") else "verde",
                sub="exceso sin evento OT: revisar configuración primero"),
-        c.stat("Intentos de acceso", str(n.get("intento_acceso", 0)),
+        c.stat("Intentos de acceso", str(n.get("intento_acceso", 0)), eventos_u(n.get("intento_acceso", 0)),
                color="amarillo" if n.get("intento_acceso") else "verde", sub="logins fallidos sin efecto"),
         c.stat("Energía en exceso", c.numero(ex["kwh"], 1), "kWh", "naranja" if ex["kwh"] else "verde",
                sub=con_tag("energía no TI real − esperada en las alertas", tipo_det), ancho=True,
@@ -542,7 +547,7 @@ def evaluacion(d: Datos) -> None:
 def ciberseguridad(d: Datos, v: Vista) -> None:
     ot = v.tabla[v.tabla["ot_event"] != "normal"]
     n = conteo_clases(v.eventos)
-    rejilla([c.stat(CLASES[k][0], str(n.get(k, 0)), color=CLASES[k][2] if n.get(k) else "verde",
+    rejilla([c.stat(CLASES[k][0], str(n.get(k, 0)), eventos_u(n.get(k, 0)), color=CLASES[k][2] if n.get(k) else "verde",
                     sub=f"severidad {CLASES[k][1].lower()}") for k in CLASES], minimo=200)
 
     with fila("Las cuatro clases de alerta", "clases"):

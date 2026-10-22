@@ -200,14 +200,14 @@ Un contrato solo cambia con un PR que actualice **este documento y `src/contrato
 | `src/evaluacion/` (comparación justa y costo del detector) | Nico | Gadiel |
 | `src/ataques/`, `docs/06-ciberseguridad-ot.md` | Guille | Gadiel |
 | `app/` | Leo | Misa |
-| `docs/07-*` (acuífero: Guille · bono: Misa) | Guille + Misa | Nico |
+| `docs/07-*` (acuífero: Nico · bono: Misa) | Nico + Misa | Misa (acuífero) · Nico (bono) |
 | `docs/08-*` | Leo | Nico |
 | `.github/`, `CONTRIBUTING.md`, este documento | Misa | Guille |
 | `resultados/numeros_oficiales.json` | Nico | Misa |
 
 `.github/CODEOWNERS` no repite esta tabla: pone a Misa y a Leo como revisores de cualquier PR, y GitHub les pide la revisión automáticamente si el plan de la cuenta lo permite.
 
-**D13 (19 oct):** Nico se suma al modelo como evaluador; el acuífero pasa a Guille, el bono a Misa y el guion a Leo.
+**D13 (19 oct):** Nico se suma al modelo como evaluador; el acuífero pasa a Guille, el bono a Misa y el guion a Leo. **Ajuste (21 oct, `678b5ff`):** el acuífero (#13) pasa a Nico.
 
 El reparto de métricas fue aprobado en **D10 y ajustado en D11**: #2 sigue con Misa, #3 pasa a Nico y #14 queda compartida entre Misa + Nico. `src/metricas/balance_neto.py` es el módulo previsto para el trabajo conjunto; las rutas de métricas y resultados señalan el destino de los entregables pendientes, sin cambiar los formatos de intercambio. Asignar un dueño no significa que ya estén implementados.
 

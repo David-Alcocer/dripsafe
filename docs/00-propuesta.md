@@ -82,7 +82,7 @@ La decisión D20 fija esta arquitectura como detector completo para N2; no se a�
 Las clases son reglas simples sobre los residuos y el registro OT. Comparar contra la "configuración aprobada" es gestión de cambios estándar en OT (IEC 62443). DripSafe solo dice cuándo y por qué hacerlo.
 
 **Ventana de 24 h:**
-- **Por qué:** en el kit el cambio de configuración ocurre de madrugada (04:00–05:00 UTC), con carga y temperatura bajando. Un setpoint alterado puede notarse hasta la tarde.
+- **Por qué:** en el kit el cambio de configuración ocurre de madrugada (04:00–05:00 UTC), con carga y temperatura todavía cerca de su mínimo del día (ya empiezan a subir). Un setpoint alterado puede notarse hasta el pico de calor de la tarde.
 - **Causalidad:** un residuo que ya existía **antes** del evento se marca *"coincidente, no causal"*, salvo que dé un escalón dentro de la ventana.
 - **Coincidencias al azar:** se reporta cuántas habría en la evaluación limpia, combinando eventos OT al azar con los residuos.
 
