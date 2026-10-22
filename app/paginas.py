@@ -700,8 +700,10 @@ def agua(d: Datos, v: Vista) -> None:
                           "nulo en el de aire. Los sitios son simulados: la diferencia no prueba que una tecnología sea mejor.")))
 
     with fila("Acuífero de Yucatán", "acuifero"):
-        st.html(c.panel("Acuífero 3105", '<p class="txt-d">Pendiente de Nico: confirmar la fuente, '
-                        'el año y la disponibilidad del acuífero antes de publicar cifras o conclusiones.</p>'))
+        st.html(c.panel("Acuífero 3105", '<p class="txt-d">CONAGUA publicó una actualización en 2024. '
+                        'Su disponibilidad regional está pendiente de integración en las cifras oficiales; '
+                        'no describe el suministro de un predio.</p>',
+                        "Fuente: CONAGUA, actualización del acuífero 3105 (2024), §8.4."))
 
     with fila("Las épocas del año en Yucatán", "epocas"):
         st.html(c.panel("Por qué una sola semana no basta", c.tabla(
@@ -717,8 +719,8 @@ def agua(d: Datos, v: Vista) -> None:
             st.html(c.panel("Enfriamiento propuesto", c.tabla(
                 ["Pieza", "Qué es", "Costo o límite"], [[f"<b>{o}</b>", q, x] for o, q, x, _ in BONO],
                 resaltar=tuple(i for i, b in enumerate(BONO) if b[3]))
-                + c.aviso("La IA <b>recomienda</b> qué respaldo usar y el operador <b>confirma</b>. Una regla verifica "
-                          "que el medidor de agua potable del enfriamiento marque cero."),
+                + c.aviso("Propuesta futura: DripSafe <b>recomendaría</b> el respaldo y el operador lo confirmaría. "
+                          "Un medidor dedicado tendría que verificar la meta de cero agua potable."),
                 "Para obra nueva o renovación. Referencias: Microsoft 2024 (sin evaporación), Google Douglas County "
                 "(agua residual tratada), ASHRAE (clases W32/W40/W45)."))
         with der:
@@ -735,11 +737,14 @@ def agua(d: Datos, v: Vista) -> None:
                             "Horas exteriores por encima del umbral ilustrativo en Mérida (2025). No son horas medidas "
                             "de operación del chiller; Misa debe confirmar su curva de rendimiento."))
     if not d.cifras_de_ejemplo:
+        pue_bono = cifra(d.numeros, "pue_con_bono")
         rejilla([
-            c.stat("PUE con bono", "Pendiente de Misa", color="gris",
-                   sub=con_tag("requiere rendimiento del chiller", "proyectado")),
+            c.stat("PUE con bono", c.numero(pue_bono, 3) if pue_bono is not None else "Pendiente",
+                   color="morado" if pue_bono is not None else "gris",
+                   sub=con_tag("escenario con COP de referencia; no medido" if pue_bono is not None
+                               else "requiere datos de respaldo", tipo_de(d, "pue_con_bono"))),
             c.stat("Acuífero 3105", "Pendiente de Nico", color="gris",
-                   sub=con_tag("requiere fuente y año confirmados", "observado")),
+                   sub=con_tag("requiere integración al JSON oficial", "observado")),
         ])
     mostrar_aviso_ejemplo(d)
 

@@ -125,17 +125,17 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
 ## 6. Impacto en el acuífero de Yucatán
 
 - **Disponibilidad:** el acuífero 3105 tiene disponibilidad oficial positiva. Se cita una sola cifra: la del acuerdo de disponibilidad vigente publicado en el DOF (Nico la obtiene; el DOF de 2013 reporta la de 2009). El riesgo principal no es agotarlo en total, sino la **calidad**: suelo kárstico, freático somero, intrusión salina en la costa y baja cobertura de saneamiento.
-- **Purga cuantificada:** en una torre, `purga = evaporación ÷ (ciclos de concentración − 1)`. Con 4 ciclos (supuesto típico), cada 3 L evaporados generan 1 L de purga con sales concentradas. El agua captada es evaporación más purga, así que **por cada litro captado que se evita por exceso de evaporación, se evita ¼ de litro de descarga** hacia el subsuelo. Evitar una fuga ahorra agua, pero no reduce la purga.
+- **Purga cuantificada como escenario:** en una torre estable, sin pérdidas adicionales y a ciclos constantes, `purga = evaporación ÷ (ciclos de concentración − 1)`. Con 4 ciclos supuestos, 3 L evaporados generan 1 L de purga y requieren 4 L de reposición. Si se evita 1 L de reposición **por menor evaporación**, se evita ¼ L de purga; una fuga evitada no implica esa reducción. La descarga necesita una ruta autorizada: el kit no registra su destino.
 - **El beneficio hídrico depende del tipo de enfriamiento** (el kit lo ilustra, no lo prueba):
   - **Evaporativo:** es grande.
   - **Aire:** es casi nulo; solo cuenta el agua de la red eléctrica.
   - DripSafe lo dice en lugar de prometer agua en todos los sitios.
-- **Gobernanza:** un reporte mensual verificable de consumo, litros evitados y purga, útil para el título de concesión de CONAGUA, las normas de descarga y los reportes ESG.
-- **Justicia ambiental:** la cola prioriza litros, y lo evitado queda para las comunidades del mismo acuífero.
+- **Gobernanza:** un reporte de captación observada y excesos estimados, útil para contrastar la operación con la autorización del sitio. La purga exige medidor o balance físico aparte.
+- **Justicia ambiental:** la prioridad por litros ayuda a investigar excesos; solo puede atribuirse beneficio a usuarios del mismo acuífero cuando se conoce la fuente de suministro.
 
 ## 7. Bono Zero Freshwater Footprint: transición guiada por datos
 
-**Propuesta:** enfriamiento líquido de agua tibia en circuito cerrado, rechazando el calor con enfriadores secos sin evaporación. En los picos de calor hay dos respaldos, y **ninguno usa agua potable**. DripSafe verifica que el agua potable sea cero y recomienda qué respaldo usar.
+**Propuesta:** enfriamiento líquido de agua tibia en circuito cerrado, rechazando el calor con enfriadores secos sin evaporación. El respaldo principal es un chiller condensado por aire; el adiabático con agua tratada es una opción futura. La meta de cero agua potable depende de verificar la fuente de llenado y reposición. DripSafe podría recomendar el modo al operador cuando tenga los datos de equipo necesarios; la demo actual no lo hace.
 
 1. **Que es viable lo respaldan fuentes externas, no el kit:**
    - **Circuito cerrado sin evaporación:** Microsoft anunció en 2024 un diseño con enfriamiento líquido a nivel de chip que, una vez lleno, no consume agua para enfriar. Estima evitar más de 125 millones de litros al año por sitio, a cambio de un aumento "nominal" del PUE. Son cifras de la empresa; los pilotos arrancan en 2026.
@@ -151,20 +151,20 @@ Las clases son reglas simples sobre los residuos y el registro OT. Comparar cont
      - El intercambiador CDU entre el circuito de la planta y el de los servidores: 2–5 K.
    - **Con clase W32:** 32 − (7 a 13) da un umbral de respaldo de **19–25 °C**. Haría falta respaldo casi todas las tardes del año, así que **no sirve**.
    - **Con clase W40:** 40 − (5 a 8) − (2 a 5) da un umbral de respaldo de **27–33 °C** según los supuestos, sobre todo en las tardes de abril a agosto. Si con el supuesto pesimista (27 °C) las horas son demasiadas, lo decimos y la recomendación pasa a W45.
-   - **El cálculo:** Nico cuenta las horas por encima de 27, 30, 33 y 35 °C, como sensibilidad, y las convierte en litros (respaldo A) o kWh (respaldo B).
-     - **Datos:** horarios del SMN. Si no están disponibles a tiempo, se usa el reanálisis ERA5 vía Open-Meteo o Meteostat, citado.
+   - **El cálculo:** Nico cuenta las horas por encima de 27, 30, 33 y 35 °C como sensibilidad. Convertirlas en kWh del respaldo requiere carga y curva del chiller; no se hace una conversión directa de horas a litros o energía.
+     - **Datos:** serie horaria ERA5 2025 vía Open-Meteo; fuente y límites en `docs/07` §5.4.
 3. **Los dos respaldos, ninguno con agua potable:**
    - **A. Adiabático con agua residual tratada** (JAPAY). Gasta poca energía, pero evapora agua no potable. **Damos por hecho que JAPAY no confirmará a tiempo:** el pitch presenta el respaldo B como el plan y el A como mejora futura sujeta a convenio.
-   - **B. Chiller mecánico de apoyo.** Usa **cero agua** a cambio de más energía, como el diseño de Microsoft. Es el respaldo garantizado: no depende de la lluvia ni de JAPAY.
+   - **B. Chiller mecánico condensado por aire.** No evapora agua y consume más electricidad, como el diseño de Microsoft. No depende de suministro de agua para disipar calor, aunque sí requiere verificar energía y rendimiento.
    - **Agua pluvial y condensado:** complemento parcial, no plan B. Abril y mayo son los meses más calientes y caen antes de las lluvias (junio a octubre), así que se necesitaría guardar agua de la temporada anterior. Lo declaramos parcial.
-4. **Purga del respaldo A:** nunca se infiltra en el suelo kárstico. Regresa por drenaje a la planta de tratamiento.
+4. **Purga del respaldo A:** si se construye, debe contar con una ruta de descarga autorizada y verificable; no se presupone retorno a una planta de tratamiento.
 5. **Legionella:** tratamiento y monitoreo del circuito de agua no potable, como en cualquier torre.
 6. **El papel de DripSafe:**
-   - Con su línea base estima las horas de respaldo y compara, hora por hora, los **litros de A contra los kWh de B**. Así recomienda cuál usar según la disponibilidad de agua tratada y el precio de la energía.
-   - Una regla verifica que el medidor de agua potable del enfriamiento marque cero.
+   - **Propuesta futura:** con parámetros reales del equipo, comparar la energía de cada modo y recomendar cuál activar.
+   - **Propuesta futura:** un medidor dedicado verifica la fuente y el volumen de agua potable del enfriamiento.
    - El operador confirma; la IA nunca manda órdenes.
 
-**Meta verificable:** WUE potable = 0 L/kWh, comprobado con un medidor dedicado (el kit no separa el agua potable de la no potable, así que con el kit no se puede demostrar). El PUE con el respaldo B y el WUE no potable con el respaldo A se reportan como estimaciones con supuestos citados. **El costo del bono es explícito:** el respaldo B sube el PUE (la métrica principal del sub-reto) durante las horas de respaldo; se reporta el PUE anual con y sin bono, para que el jurado vea el intercambio de agua por energía.
+**Meta por verificar:** WUE potable de enfriamiento = 0 L/kWh durante operación si llenado y reposición usan fuente no potable; se necesitará un medidor dedicado. El kit no separa potable de no potable. Con un COP de referencia aportado por Misa y horas ERA5 por encima de 30 °C, el **PUE proyectado del escenario es aproximadamente 1.284**, bajo los supuestos de `docs/07` §5.4. No es el PUE físico de esta arquitectura: faltan curvas locales y energía de bombas. El respaldo A sigue siendo una alternativa futura condicionada a suministro y descarga.
 
 ## 8. Arquitectura segura
 
