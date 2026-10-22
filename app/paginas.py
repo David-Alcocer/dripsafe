@@ -609,8 +609,10 @@ def balance(d: Datos, v: Vista) -> None:
                   "Las cifras de ejemplo solo ilustran el flujo. ")
     validacion = (f'Umbral y saldo validados por {" y ".join(d.fuentes["firma_balance"])}; '
                   if firmado else "El umbral y el saldo requieren validación conjunta; ")
-    st.html('<p class="lead"><b>Balance del detector.</b> ' + detalle_g3 + validacion +
-            'las emisiones requieren un factor verificable. El escenario anual no es ahorro observado.</p>')
+    emisiones = ("el CO₂ usa el factor oficial del SEN. " if co2 is not None
+                 else "las emisiones requieren un factor verificable. ")
+    st.html('<p class="lead"><b>Balance del detector.</b> ' + detalle_g3 + validacion + emisiones +
+            'El escenario anual no es ahorro observado.</p>')
     rejilla([
         c.stat("Tiempo del detector", c.numero(tiempo, 1) if tiempo is not None else etiqueta,
                "ms" if tiempo is not None else "", "gris",
@@ -621,7 +623,7 @@ def balance(d: Datos, v: Vista) -> None:
         c.stat("Umbral de equilibrio", *tiempo_corto(equilibrio) if equilibrio is not None else
                ("Ejemplo" if ejemplo else "Pendiente de revisión", ""), "gris" if equilibrio is None else "azul",
                sub=con_tag("costo ÷ exceso típico verificable", tipo_de(d, "equilibrio_horas"))),
-        c.stat("CO₂ evitado", c.numero(co2, 1) if co2 is not None else
+        c.stat("CO₂ evitado", c.numero(co2) if co2 is not None else
                ("Ejemplo" if ejemplo else "Pendiente"),
                "kgCO₂e/año" if co2 is not None else "", "gris",
                sub=con_tag("proyección con factor externo verificado" if co2 is not None
